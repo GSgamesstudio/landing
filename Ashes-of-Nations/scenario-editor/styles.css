@@ -25,6 +25,16 @@ body {
 
 button, input, select { font: inherit; }
 
+.project-select {
+  width: 168px;
+  min-height: 38px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(15, 20, 24, .68);
+  color: var(--text);
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -78,6 +88,14 @@ button, input, select { font: inherit; }
 
 .panel.grow { display: flex; flex: 1; min-height: 0; flex-direction: column; }
 .panel h2 { margin: 0 0 14px; font-size: 15px; }
+.right-sidebar .panel.grow { overflow: hidden; }
+.right-sidebar #countryForm {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+}
 .panel-heading { display: flex; align-items: center; justify-content: space-between; }
 .panel-heading span { color: var(--muted); }
 
@@ -144,6 +162,18 @@ label.button { display: flex; align-items: center; }
 }
 
 .admin-editor small { color: var(--muted); font-size: 11px; line-height: 1.35; }
+
+.subject-editor {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.subject-editor legend { padding: 0 5px; color: var(--accent); font-size: 12px; }
+.subject-editor small { color: var(--muted); font-size: 11px; line-height: 1.35; }
 
 .map-mode-buttons .button {
   min-width: 0;

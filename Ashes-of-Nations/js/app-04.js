@@ -295,7 +295,10 @@
   }
 
   function peaceDemandCost(demand) {
-    if (demand.type === "annex_occupied") return 22 + (demand.regionIds?.length || 0) * 18;
+    if (demand.type === "annex_occupied") {
+      const regions = demand.regionIds || (demand.regionId ? [demand.regionId] : []);
+      return Math.max(8, 22 + regions.length * 18 - territorialClaimDiscount(demand.actorId, demand.targetId, regions));
+    }
     if (demand.type === "reparations") return 24 + Math.round((demand.value || 20) / 3);
     if (demand.type === "demilitarize") return 42;
     return 6;
@@ -308,6 +311,53 @@
     if (!actor || !target) return 0;
     const occupied = occupiedRegionsControlledBy(actorId, targetId).length - occupiedRegionsControlledBy(targetId, actorId).length;
     return occupied * 24 + (actor.warSupport - target.warSupport) * 0.55 + (actor.stability - target.stability) * 0.25 + (actor.gdp - target.gdp) * 0.08;
+  }
+
+  function regionalCulturalAffinity(regionId, actorId) {
+    const actor = countryById(actorId);
+    const values = REGION_CULTURAL_AFFINITIES[Number(regionId)] || {};
+    return Number(values[isRussiaCountry(actor) ? "russia" : actor?.name] || 0) + historicalTerritoryPriority(actor, regionId);
+  }
+
+  function mainTerritoryRegionIds(actorId) {
+    const actor = countryById(actorId);
+    const owned = new Set((actor?.regionIds || []).map(Number));
+    const groups = [];
+    while (owned.size) {
+      const start = owned.values().next().value;
+      const group = new Set([start]);
+      const queue = [start];
+      owned.delete(start);
+      while (queue.length) {
+        const regionId = queue.shift();
+        adjacentRegionIds(regionId).forEach((neighborId) => {
+          const neighbor = Number(neighborId);
+          if (!owned.has(neighbor)) return;
+          owned.delete(neighbor);
+          group.add(neighbor);
+          queue.push(neighbor);
+        });
+      }
+      groups.push(group);
+    }
+    return groups.sort((left, right) => right.size - left.size)[0] || new Set();
+  }
+
+  function contiguousClaimRegions(actorId, regionIds) {
+    const anchors = mainTerritoryRegionIds(actorId);
+    const pending = [...new Set((regionIds || []).map(Number))];
+    const approved = [];
+    while (pending.length) {
+      const available = pending
+        .filter((regionId) => [...adjacentRegionIds(regionId)].some((neighborId) => anchors.has(Number(neighborId))))
+        .sort((left, right) => regionalCulturalAffinity(right, actorId) - regionalCulturalAffinity(left, actorId));
+      const next = available[0];
+      if (!next) break;
+      anchors.add(next);
+      approved.push(next);
+      pending.splice(pending.indexOf(next), 1);
+    }
+    return approved;
   }
 
   function peaceVenueChoices(conference) {
@@ -330,7 +380,7 @@
         const enemies = warEnemies(actorId, group);
         if (!enemies.length) return;
         const targetId = enemies.sort((a, b) => getRelation(actorId, a) - getRelation(actorId, b))[0];
-        const occupied = occupiedRegionsControlledBy(actorId, targetId).slice(0, 4);
+        const occupied = contiguousClaimRegions(actorId, occupiedRegionsControlledBy(actorId, targetId));
         if (occupied.length) {
           demands.push({ source: "bot", actorId, targetId, type: "annex_occupied", regionIds: occupied, status: "pending" });
           return;
@@ -365,6 +415,7 @@
       mediator: null,
       title: "Мирный договор",
       venueRegionId: null,
+      nonAggressionExpires: defaultPostWarPactExpiry(),
     };
     conference.venueRegionId = peaceVenueChoices(conference)[0]?.regionId || null;
     strategyState.peaceConference = conference;
@@ -540,6 +591,168 @@
     return moveRegionOwnership(regionId, actorId);
   }
 
+  function countryOccupationLoss(country) {
+    const regions = (country?.regionIds || []).map(Number);
+    if (!regions.length) return { lost: 0, total: 0, ratio: 0 };
+    const lost = regions.filter((regionId) => Number(controllerOfRegion(regionId)?.id) !== Number(country.id)).length;
+    return { lost, total: regions.length, ratio: lost / regions.length };
+  }
+
+  function canFormGovernmentInExile(country) {
+    const runtime = country && strategyState?.countryStates[String(country.id)];
+    if (!country || !runtime || runtime.capitulated || !country.regionIds?.length) return false;
+    const capitalId = Number(country.capitalRegionId);
+    const capitalThreatened = Number(controllerOfRegion(capitalId)?.id) !== Number(country.id) ||
+      [...adjacentRegionIds(capitalId)].some((regionId) => Number(controllerOfRegion(regionId)?.id) !== Number(country.id));
+    return capitalThreatened && strategyState.wars.some((war) => war.active && (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)));
+  }
+
+  function formGovernmentInExile(country, sponsorId = null) {
+    const runtime = country && strategyState?.countryStates[String(country.id)];
+    if (!country || !runtime || runtime.capitulated || !country.regionIds?.length) return false;
+    const originalRegions = [...country.regionIds].map(Number);
+    const activeWars = strategyState.wars.filter((war) => war.active && (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)));
+    if (!activeWars.length) return false;
+    const sponsors = [...new Set((runtime.allies || []).map(Number))].filter((id) => countryById(id) && !strategyState.countryStates[String(id)]?.capitulated);
+    if (sponsorId && !sponsors.includes(Number(sponsorId))) sponsors.push(Number(sponsorId));
+    runtime.capitulated = true;
+    runtime.governmentInExile = true;
+    runtime.capitulatedRegionIds = originalRegions;
+    runtime.capitulatedCapitalRegionId = Number(country.capitalRegionId);
+    runtime.capitulatedByCountryId = null;
+    runtime.exileLiberatorIds = sponsors;
+    runtime.armies = [];
+    activeWars.forEach((war) => {
+      const enemyId = Number(war.attackerId) === Number(country.id) ? Number(war.defenderId) : Number(war.attackerId);
+      sponsors.forEach((allyId) => {
+        if (Number(allyId) === enemyId || isAtWar(allyId, enemyId)) return;
+        strategyState.wars.push({ attackerId: Number(war.attackerId) === Number(country.id) ? enemyId : allyId, defenderId: Number(war.defenderId) === Number(country.id) ? enemyId : allyId, start: strategyState.date.toISOString().slice(0, 10), active: true, liberation: true });
+      });
+      war.active = false;
+      war.ended = strategyState.date.toISOString().slice(0, 10);
+      war.capitulation = true;
+    });
+    addLog(`${country.name} подписывает капитуляцию и создаёт правительство в изгнании. Союзники обязались освободить страну.`);
+    markMapDirty();
+    renderGameMap();
+    renderStrategyPanel();
+    return true;
+  }
+
+  function decideGovernmentInExile(countryId, accept) {
+    const country = countryById(countryId);
+    const runtime = country && strategyState?.countryStates[String(country.id)];
+    if (!country || !runtime?.exileOfferPending) return;
+    runtime.exileOfferPending = false;
+    strategyState.turnNotifications = (strategyState.turnNotifications || []).filter((notice) => Number(notice.exileCountryId) !== Number(country.id));
+    renderNotificationIcons();
+    if (!accept) {
+      runtime.exileOfferDeclined = true;
+      addLog("Предложение создать правительство в изгнании отклонено.");
+      return;
+    }
+    formGovernmentInExile(country, runtime.exileOfferSponsorId);
+    delete runtime.exileOfferSponsorId;
+  }
+
+  function maybeOfferGovernmentInExile() {
+    const player = currentPlayerCountry();
+    const runtime = currentPlayerState();
+    if (!player || !runtime || runtime.capitulated || runtime.exileOfferPending || runtime.exileOfferDeclined) return;
+    const loss = countryOccupationLoss(player);
+    if (loss.ratio <= 0.6) return;
+    const sponsor = (runtime.allies || []).map(countryById).find((country) => country && !strategyState.countryStates[String(country.id)]?.capitulated);
+    if (!sponsor) return;
+    runtime.exileOfferPending = true;
+    runtime.exileOfferSponsorId = Number(sponsor.id);
+    addLog({ text: `${sponsor.name} предлагает создать правительство в изгнании.`, detail: `Потеряно ${loss.lost} из ${loss.total} регионов. Союзники продолжат войну за освобождение страны.`, severity: "warning", kind: "exile", exileCountryId: Number(player.id) });
+  }
+
+  function checkForGovernmentInExileLiberation(liberatorId, regionId) {
+    const target = gameData?.scenario.countries.find((country) => {
+      const runtime = strategyState.countryStates[String(country.id)];
+      return runtime?.governmentInExile && (runtime.capitulatedRegionIds || []).map(Number).includes(Number(regionId)) &&
+        ((runtime.exileLiberatorIds || []).map(Number).includes(Number(liberatorId)) || areMilitaryAllies(liberatorId, country.id));
+    });
+    if (!target) return false;
+    return restoreCapitulatedCountry(target, countryById(liberatorId));
+  }
+
+  function checkForLiberationOpportunity(liberatorId, regionId) {
+    const target = gameData?.scenario.countries.find((country) => {
+      const runtime = strategyState.countryStates[String(country.id)];
+      return runtime?.capitulated && Number(runtime.capitulatedCapitalRegionId) === Number(regionId) && !runtime.restorationOfferPending && !runtime.restorationDeclined;
+    });
+    if (!target) return;
+    const targetRuntime = strategyState.countryStates[String(target.id)];
+    if (Number(liberatorId) !== Number(strategyState?.playerCountryId)) {
+      if (areMilitaryAllies(liberatorId, target.id)) restoreCapitulatedCountry(target, countryById(liberatorId));
+      return;
+    }
+    targetRuntime.restorationOfferPending = true;
+    addLog({
+      text: `Освобождена столица страны ${target.name}. Можно восстановить её государственность.`,
+      detail: `Восстановление вернёт ${target.name} её земли, введёт страну в вашу войну, установит отношения +100 и даст стартовые войска.`,
+      severity: "warning", kind: "restoration", restorationCountryId: Number(target.id),
+    });
+  }
+
+  function decideCountryRestoration(targetId, accept) {
+    const player = currentPlayerCountry();
+    const target = countryById(targetId);
+    const runtime = target && strategyState?.countryStates[String(target.id)];
+    if (!player || !target || !runtime?.capitulated || !runtime.restorationOfferPending) return;
+    runtime.restorationOfferPending = false;
+    strategyState.turnNotifications = (strategyState.turnNotifications || []).filter((notice) => Number(notice.restorationCountryId) !== Number(target.id));
+    renderNotificationIcons();
+    if (!accept) {
+      runtime.restorationDeclined = true;
+      addLog(`Восстановление страны ${target.name} отклонено.`);
+      renderStrategyPanel();
+      return;
+    }
+    restoreCapitulatedCountry(target, player);
+  }
+
+  function restoreCapitulatedCountry(target, liberator) {
+    const runtime = strategyState.countryStates[String(target.id)];
+    const originalRegions = [...new Set((runtime?.capitulatedRegionIds || []).map(Number))];
+    const capitalRegionId = Number(runtime?.capitulatedCapitalRegionId);
+    if (!runtime || !originalRegions.length || !capitalRegionId) return false;
+    const priorControllers = new Map(originalRegions.map((regionId) => [regionId, Number(controllerOfRegion(regionId)?.id || 0)]));
+    originalRegions.forEach((regionId) => transferRegionOwnership(regionId, target.id));
+    target.capitalRegionId = capitalRegionId;
+    gameData.scenario.occupations = (gameData.scenario.occupations || []).filter((occupation) => !originalRegions.includes(Number(occupation.regionId)));
+    priorControllers.forEach((controllerId, regionId) => {
+      if (!controllerId || controllerId === Number(target.id) || controllerId === Number(liberator.id) || areMilitaryAllies(liberator.id, controllerId)) return;
+      gameData.scenario.occupations.push({ regionId, controllerCountryId: controllerId });
+    });
+    runtime.capitulated = false;
+    delete runtime.governmentInExile;
+    delete runtime.exileLiberatorIds;
+    delete runtime.capitulatedRegionIds;
+    delete runtime.capitulatedCapitalRegionId;
+    delete runtime.capitulatedByCountryId;
+    delete runtime.restorationDeclined;
+    setRelation(liberator.id, target.id, 100);
+    addAlliance(strategyState, liberator.id, target.id);
+    strategyState.wars.filter((war) => war.active && (Number(war.attackerId) === Number(liberator.id) || Number(war.defenderId) === Number(liberator.id))).forEach((war) => {
+      const enemyId = Number(war.attackerId) === Number(liberator.id) ? Number(war.defenderId) : Number(war.attackerId);
+      const exists = strategyState.wars.some((candidate) => candidate.active && ((Number(candidate.attackerId) === Number(target.id) && Number(candidate.defenderId) === enemyId) || (Number(candidate.defenderId) === Number(target.id) && Number(candidate.attackerId) === enemyId)));
+      if (!exists) strategyState.wars.push({ attackerId: Number(war.attackerId) === Number(liberator.id) ? Number(target.id) : enemyId, defenderId: Number(war.defenderId) === Number(liberator.id) ? Number(target.id) : enemyId, start: strategyState.date.toISOString().slice(0, 10), active: true, restoration: true });
+    });
+    const capitalProfile = runtime.regionProfiles[String(capitalRegionId)];
+    runtime.armies = [{ id: `${target.id}-restoration-${Date.now()}`, name: "Армия восстановления", ownerCountryId: Number(target.id), regionId: capitalRegionId, soldiers: 900, readiness: 72, movingTo: null, eta: 0, order: "", lastSupply: runtime.supply?.level || 100 }];
+    if (capitalProfile) capitalProfile.readySoldiers = Math.max(0, Number(capitalProfile.readySoldiers || 0) - 900);
+    rebuildOwnerByRegion();
+    markMapDirty();
+    addLog(`${target.name} восстановлена, вступает в войну на вашей стороне и получает стартовую армию.`);
+    playSound("war");
+    renderGameMap();
+    renderStrategyPanel();
+    return true;
+  }
+
   function integrateCountryIntoActor(targetName, actorId) {
     const actor = countryById(actorId);
     const target = gameData?.scenario.countries.find((country) => country.name === targetName);
@@ -630,11 +843,14 @@
     const targetRuntime = strategyState.countryStates[String(demand.targetId)];
     if (!actorRuntime || !targetRuntime) return;
     if (demand.type === "annex_occupied") {
-      const transferredRegions = (demand.regionIds || []).filter((regionId) => transferRegionOwnership(regionId, demand.actorId));
+      const requestedRegions = demand.regionIds || [];
+      const contiguousRegions = demand.mapAllocation ? requestedRegions : contiguousClaimRegions(demand.actorId, requestedRegions);
+      const transferredRegions = contiguousRegions.filter((regionId) => transferRegionOwnership(regionId, demand.actorId));
       if (transferredRegions.length) {
         const names = transferredRegions.map((regionId) => gameData.regionById.get(Number(regionId))?.name || regionId).join(", ");
         addLog(`Переданы регионы по мирному договору: ${names}.`);
       }
+      if (contiguousRegions.length < requestedRegions.length) addLog("Часть требований отклонена: новые территории должны примыкать к основной территории страны или к уже передаваемым регионам.");
     }
     if (demand.type === "reparations") {
       const value = Math.min(demand.value || 20, Math.max(0, targetRuntime.budget));
@@ -664,12 +880,13 @@
     conference.warIds.forEach((warIndex) => {
       if (strategyState.wars[warIndex]) strategyState.wars[warIndex].active = false;
     });
+    const pactsCreated = createPostWarNonAggressionPacts(conference.warIds, conference.nonAggressionExpires);
     strategyState.peaceConference = null;
     rebuildOwnerByRegion();
     markMapDirty();
     renderGameMap();
     const venueName = gameData.regionById.get(Number(conference.venueRegionId))?.name || "согласованном месте";
-    addLog(`«${conference.title || "Мирный договор"}» подписан в регионе ${venueName}. Снято оккупаций: ${clearedOccupations}. Все связанные войны завершены одновременно.`);
+    addLog(`«${conference.title || "Мирный договор"}» подписан в регионе ${venueName}. Снято оккупаций: ${clearedOccupations}. Все связанные войны завершены одновременно.${pactsCreated ? ` Пакты о ненападении действуют до ${conference.nonAggressionExpires}.` : ""}`);
     playSound("peace");
     showScreen(gameScreen);
     renderStrategyPanel();
@@ -685,6 +902,88 @@
     renderPeaceSigningScreen();
     showScreen(peaceScreen);
     requestAnimationFrame(() => renderPeace3D(strategyState.peaceConference));
+  }
+
+  function openPeaceMap() {
+    const conference = strategyState?.peaceConference;
+    if (!conference) return;
+    peaceMapMode = true;
+    peaceMapRecipientId = Number(peaceMapRecipientId || strategyState.playerCountryId);
+    showScreen(gameScreen);
+    activeTab = "wars";
+    renderStrategyPanel();
+    renderPeaceMapControls();
+    renderGameMap();
+  }
+
+  function renderPeaceMapControls() {
+    document.getElementById("peaceMapControls")?.remove();
+    if (!peaceMapMode || !strategyState?.peaceConference) return;
+    const participants = strategyState.peaceConference.participants.map(countryById).filter(Boolean);
+    const panel = document.createElement("section");
+    panel.id = "peaceMapControls";
+    panel.className = "strategy-card accent-card";
+    panel.innerHTML = `<header><strong>Карта мирной конференции</strong><button class="text-button" type="button" data-close-peace-map>Вернуться к договору</button></header><label>Передать регион стране<select id="peaceMapRecipient" class="strategy-select">${participants.map((country) => `<option value="${country.id}" ${Number(country.id) === Number(peaceMapRecipientId) ? "selected" : ""}>${country.name}</option>`).join("")}</select></label><small>Нажмите на регион участника войны, чтобы добавить его передачу в проект договора.</small>`;
+    panel.addEventListener("change", () => { peaceMapRecipientId = Number(panel.querySelector("#peaceMapRecipient").value); });
+    panel.addEventListener("click", (event) => { if (event.target.closest("[data-close-peace-map]")) { peaceMapMode = false; panel.remove(); openPeaceSigningScreen(); } });
+    strategyContent.prepend(panel);
+  }
+
+  function assignPeaceMapRegion(regionId) {
+    const conference = strategyState?.peaceConference;
+    const recipient = countryById(peaceMapRecipientId);
+    const owner = ownerOfRegion(regionId);
+    const occupation = (gameData.scenario.occupations || []).find((item) => Number(item.regionId) === Number(regionId));
+    if (!conference || !recipient || !owner || !occupation || !conference.participants.map(Number).includes(Number(owner.id)) || !conference.participants.map(Number).includes(Number(recipient.id))) {
+      addLog("На карте мирной конференции можно распределять только оккупированные регионы участников войны.");
+      return false;
+    }
+    conference.demands = conference.demands.filter((demand) => !(demand.source === "player" && demand.mapAllocation && Number(demand.regionId) === Number(regionId)));
+    if (Number(owner.id) !== Number(recipient.id)) conference.demands.push({ source: "player", actorId: Number(recipient.id), targetId: Number(owner.id), type: "annex_occupied", regionIds: [Number(regionId)], regionId: Number(regionId), mapAllocation: true, status: "accepted" });
+    addLog(`На карте мирной конференции выбран регион ${gameData.regionById.get(Number(regionId))?.name || regionId}: ${owner.name} → ${recipient.name}.`);
+    renderPeaceMapControls();
+    return true;
+  }
+
+  function renderPeaceLaptopMap() {
+    const canvas = document.getElementById("peaceAllocationMap");
+    const conference = strategyState?.peaceConference;
+    if (!canvas || !conference || !gameData?.map) return;
+    const map = gameData.map;
+    canvas.width = map.width; canvas.height = map.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(gameMapCanvas, 0, 0);
+    const pixels = ctx.getImageData(0, 0, map.width, map.height);
+    const data = pixels.data;
+    const allocations = new Map((conference.demands || []).filter((d) => (d.regionIds || (d.regionId ? [d.regionId] : [])).length).flatMap((d) => (d.regionIds || [d.regionId]).map((regionId) => [Number(regionId), Number(d.actorId)])));
+    const participantIds = new Set(conference.participants.map(Number));
+    for (let index = 0; index < gameData.regionAtPixel.length; index += 1) {
+      const regionId = Number(gameData.regionAtPixel[index]);
+      const ownerId = Number(ownerOfRegion(regionId)?.id);
+      const allocatedTo = allocations.get(regionId);
+      const offset = index * 4;
+      const occupation = (gameData.scenario.occupations || []).find((item) => Number(item.regionId) === regionId);
+      if (allocatedTo) {
+        const hex = (countryById(allocatedTo)?.color || "#d6bd5a").replace("#", "");
+        const color = [parseInt(hex.slice(0, 2), 16) || 214, parseInt(hex.slice(2, 4), 16) || 189, parseInt(hex.slice(4, 6), 16) || 90];
+        data[offset] = Math.round(data[offset] * .28 + color[0] * .72); data[offset + 1] = Math.round(data[offset + 1] * .28 + color[1] * .72); data[offset + 2] = Math.round(data[offset + 2] * .28 + color[2] * .72);
+      } else if (occupation) {
+        const hex = (countryById(occupation.controllerCountryId)?.color || "#c9a34a").replace("#", "");
+        const color = [parseInt(hex.slice(0, 2), 16) || 201, parseInt(hex.slice(2, 4), 16) || 163, parseInt(hex.slice(4, 6), 16) || 74];
+        const x = index % map.width; const y = Math.floor(index / map.width);
+        const stripe = (x + y) % 12 < 5;
+        data[offset] = Math.round(data[offset] * .48 + color[0] * .52); data[offset + 1] = Math.round(data[offset + 1] * .48 + color[1] * .52); data[offset + 2] = Math.round(data[offset + 2] * .48 + color[2] * .52);
+        if (stripe) { data[offset] = Math.round(data[offset] * .62); data[offset + 1] = Math.round(data[offset + 1] * .62); data[offset + 2] = Math.round(data[offset + 2] * .62); }
+      } else if (!participantIds.has(ownerId)) data[offset + 3] = 72;
+    }
+    ctx.putImageData(pixels, 0, 0);
+    canvas.onclick = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((event.clientX - rect.left) / rect.width * map.width);
+      const y = Math.floor((event.clientY - rect.top) / rect.height * map.height);
+      const regionId = Number(gameData.regionAtPixel[y * map.width + x]);
+      if (regionId && gameData.regionTypeById.get(regionId) !== "sea") { assignPeaceMapRegion(regionId); renderPeaceLaptopMap(); }
+    };
   }
 
   function loadPeaceVersaillesMesh(gl) {
@@ -791,7 +1090,7 @@
     const workspace = peaceContent.querySelector(".peace-workspace");
     // The laptop is anchored to the table plane: horizontal camera yaw may shift it in depth,
     // but vertical pitch must never make the UI float up or down on the screen.
-    if (workspace) workspace.style.transform = "translateX(-50%) translateZ(180px) rotate(-1deg)";
+    if (workspace) workspace.style.transform = "translateX(-50%)";
   }
 
   function renderPeaceSigningScreen() {
@@ -805,7 +1104,7 @@
     const delegatePeople = [...participants.map((country) => ({ ...country, mediator: false })), ...(conference.mediator ? [{
       id: conference.mediator.id,
       name: conference.mediator.name,
-      flag: conference.mediator.type === "un" ? "flags/ООН.png" : mediatorCountry?.flag,
+      flag: conference.mediator.type === "un" ? "flags/05-организации-и-соглашения/ООН.png" : mediatorCountry?.flag,
       mediator: true,
     }] : [])];
     const playerId = Number(strategyState.playerCountryId);
@@ -843,7 +1142,7 @@
         <div class="peace-delegates">
           <div class="delegation-side delegation-player">${delegateMarkup(playerCountry, "player-delegate")}</div>
           <div class="delegation-side delegation-opponent">${delegateMarkup(leadOpponent, "opponent-delegate", .12)}</div>
-          ${conference.mediator ? `<div class="delegate mediator-delegate" style="--flag: url('${resolveFlagUrl(conference.mediator.type === "un" ? "flags/ООН.png" : mediatorCountry?.flag || "")}' ); --delay:.24s"><span class="delegate-head"></span><div class="delegate-speech">${conference.mediator.type === "un" ? "Совет Безопасности ООН предлагает компромисс" : "Посредник предлагает условия, приемлемые для всех"}</div><span class="delegate-body"><i class="delegate-lapel"></i><i class="delegate-territory"></i></span><small>${conference.mediator.name}</small></div>` : ""}
+          ${conference.mediator ? `<div class="delegate mediator-delegate" style="--flag: url('${resolveFlagUrl(conference.mediator.type === "un" ? "flags/05-организации-и-соглашения/ООН.png" : mediatorCountry?.flag || "")}' ); --delay:.24s"><span class="delegate-head"></span><div class="delegate-speech">${conference.mediator.type === "un" ? "Совет Безопасности ООН предлагает компромисс" : "Посредник предлагает условия, приемлемые для всех"}</div><span class="delegate-body"><i class="delegate-lapel"></i><i class="delegate-territory"></i></span><small>${conference.mediator.name}</small></div>` : ""}
         </div>
         <div class="peace-table"></div>
       </div>
@@ -855,6 +1154,7 @@
           <div class="laptop-parties"><span><b>УЧАСТНИКИ</b> ${participantSummary || "—"}</span><span><b>ПЛОЩАДКА</b> ${venueCountry?.name || "—"}</span></div>
           <label class="peace-field"><span>Место подписания</span><select id="peaceVenue" class="strategy-select">${venueChoices.map(({ country, regionId }) => `<option value="${regionId}" ${Number(conference.venueRegionId) === regionId ? "selected" : ""}>${gameData.regionById.get(regionId)?.name || `Регион ${regionId}`} — ${country.name}</option>`).join("")}</select></label>
           <label class="peace-field"><span>Дата переговоров</span><input id="peaceDate" class="strategy-select" type="date" min="${strategyState.date.toISOString().slice(0, 10)}" value="${conference.negotiationDate || strategyState.date.toISOString().slice(0, 10)}"></label>
+          <label class="peace-field"><span>Пакт о ненападении до</span><input id="peaceNonAggressionExpires" class="strategy-select" type="date" min="${strategyState.date.toISOString().slice(0, 10)}" max="${new Date(strategyState.date.getFullYear() + 10, strategyState.date.getMonth(), strategyState.date.getDate()).toISOString().slice(0, 10)}" value="${conference.nonAggressionExpires || defaultPostWarPactExpiry()}" required><small>После мира стороны не смогут объявить друг другу войну до этой даты.</small></label>
           ${conference.scheduled ? `<small class="scheduled-note">Встреча назначена на ${conference.negotiationDate}. ${conference.negotiationDate === strategyState.date.toISOString().slice(0, 10) ? "Делегации готовы к подписанию." : "Вернитесь в день встречи."}</small>` : `<button class="mini-button" type="button" data-peace-action="schedule">Назначить дату и место</button>`}
           <div class="peace-help"><strong>Как выдвинуть требование</strong><span>Выберите другую сторону и тип условия. Для передачи земель сначала оккупируйте нужные регионы, отметьте их ниже, затем нажмите «Записать условие» и «Передать противнику».</span></div>
           <div class="peace-terms">${terms}</div>
@@ -867,12 +1167,23 @@
           <button class="primary-button" type="button" data-peace-action="sign" ${conference.scheduled && conference.negotiationDate > strategyState.date.toISOString().slice(0, 10) ? "disabled" : ""}>Подписать мир</button>
         </section>
       </div>`;
+    const peaceActions = peaceContent.querySelector(".peace-offer-row");
+    if (peaceActions) peaceActions.insertAdjacentHTML("beforeend", '<button class="mini-button" type="button" data-peace-action="map">Открыть карту распределения</button>');
+    const laptop = peaceContent.querySelector(".peace-laptop");
+    if (peaceLaptopMapVisible && laptop) {
+      const mapPanel = document.createElement("section");
+      mapPanel.className = "peace-laptop-map";
+      mapPanel.innerHTML = `<header><strong>Карта распределения</strong><button class="text-button" type="button" data-peace-action="close-map">Закрыть</button></header><label>Получатель<select id="peaceLaptopRecipient" class="strategy-select">${participants.map((country) => `<option value="${country.id}" ${Number(country.id) === Number(peaceMapRecipientId || strategyState.playerCountryId) ? "selected" : ""}>${country.name}</option>`).join("")}</select></label><canvas id="peaceAllocationMap"></canvas><small>Цвет региона показывает назначенного получателя. Нажмите на регион участника войны, чтобы передать его выбранной стране.</small>`;
+      laptop.insertBefore(mapPanel, laptop.querySelector(".peace-terms"));
+      mapPanel.querySelector("#peaceLaptopRecipient").addEventListener("change", (event) => { peaceMapRecipientId = Number(event.target.value); });
+      requestAnimationFrame(renderPeaceLaptopMap);
+    }
     const nextLaptop = peaceContent.querySelector(".peace-laptop");
     if (nextLaptop) {
       nextLaptop.scrollTop = laptopScrollTop;
       requestAnimationFrame(() => { nextLaptop.scrollTop = laptopScrollTop; });
     }
-    peaceScreen.classList.toggle("peace-webgl-active", renderPeace3D(conference));
+    peaceScreen.classList.remove("peace-webgl-active");
   }
 
   function canDemandCapitulation(target) {
@@ -886,6 +1197,95 @@
     return atWar && capitalControlled && controlledRegions.length >= Math.ceil(target.regionIds.length / 2);
   }
 
+  function subjectLabel(type) {
+    return ({ puppet: "марионетка", vassal: "вассал", colony: "колония" })[type] || "зависимое государство";
+  }
+
+  function makeSubject(targetId, type = "puppet") {
+    const overlord = currentPlayerCountry();
+    const target = countryById(targetId);
+    const runtime = target && strategyState.countryStates[String(target.id)];
+    if (!overlord || !target || !runtime || !canDemandCapitulation(target)) return false;
+    if (type === "colony") {
+      const bordersOverlord = (overlord.regionIds || []).some((regionId) => [...adjacentRegionIds(regionId)].some((neighborId) => Number(ownerOfRegion(neighborId)?.id) === Number(target.id)));
+      if (bordersOverlord) {
+        addLog("Колонию нельзя создать из страны с общей сухопутной границей: используйте марионетку или вассала.");
+        renderStrategyPanel();
+        return false;
+      }
+    }
+    runtime.subjectOf = Number(overlord.id);
+    runtime.subjectType = ["puppet", "vassal", "colony"].includes(type) ? type : "puppet";
+    runtime.subjectAutonomy = type === "colony" ? 0 : type === "puppet" ? 1 : 3;
+    runtime.subjectLoyalty = 68;
+    runtime.subjectSince = strategyState.date.toISOString().slice(0, 10);
+    runtime.subjectArmyDemand = 0;
+    runtime.capitulated = false;
+    addAlliance(strategyState, overlord.id, target.id);
+    setRelation(overlord.id, target.id, 100);
+    strategyState.wars.filter((war) => war.active && (Number(war.attackerId) === Number(overlord.id) || Number(war.defenderId) === Number(overlord.id))).forEach((war) => {
+      const enemyId = Number(war.attackerId) === Number(overlord.id) ? Number(war.defenderId) : Number(war.attackerId);
+      if (!isAtWar(target.id, enemyId)) strategyState.wars.push({ attackerId: Number(war.attackerId) === Number(overlord.id) ? Number(target.id) : enemyId, defenderId: Number(war.defenderId) === Number(overlord.id) ? Number(target.id) : enemyId, start: strategyState.date.toISOString().slice(0, 10), active: true, subjectWar: true });
+    });
+    addLog(`${target.name} становится: ${subjectLabel(runtime.subjectType)} страны ${overlord.name}.`);
+    renderStrategyPanel();
+    return true;
+  }
+
+  function setSubjectPolicy(targetId, values) {
+    const runtime = strategyState?.countryStates[String(targetId)];
+    if (!runtime || Number(runtime.subjectOf) !== Number(strategyState.playerCountryId)) return false;
+    runtime.subjectAutonomy = clamp(Number(values.autonomy), 0, 3);
+    runtime.subjectArmyDemand = clamp(Number(values.armyDemand), 0, 12);
+    runtime.subjectLoyalty = clamp(Number(runtime.subjectLoyalty || 50) + (runtime.subjectAutonomy >= 2 ? 3 : -2), 0, 100);
+    addLog(`Политика в зависимой стране изменена: автономия ${runtime.subjectAutonomy}/3, требование войск ${runtime.subjectArmyDemand}.`);
+    renderStrategyPanel();
+    return true;
+  }
+
+  function annexSubject(targetId) {
+    const overlord = currentPlayerCountry();
+    const target = countryById(targetId);
+    const runtime = target && strategyState?.countryStates[String(target.id)];
+    const since = runtime?.subjectSince ? new Date(`${runtime.subjectSince}T00:00:00`) : strategyState.date;
+    const days = Math.floor((strategyState.date - since) / 86400000);
+    if (!overlord || !target || !runtime || runtime.subjectType !== "vassal" || Number(runtime.subjectOf) !== Number(overlord.id) || Number(runtime.subjectLoyalty) < 85 || days < 365) return false;
+    [...target.regionIds].forEach((regionId) => transferRegionOwnership(regionId, overlord.id));
+    target.regionIds = [];
+    target.capitalRegionId = 0;
+    runtime.capitulated = true;
+    runtime.armies = [];
+    removeAlliance(strategyState, overlord.id, target.id);
+    addLog(`${target.name} аннексирована после года верности сюзерену.`);
+    renderGameMap();
+    renderStrategyPanel();
+    return true;
+  }
+
+  function manageSubject(targetId, values) {
+    const overlord = currentPlayerCountry();
+    const target = countryById(targetId);
+    const runtime = target && strategyState.countryStates[String(target.id)];
+    if (!overlord || !target || !runtime || Number(runtime.subjectOf) !== Number(overlord.id)) return false;
+    const name = String(values.name || "").trim();
+    if (name) target.name = name.slice(0, 80);
+    const flag = String(values.flag || "").trim();
+    if (flag) target.flag = flag.slice(0, 240);
+    const capital = Number(values.capitalRegionId);
+    if (target.regionIds.map(Number).includes(capital) && Number(controllerOfRegion(capital)?.id) === Number(target.id)) target.capitalRegionId = capital;
+    const ideology = IDEOLOGY_OPTIONS.find((item) => item.id === values.ideology);
+    if (ideology) {
+      target.ideology = ideology.id;
+      runtime.ideology = ideology.id;
+      runtime.democracy.active = Boolean(DEMOCRATIC_IDEOLOGIES.has(ideology.id));
+    }
+    markMapDirty();
+    addLog(`Изменено управление зависимой страной: ${target.name}.`);
+    renderGameMap();
+    renderStrategyPanel();
+    return true;
+  }
+
   function demandCapitulation(targetId) {
     const player = currentPlayerCountry();
     const target = countryById(targetId);
@@ -895,6 +1295,7 @@
       return;
     }
     const regions = [...target.regionIds].map(Number);
+    const capitalRegionId = Number(target.capitalRegionId);
     regions.forEach((regionId) => transferRegionOwnership(regionId, player.id));
     target.regionIds = [];
     target.capitalRegionId = 0;
@@ -902,6 +1303,11 @@
     if (targetRuntime) {
       targetRuntime.capitulated = true;
       targetRuntime.armies = [];
+      targetRuntime.capitulatedRegionIds = regions;
+      targetRuntime.capitulatedCapitalRegionId = capitalRegionId;
+      targetRuntime.capitulatedByCountryId = Number(player.id);
+      delete targetRuntime.restorationOfferPending;
+      delete targetRuntime.restorationDeclined;
     }
     strategyState.wars.forEach((war) => {
       if (war.active && (Number(war.attackerId) === Number(target.id) || Number(war.defenderId) === Number(target.id))) {
@@ -921,8 +1327,11 @@
   }
 
   function startRealtimeClock() {
-    // Compatibility hook: turns are advanced only by the player action below.
     stopRealtimeClock();
+    if (!historicalViewerMode) return;
+    gameTimer = window.setInterval(() => {
+      if (!advancingDay && gameData && strategyState) void advanceDay();
+    }, 80);
   }
 
   function stopRealtimeClock() {
@@ -1704,6 +2113,7 @@
     const pairSource = relationPair ? countryById(relationPair.sourceId) : null;
     const pairTarget = relationPair ? countryById(relationPair.targetId) : null;
     const pairValue = pairSource && pairTarget ? getRelation(pairSource.id, pairTarget.id) : null;
+    const subjects = gameData.scenario.countries.filter((country) => Number(strategyState.countryStates[String(country.id)]?.subjectOf) === Number(strategyState.playerCountryId));
     strategyContent.innerHTML = `
       <section class="tab-section">
         <h3>Внешняя политика</h3>
@@ -1727,9 +2137,15 @@
           <button class="mini-button" type="button" data-action="alliance">Союз</button>
           <small>Улучшение стоит 15 ПП. Союз стоит 35 ПП и требует отношения +30.</small>
         </article>
+        ${subjects.length ? `<article class="strategy-card accent-card"><header><strong>Зависимые государства</strong><small>полное управление</small></header><select id="subjectTarget" class="strategy-select">${subjects.map((country) => `<option value="${country.id}">${country.name} · ${subjectLabel(strategyState.countryStates[String(country.id)]?.subjectType)}</option>`).join("")}</select><label class="settings-field"><span>Название</span><input id="subjectName" class="strategy-select" type="text" value="${subjects[0].name}" maxlength="80"></label><label class="settings-field"><span>Флаг: путь к изображению</span><input id="subjectFlag" class="strategy-select" type="text" value="${subjects[0].flag || ""}" maxlength="240"></label><label class="settings-field"><span>Столица</span><select id="subjectCapital" class="strategy-select">${subjects[0].regionIds.map((id) => `<option value="${id}" ${Number(id) === Number(subjects[0].capitalRegionId) ? "selected" : ""}>${gameData.regionById.get(Number(id))?.name || id}</option>`).join("")}</select></label><label class="settings-field"><span>Идеология</span><select id="subjectIdeology" class="strategy-select">${IDEOLOGY_OPTIONS.map((item) => `<option value="${item.id}" ${item.id === strategyState.countryStates[String(subjects[0].id)]?.ideology ? "selected" : ""}>${item.name}</option>`).join("")}</select></label><button class="mini-button" type="button" data-action="manage-subject">Применить управление</button><label class="settings-field"><span>Автономия: ${strategyState.countryStates[String(subjects[0].id)]?.subjectAutonomy ?? 2}/3</span><input id="subjectAutonomy" class="strategy-select" type="number" min="0" max="3" value="${strategyState.countryStates[String(subjects[0].id)]?.subjectAutonomy ?? 2}"></label><label class="settings-field"><span>Требование дивизий на фронте</span><input id="subjectArmyDemand" class="strategy-select" type="number" min="0" max="12" value="${strategyState.countryStates[String(subjects[0].id)]?.subjectArmyDemand || 0}"></label><small>Лояльность: ${Math.round(strategyState.countryStates[String(subjects[0].id)]?.subjectLoyalty ?? 60)} · войск: ${strategyState.countryStates[String(subjects[0].id)]?.armies.length || 0}</small><div class="inline-actions"><button class="mini-button" type="button" data-action="subject-policy">Применить политику</button><button class="danger-button" type="button" data-action="annex-subject">Аннексировать</button></div><small>Аннексия доступна после года зависимости и при лояльности не ниже 85.</small></article>` : ""}
         <article class="strategy-card">
           <strong>Договоры</strong>
           <select id="treatyTarget" class="strategy-select">${countryOptions()}</select>
+          <select id="claimRegion" class="strategy-select">${gameData.scenario.countries.filter((country) => Number(country.id) !== Number(strategyState.playerCountryId)).flatMap((country) => (country.regionIds || []).map((regionId) => `<option value="${regionId}">${country.name}: ${gameData.regionById.get(Number(regionId))?.name || regionId}</option>`)).join("")}</select>
+          <div class="inline-actions treaty-actions"><button class="mini-button" type="button" data-action="claim">Территориальная претензия</button></div>
+          <small>Претензия стоит 20 политической силы, даёт повод для войны и снижает стоимость требования региона на мирной конференции.</small>
+          <select id="baseRegion" class="strategy-select">${gameData.scenario.countries.filter((country) => Number(country.id) !== Number(strategyState.playerCountryId)).flatMap((country) => (country.regionIds || []).map((regionId) => `<option value="${regionId}">${country.name}: ${gameData.regionById.get(Number(regionId))?.name || regionId}</option>`)).join("")}</select>
+          <select id="baseType" class="strategy-select"><option value="joint">Совместная база</option><option value="army">Сухопутная база</option><option value="navy">Морская база</option><option value="air">Авиационная база</option></select>
           <select id="nonAggressionMonths" class="strategy-select" aria-label="Срок пакта о ненападении">
             <option value="1">Ненападение: 1 месяц</option>
             <option value="3">Ненападение: 3 месяца</option>
@@ -1745,7 +2161,7 @@
             <button class="mini-button" type="button" data-action="guarantee">Гарантия</button>
             <button class="mini-button" type="button" data-action="security-guarantee">Безопасность</button>
           </div>
-          <small>Срок пакта выбирается от месяца до двух лет. Проход и безвиз доступны при нейтральных отношениях. База требует +20 и бюджет.</small>
+          <small>База требует союз или статус вассала, 25 бюджета и даёт место для размещения сухопутных войск, флота и авиации.</small>
         </article>
         <article class="strategy-card">
           <strong>Давление и деэскалация</strong>

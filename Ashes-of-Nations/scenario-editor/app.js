@@ -3,6 +3,10 @@
 
   const mapFile = document.getElementById("mapFile");
   const scenarioFile = document.getElementById("scenarioFile");
+  const projectMapSelect = document.getElementById("projectMapSelect");
+  const projectScenarioSelect = document.getElementById("projectScenarioSelect");
+  const loadProjectMapButton = document.getElementById("loadProjectMapButton");
+  const loadProjectScenarioButton = document.getElementById("loadProjectScenarioButton");
   const exportButton = document.getElementById("exportButton");
   const newCountryButton = document.getElementById("newCountryButton");
   const colorCountriesButton = document.getElementById("colorCountriesButton");
@@ -27,6 +31,10 @@
   const flagFile = document.getElementById("flagFile");
   const flagSelect = document.getElementById("flagSelect");
   const flagPreview = document.getElementById("flagPreview");
+  const subjectOverlord = document.getElementById("subjectOverlord");
+  const subjectType = document.getElementById("subjectType");
+  const subjectAutonomy = document.getElementById("subjectAutonomy");
+  const subjectAutonomyValue = document.getElementById("subjectAutonomyValue");
   const selectedRegionCount = document.getElementById("selectedRegionCount");
   const armyStrength = document.getElementById("armyStrength");
   const mapModeHint = document.getElementById("mapModeHint");
@@ -55,6 +63,8 @@
   let administrativeDivisions = {};
   let selectedAdministrativeRegionId = null;
   let mapMode = "territory";
+
+  const PROJECT_CACHE_VERSION = "20260912-154513";
 
   function hexToRgb(hex) {
     const value = hex.replace("#", "");
@@ -132,6 +142,46 @@
       flagSelect.options[0].textContent = "В папке flags пока нет флагов";
     }
     if (selectedCountry()) renderCountryForm();
+  }
+
+  function catalogEntries(value) {
+    return Array.isArray(value) ? value : [];
+  }
+
+  function configureProjectPickers() {
+    const maps = catalogEntries(window.MAPS_CATALOG);
+    const scenarios = catalogEntries(window.SCENARIOS_CATALOG);
+    maps.forEach((map, index) => projectMapSelect.add(new Option(map.name || map.file, String(index))));
+    scenarios.forEach((scenario, index) => projectScenarioSelect.add(new Option(`${scenario.name || scenario.file} · ${scenario.year || ""}`, String(index))));
+    loadProjectMapButton.disabled = maps.length === 0;
+    loadProjectScenarioButton.disabled = scenarios.length === 0;
+  }
+
+  async function fetchProjectJson(path) {
+    const url = encodeURI(`../${String(path || "").replace(/^\.\.\//, "")}`);
+    const response = await fetch(`${url}${url.includes("?") ? "&" : "?"}v=${PROJECT_CACHE_VERSION}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Не удалось открыть ${path}`);
+    return response.json();
+  }
+
+  async function openProjectMap(map) {
+    const data = await fetchProjectJson(map?.path || `maps/${map?.file || ""}`);
+    if (!data || !Number.isInteger(data.width) || !Number.isInteger(data.height) || !Array.isArray(data.regions)) {
+      throw new Error("Файл карты имеет неверный формат");
+    }
+    buildMap(data);
+  }
+
+  async function openProjectScenario(scenario) {
+    const maps = catalogEntries(window.MAPS_CATALOG);
+    const map = maps.find((item) => String(item.file) === String(scenario?.mapFile));
+    if (!map) throw new Error("Для сценария не найдена карта из папки maps");
+    const [mapDataFromProject, scenarioData] = await Promise.all([
+      fetchProjectJson(map.path || `maps/${map.file}`),
+      fetchProjectJson(scenario?.path || `scenarios/${scenario?.file || ""}`),
+    ]);
+    buildMap(mapDataFromProject);
+    importScenario(scenarioData);
   }
 
   function setZoom(value) {
@@ -485,15 +535,43 @@
     flagPreview.append(image);
   }
 
+  function wouldCreateSubjectCycle(countryId, overlordId) {
+    let currentId = Number(overlordId);
+    const visited = new Set();
+    while (currentId && !visited.has(currentId)) {
+      if (currentId === Number(countryId)) return true;
+      visited.add(currentId);
+      currentId = Number(countries.find((item) => Number(item.id) === currentId)?.subjectOf) || 0;
+    }
+    return false;
+  }
+
+  function renderSubjectControls(country) {
+    subjectOverlord.innerHTML = "";
+    subjectOverlord.add(new Option("Независимая страна", ""));
+    countries
+      .filter((candidate) => Number(candidate.id) !== Number(country.id) && !wouldCreateSubjectCycle(country.id, candidate.id))
+      .forEach((candidate) => subjectOverlord.add(new Option(candidate.name, String(candidate.id))));
+    const validOverlord = countries.some((candidate) => Number(candidate.id) === Number(country.subjectOf) && !wouldCreateSubjectCycle(country.id, country.subjectOf));
+    if (!validOverlord) country.subjectOf = null;
+    subjectOverlord.value = country.subjectOf ? String(country.subjectOf) : "";
+    subjectType.value = ["puppet", "vassal", "colony"].includes(country.subjectType) ? country.subjectType : "puppet";
+    subjectAutonomy.value = String(Math.max(0, Math.min(3, Number(country.subjectAutonomy) || 0)));
+    subjectAutonomyValue.value = subjectAutonomy.value;
+    const disabled = !country.subjectOf;
+    subjectType.disabled = disabled;
+    subjectAutonomy.disabled = disabled;
+  }
+
   function resolveEditorFlagUrl(value) {
     const source = String(value || "");
     if (source.startsWith("data:")) return source;
     if (source.startsWith("../")) {
       const path = source.replace("flags/pixel/", "flags/");
-      return `${path}${path.includes("?") ? "&" : "?"}v=20260821-170000`;
+      return `${path}${path.includes("?") ? "&" : "?"}v=20260912-154513`;
     }
     const path = `../${source.replace(/^flags\/pixel\//, "flags/")}`;
-    return `${path}${path.includes("?") ? "&" : "?"}v=20260821-170000`;
+    return `${path}${path.includes("?") ? "&" : "?"}v=20260912-154513`;
   }
 
   function renderCountryForm() {
@@ -505,6 +583,7 @@
     ideology.value = country.ideology;
     countryColor.value = country.color;
     flagSelect.value = country.flagId || "";
+    renderSubjectControls(country);
     selectedRegionCount.textContent = String(country.regionIds.length);
     updateCapitalOptions(country);
     renderFlag(country);
@@ -521,6 +600,9 @@
       color: palette[countries.length % palette.length],
       flag: null,
       flagId: "",
+      subjectOf: null,
+      subjectType: "puppet",
+      subjectAutonomy: 1,
       regionIds: [],
     };
     countries.push(country);
@@ -704,6 +786,9 @@
         color: country.color,
         flag: country.flag,
         flagId: country.flagId,
+        subjectOf: country.subjectOf,
+        subjectType: country.subjectType,
+        subjectAutonomy: country.subjectAutonomy,
         regionIds: country.regionIds,
       })),
       occupations,
@@ -776,10 +861,18 @@
         color: /^#[0-9a-f]{6}$/i.test(source.color) ? source.color : "#b94632",
         flag: typeof source.flag === "string" ? source.flag.replace(/^flags\/pixel\//, "flags/") : null,
         flagId: typeof source.flagId === "string" ? source.flagId : "",
+        subjectOf: Number.isInteger(Number(source.subjectOf)) ? Number(source.subjectOf) : null,
+        subjectType: ["puppet", "vassal", "colony"].includes(source.subjectType) ? source.subjectType : "puppet",
+        subjectAutonomy: Math.max(0, Math.min(3, Number(source.subjectAutonomy) || 0)),
         regionIds,
       };
     });
     const countryIds = new Set(countries.map((country) => country.id));
+    countries.forEach((country) => {
+      if (!countryIds.has(country.subjectOf) || Number(country.subjectOf) === Number(country.id) || wouldCreateSubjectCycle(country.id, country.subjectOf)) {
+        country.subjectOf = null;
+      }
+    });
     occupations = (Array.isArray(data.occupations) ? data.occupations : [])
       .map((item) => ({
         regionId: Number(item.regionId),
@@ -850,6 +943,28 @@
       }
     });
     reader.readAsText(file);
+  });
+
+  loadProjectMapButton.addEventListener("click", async () => {
+    if (projectMapSelect.value === "") return;
+    const map = catalogEntries(window.MAPS_CATALOG)[Number(projectMapSelect.value)];
+    if (!map) return;
+    try {
+      await openProjectMap(map);
+    } catch (error) {
+      window.alert(`Не удалось загрузить карту из maps: ${error.message}`);
+    }
+  });
+
+  loadProjectScenarioButton.addEventListener("click", async () => {
+    if (projectScenarioSelect.value === "") return;
+    const scenario = catalogEntries(window.SCENARIOS_CATALOG)[Number(projectScenarioSelect.value)];
+    if (!scenario) return;
+    try {
+      await openProjectScenario(scenario);
+    } catch (error) {
+      window.alert(`Не удалось загрузить сценарий из scenarios: ${error.message}`);
+    }
   });
 
   newCountryButton.addEventListener("click", createCountry);
@@ -926,6 +1041,26 @@
     renderMap();
   });
 
+  subjectOverlord.addEventListener("change", () => {
+    const country = selectedCountry();
+    if (!country) return;
+    const overlordId = Number(subjectOverlord.value) || null;
+    country.subjectOf = overlordId && !wouldCreateSubjectCycle(country.id, overlordId) ? overlordId : null;
+    renderSubjectControls(country);
+  });
+
+  subjectType.addEventListener("change", () => {
+    const country = selectedCountry();
+    if (country?.subjectOf) country.subjectType = subjectType.value;
+  });
+
+  subjectAutonomy.addEventListener("input", () => {
+    const country = selectedCountry();
+    if (!country?.subjectOf) return;
+    country.subjectAutonomy = Math.max(0, Math.min(3, Number(subjectAutonomy.value) || 0));
+    subjectAutonomyValue.value = String(country.subjectAutonomy);
+  });
+
   flagFile.addEventListener("change", () => {
     const country = selectedCountry();
     const file = flagFile.files[0];
@@ -953,6 +1088,9 @@
     if (!selectedCountry()) return;
     const removedCountryId = selectedCountryId;
     countries = countries.filter((country) => country.id !== selectedCountryId);
+    countries.forEach((country) => {
+      if (Number(country.subjectOf) === Number(removedCountryId)) country.subjectOf = null;
+    });
     occupations = occupations.filter((item) => item.controllerCountryId !== removedCountryId);
     armies = armies.filter((item) => item.countryId !== removedCountryId);
     Object.keys(administrativeDivisions).forEach((regionId) => {
@@ -968,5 +1106,6 @@
 
   zoomOut.addEventListener("click", () => setZoom(zoom - 0.25));
   zoomIn.addEventListener("click", () => setZoom(zoom + 0.25));
+  configureProjectPickers();
   loadReferenceData();
 })();

@@ -16,8 +16,34 @@
       <header><strong>${notification.text}</strong><button type="button" class="text-button" data-close-notification>×</button></header>
       <p>${notification.detail || "Подробностей нет."}</p>
       ${notification.requestId ? `<div class="inline-actions"><button class="mini-button" type="button" data-admin-request="approve" data-id="${notification.requestId}">Разрешить</button><button class="danger-button" type="button" data-admin-request="refuse" data-id="${notification.requestId}">Отказать</button></div>` : ""}`;
+    if (notification.restorationCountryId) {
+      const actions = document.createElement("div");
+      actions.className = "inline-actions";
+      actions.innerHTML = `<button class="mini-button" type="button" data-country-restoration="accept" data-id="${notification.restorationCountryId}">Восстановить страну</button><button class="danger-button" type="button" data-country-restoration="refuse" data-id="${notification.restorationCountryId}">Отказаться</button>`;
+      details.appendChild(actions);
+    }
+    if (notification.exileCountryId) {
+      const actions = document.createElement("div");
+      actions.className = "inline-actions";
+      actions.innerHTML = `<button class="mini-button" type="button" data-government-exile="accept" data-id="${notification.exileCountryId}">Принять правительство в изгнании</button><button class="danger-button" type="button" data-government-exile="refuse" data-id="${notification.exileCountryId}">Отказаться</button>`;
+      details.appendChild(actions);
+    }
     details.addEventListener("click", (event) => {
       if (event.target === details || event.target.closest("[data-close-notification]")) {
+        details.close();
+        details.remove();
+        return;
+      }
+      const restorationAction = event.target.closest("button[data-country-restoration]");
+      if (restorationAction) {
+        decideCountryRestoration(restorationAction.dataset.id, restorationAction.dataset.countryRestoration === "accept");
+        details.close();
+        details.remove();
+        return;
+      }
+      const exileAction = event.target.closest("button[data-government-exile]");
+      if (exileAction) {
+        decideGovernmentInExile(exileAction.dataset.id, exileAction.dataset.governmentExile === "accept");
         details.close();
         details.remove();
         return;
@@ -102,6 +128,13 @@
       strategyState?.countryStates[String(countryId)]?.allies.includes(Number(hostId));
   }
 
+  function areMilitaryAllies(firstId, secondId) {
+    if (Number(firstId) === Number(secondId)) return true;
+    const first = strategyState?.countryStates[String(firstId)];
+    const second = strategyState?.countryStates[String(secondId)];
+    return Boolean(first?.allies?.includes(Number(secondId)) || second?.allies?.includes(Number(firstId)));
+  }
+
   function canArmyUseTerritory(countryId, hostId) {
     const sourceId = Number(countryId);
     const hostCountryId = Number(hostId);
@@ -110,7 +143,7 @@
     const hasPassage = strategyState?.accessTreaties.some((item) =>
       Number(item.from) === sourceId && Number(item.host) === hostCountryId
     );
-    return Boolean(hasPassage || isAtWar(sourceId, hostCountryId));
+    return Boolean(hasPassage || areMilitaryAllies(sourceId, hostCountryId) || isAtWar(sourceId, hostCountryId));
   }
 
   function isSeaRegion(regionId) {
@@ -154,6 +187,110 @@
     return strategyState?.wars.some((war) => war.active &&
       ((Number(war.attackerId) === Number(a) && Number(war.defenderId) === Number(b)) ||
       (Number(war.attackerId) === Number(b) && Number(war.defenderId) === Number(a))));
+  }
+
+  const COLD_WAR_SOVIET_BLOC = ["СССР", "ГДР", "Польша", "Чехословакия", "Венгрия", "Румыния", "Болгария", "Албания", "Югославия"];
+  const COLD_WAR_NATO_BLOC = ["Великобритания", "Франция", "ФРГ", "Италия", "Бельгия", "Нидерланды", "Люксембург", "Дания", "Норвегия", "Греция", "Турция", "Португалия"];
+  const SOVIET_VICTORY_SUBJECTS = ["ГДР", "Польша", "Чехословакия", "Венгрия", "Румыния", "Болгария", "Албания", "Югославия", "Греция", "Турция"];
+  const EASTERN_EUROPE = ["Польша", "Чехословакия", "Венгрия", "Румыния", "Болгария", "Албания", "Югославия"];
+
+  function addColdWarScore(value) {
+    const [rawSide, rawPoints] = String(value || "").split(/[:=]/);
+    const side = String(rawSide || "").trim().toLowerCase();
+    const points = Number(rawPoints);
+    if (!strategyState || !["soviet", "nato"].includes(side) || !Number.isFinite(points)) return;
+    strategyState.coldWar = strategyState.coldWar || { soviet: 0, nato: 0, resolved: null };
+    strategyState.coldWar[side] = Math.max(0, Number(strategyState.coldWar[side] || 0) + points);
+  }
+
+  function coldWarScoreForBloc(names) {
+    return names.reduce((score, name) => {
+      const country = gameData?.scenario.countries.find((item) => item.name === name);
+      const controller = country?.capitalRegionId && controllerOfRegion(country.capitalRegionId);
+      return score + (country && Number(controller?.id) === Number(country.id) ? 8 : 0);
+    }, 0);
+  }
+
+  function forceFocusSubjects(overlordId, value) {
+    const overlord = countryById(overlordId);
+    if (!overlord) return;
+    String(value || "").split(/[;,|]/).map((name) => name.trim()).filter(Boolean).forEach((name) => {
+      const target = gameData?.scenario.countries.find((item) => item.name === name);
+      const targetRuntime = target && strategyState?.countryStates[String(target.id)];
+      if (!target || !targetRuntime || Number(target.id) === Number(overlord.id) || !target.regionIds?.length) return;
+      targetRuntime.subjectOf = Number(overlord.id);
+      targetRuntime.subjectType = "puppet";
+      targetRuntime.subjectAutonomy = 1;
+      targetRuntime.subjectLoyalty = 82;
+      targetRuntime.subjectSince = strategyState.date.toISOString().slice(0, 10);
+      targetRuntime.subjectArmyDemand = 0;
+      targetRuntime.capitulated = false;
+      addAlliance(strategyState, overlord.id, target.id);
+      setRelation(overlord.id, target.id, 100);
+      addLog(`${target.name} становится марионеткой страны ${overlord.name}.`);
+    });
+  }
+
+  function unifyGermany(winnerName, loserName) {
+    const winner = gameData?.scenario.countries.find((country) => country.name === winnerName);
+    const loser = gameData?.scenario.countries.find((country) => country.name === loserName);
+    if (!winner || !loser) return;
+    [...(loser.regionIds || [])].forEach((regionId) => transferRegionOwnership(regionId, winner.id));
+    loser.regionIds = [];
+    loser.capitalRegionId = 0;
+    const runtime = strategyState.countryStates[String(winner.id)];
+    if (runtime) runtime.stability = clamp(runtime.stability + 12, 0, 100);
+    addLog(`Германия объединена под властью ${winnerName}.`);
+  }
+
+  function restoreBalticState(name, sovietId) {
+    const country = gameData?.scenario.countries.find((item) => item.name === name);
+    if (!country || country.regionIds?.length) return;
+    [...gameData.regionById.values()]
+      .filter((region) => String(region.name || "").startsWith(`${name}:`))
+      .forEach((region) => transferRegionOwnership(region.id, country.id));
+    if (!country.regionIds?.length) return;
+    country.capitalRegionId = Number(country.regionIds[0]);
+    const runtime = strategyState.countryStates[String(country.id)];
+    if (runtime) {
+      runtime.capitulated = false;
+      runtime.ideology = "democratic";
+      runtime.stability = Math.max(runtime.stability, 55);
+    }
+    setRelation(sovietId, country.id, -90);
+    setOrganizationMembership(country.id, "nato", true);
+    addLog(`${name} восстанавливает независимость и вступает в НАТО.`);
+  }
+
+  function resolveColdWar() {
+    const ussr = gameData?.scenario.countries.find((country) => country.name === "СССР");
+    if (!ussr || Number(gameData?.scenario?.year) !== 1960) return;
+    strategyState.coldWar = strategyState.coldWar || { soviet: 0, nato: 0, resolved: null };
+    if (strategyState.coldWar.resolved) return;
+    const soviet = Number(strategyState.coldWar.soviet || 0) + coldWarScoreForBloc(COLD_WAR_SOVIET_BLOC);
+    const nato = Number(strategyState.coldWar.nato || 0) + coldWarScoreForBloc(COLD_WAR_NATO_BLOC);
+    const sovietWon = soviet >= nato;
+    strategyState.coldWar.resolved = sovietWon ? "soviet" : "nato";
+    addLog(`Итог холодной войны: СССР — ${soviet} очков, НАТО — ${nato}. Побеждает ${sovietWon ? "СССР" : "НАТО"}.`);
+    if (sovietWon) {
+      unifyGermany("ГДР", "ФРГ");
+      forceFocusSubjects(ussr.id, SOVIET_VICTORY_SUBJECTS.join(";"));
+      addLog("Социалистический лагерь одерживает победу в горячей фазе холодной войны.");
+    } else {
+      unifyGermany("ФРГ", "ГДР");
+      ["Эстония", "Латвия", "Литва"].forEach((name) => restoreBalticState(name, ussr.id));
+      EASTERN_EUROPE.forEach((name) => {
+        const country = gameData?.scenario.countries.find((item) => item.name === name);
+        const runtime = country && strategyState.countryStates[String(country.id)];
+        if (!country || !runtime || !country.regionIds?.length) return;
+        delete runtime.subjectOf;
+        delete runtime.subjectType;
+        setOrganizationMembership(country.id, "nato", true);
+        setRelation(ussr.id, country.id, -100);
+      });
+      addLog("Восточная Европа выходит из советской сферы влияния и присоединяется к НАТО.");
+    }
+    markMapDirty();
   }
 
   function applyFocusReward(runtime, reward) {
@@ -202,6 +339,7 @@
     };
     if (reward.organizationLeave) updateOrganizationMembership(reward.organizationLeave, false);
     if (reward.organizationJoin) updateOrganizationMembership(reward.organizationJoin, true);
+    if (reward.coldWarScore) addColdWarScore(reward.coldWarScore);
     Object.entries(reward).forEach(([key, value]) => {
       const match = key.match(/^law:(.+)$/);
       if (!match || !LAW_GROUPS[match[1]]) return;
@@ -236,6 +374,8 @@
       const [name, ids] = String(reward.createCountry).split(":");
       if (name && ids && createFocusCountry(name.trim(), ids.split(/[|,;]/))) addLog(`Создано государство: ${name.trim()}.`);
     }
+    if (reward.makeSubjects && country) forceFocusSubjects(country.id, reward.makeSubjects);
+    if (reward.resolveColdWar && country) resolveColdWar(country.id);
     if (reward.politicalPowerDailyMultiplier) runtime.politicalPowerDailyMultiplier = Math.max(0.1, Number(reward.politicalPowerDailyMultiplier) || 1);
   }
 
@@ -555,6 +695,9 @@
     createCountry: ["createcountry", "создатьстрану", "признатьстрану"],
     politicalPowerDailyMultiplier: ["politicalpowerdailymultiplier", "множительполитвласти"],
     capitalRegion: ["capitalregion", "столицарегион", "перенестистолицу"],
+    makeSubjects: ["makesubjects", "создатьмарионетки", "марионетки"],
+    coldWarScore: ["coldwarscore", "очкихолоднойвойны"],
+    resolveColdWar: ["resolvecoldwar", "итогхолоднойвойны"],
   };
 
   function focusRewardKey(rawKey) {
@@ -773,13 +916,15 @@
       .map(([id, formable]) => ({ id, ...formable }));
   }
 
-  function controlsCountryTerritory(runtime, countryName) {
+  function controlsCountryTerritory(runtime, countryName, controllerCountryId = runtime?.countryId) {
     const target = gameData?.scenario.countries.find((country) => country.name === countryName);
     if (!runtime || !target) return false;
+    const controllerId = Number(controllerCountryId);
+    if (!Number.isFinite(controllerId)) return false;
     const regions = target.regionIds || [];
     if (!regions.length) return true;
-    return regions.every((regionId) => Number(controllerOfRegion(regionId)?.id) === Number(runtime.countryId) ||
-      Number(ownerOfRegion(regionId)?.id) === Number(runtime.countryId));
+    return regions.every((regionId) => Number(controllerOfRegion(regionId)?.id) === controllerId ||
+      Number(ownerOfRegion(regionId)?.id) === controllerId);
   }
 
   function formableRequirementStatus(formable, player, runtime) {
@@ -834,7 +979,7 @@
     });
     (requirements.controlCountries || []).forEach((countryName) => {
       statuses.push({
-        ok: controlsCountryTerritory(runtime, countryName),
+        ok: controlsCountryTerritory(runtime, countryName, player.id),
         text: `Контролировать территории: ${countryName}`,
       });
     });
@@ -842,7 +987,7 @@
       const region = gameData?.regionById?.get(Number(regionId));
       const controller = controllerOfRegion(regionId);
       statuses.push({
-        ok: Number(controller?.id) === Number(runtime.countryId) || Number(ownerOfRegion(regionId)?.id) === Number(runtime.countryId),
+        ok: Number(controller?.id) === Number(player.id) || Number(ownerOfRegion(regionId)?.id) === Number(player.id),
         text: `Контролировать регион: ${region?.name || regionId}`,
       });
     });
@@ -1036,12 +1181,26 @@
     score += Number(reward.politicalPower || 0) * 0.22 + Number(reward.commandPower || 0) * 0.15;
     score += Number(reward.organizationJoin ? 10 : 0) + Number(reward.organizationLeave ? 7 : 0);
     score += Number(reward.integrateCountry ? 28 : 0) + Number(reward.formedNation ? 30 : 0);
+    // Formation candidates follow their prerequisite chain rather than
+    // drifting into an unrelated high-reward branch.
+    const focuses = getFocusTree(country, gameData.scenario.year);
+    const leadsTo = (candidateId, targetId, visited = new Set()) => {
+      if (candidateId === targetId) return true;
+      if (visited.has(targetId)) return false;
+      visited.add(targetId);
+      const target = focuses.find((item) => item.id === targetId);
+      return Boolean(target?.requires?.some((requirement) => leadsTo(candidateId, requirement, visited)));
+    };
+    const formationPath = availableFormables(country, runtime).some((formable) =>
+      formable.requiredFocus && leadsTo(focus.id, focusIdFor(country, formable.requiredFocus)));
+    if (formationPath) score += 60;
     if (/livoni|югослав|балкан|велик.*княжеств/i.test(`${focus.rawId || ""} ${focus.name || ""}`)) score += 24;
     if (isCountryAtWar(country.id)) score += Number(reward.commandPower || 0) * 0.8 + Number(reward.warSupport || 0) * 0.9;
     return score + (hashNumber(`${country.id}:${focus.rawId || focus.id}:${strategyState.date.toISOString().slice(0, 7)}`) % 18);
   }
 
   function aiMaybeStartFocuses(country, runtime) {
+    if (isHistoricalPhaseActive()) return;
     const focuses = getFocusTree(country, gameData.scenario.year);
     if (!focuses.length) return;
     while (getActiveFocuses(runtime).length < maxActiveFocuses(runtime)) {
@@ -1054,6 +1213,19 @@
       syncLegacyFocus(runtime);
       addLog(`ИИ начал фокус: ${country.name} — ${focus.name}.`);
     }
+  }
+
+  function applyHistoricalAlternativePath(country, runtime) {
+    if (!strategyState?.historicalDiverged) return;
+    const scenarioYear = Number(gameData?.scenario?.year);
+    const paths = window.HISTORICAL_ALTERNATIVE_PATHS || [];
+    const selected = paths.find((item) => item.years?.includes(scenarioYear) && item.countries?.includes(country.name)) ||
+      paths.find((item) => item.years?.includes(scenarioYear) && item.defaultPath);
+    if (!selected || runtime.historicalAlternativePath === selected.id) return;
+    runtime.historicalAlternativePath = selected.id;
+    runtime.aiAgenda = selected.agenda || runtime.aiAgenda || "security";
+    runtime.warSupport = clamp(runtime.warSupport + Number(selected.warSupport || 0), 0, 100);
+    runtime.stability = clamp(runtime.stability + Number(selected.stability || 0), 0, 100);
   }
 
   function hasTechnology(runtime, techId) {
@@ -1176,8 +1348,15 @@
     const economyLaw = LAW_GROUPS.economy.options.find((item) => item.id === runtime.laws.economy);
     const consumerGoods = economyLaw?.effects.consumerGoods ?? 0.25;
     const atWar = strategyState.wars.some((war) => war.active && (Number(war.attackerId) === Number(runtime.countryId) || Number(war.defenderId) === Number(runtime.countryId)));
+    const peacetimeStabilityTarget = runtime.laws.economy === "civilian" ? 64 : 60;
+    if (!atWar && runtime.stability < peacetimeStabilityTarget) {
+      runtime.stability = clamp(runtime.stability + 0.06, 0, peacetimeStabilityTarget);
+    }
     const warTreasuryMultiplier = atWar ? 1.35 : 1;
-    runtime.budget += Math.max(1.5, runtime.gdp * runtime.taxRate / 26000 * (1 - consumerGoods * 0.35) * warTreasuryMultiplier);
+    const dailyTaxRevenue = Math.max(1.5, runtime.gdp * runtime.taxRate / 26000 * (1 - consumerGoods * 0.35) * warTreasuryMultiplier);
+    runtime.lastDailyTaxRevenue = dailyTaxRevenue;
+    runtime.budget += dailyTaxRevenue;
+    if (runtime.subjectOf) applySubjectObligations(runtime, country, dailyTaxRevenue);
     runtime.manpower += Math.max(0, Math.round(runtime.population * runtime.modifiers.recruitable / 3650));
     if (country) updateDemocracy(runtime, country);
     if (strategyState.date.getDate() !== 1) return;
@@ -1197,6 +1376,32 @@
     runtime.resources.food = Math.max(0, runtime.resources.food - Math.max(1, Math.round(runtime.manpower / 260)));
     applyRegionalMinisters(runtime);
     updateMacroIndicators(runtime);
+  }
+
+  function applySubjectObligations(runtime, country, dailyTaxRevenue) {
+    const overlord = strategyState.countryStates[String(runtime.subjectOf)];
+    if (!overlord || !country) return;
+    const typeRate = runtime.subjectType === "colony" ? 0.34 : runtime.subjectType === "puppet" ? 0.22 : 0.12;
+    const autonomy = clamp(Number(runtime.subjectAutonomy ?? 2), 0, 3);
+    const rate = typeRate * (1 - autonomy * 0.16);
+    const tribute = Math.min(runtime.budget, dailyTaxRevenue * rate);
+    runtime.budget -= tribute;
+    overlord.budget += tribute;
+    Object.keys(RESOURCE_LABELS).forEach((resource) => {
+      const amount = Math.max(0, Math.floor((runtime.resources[resource] || 0) * rate / 45));
+      runtime.resources[resource] -= amount;
+      overlord.resources[resource] += amount;
+    });
+    const demanded = Number(runtime.subjectArmyDemand || 0);
+    const fulfilled = runtime.armies.length >= demanded;
+    runtime.subjectLoyalty = clamp(Number(runtime.subjectLoyalty ?? 60) + autonomy * 0.018 - rate * 0.42 - (demanded && !fulfilled ? 0.09 : 0), 0, 100);
+    if (strategyState.date.getDate() !== 1 || runtime.subjectLoyalty >= 18) return;
+    const subject = countryById(runtime.countryId);
+    const master = countryById(runtime.subjectOf);
+    runtime.subjectOf = null;
+    removeAlliance(strategyState, subject.id, master.id);
+    if (!isAtWar(subject.id, master.id)) strategyState.wars.push({ attackerId: Number(subject.id), defenderId: Number(master.id), start: strategyState.date.toISOString().slice(0, 10), active: true, independenceWar: true });
+    if (Number(master.id) === Number(strategyState.playerCountryId)) addLog(`${subject.name} поднимает восстание против зависимости.`);
   }
 
   function applyRegionalMinisters(runtime) {
@@ -1245,8 +1450,10 @@
         changed = true;
         const owner = ownerOfRegion(army.regionId);
         const alreadyOccupied = (gameData.scenario.occupations || []).some((occupation) => Number(occupation.regionId) === Number(army.regionId));
-        if (owner && Number(owner.id) !== Number(runtime.countryId) && isAtWar(runtime.countryId, owner.id) && !alreadyOccupied && canAutoTargetRegion(army.regionId, runtime.countryId)) {
+        if (owner && Number(owner.id) !== Number(runtime.countryId) && isAtWar(runtime.countryId, owner.id) && !alreadyOccupied && canAutoTargetRegion(army.regionId, runtime.countryId) && canMilitaryOvercome(runtime.countryId, owner.id, army)) {
           gameData.scenario.occupations.push({ regionId: Number(army.regionId), controllerCountryId: Number(runtime.countryId) });
+          dislodgeDefendingArmies(army.regionId, runtime.countryId);
+          checkForLiberationOpportunity(runtime.countryId, army.regionId);
           markMapDirty();
           if (Number(runtime.countryId) === Number(strategyState.playerCountryId)) addLog(`${army.name} заняла регион.`);
         }
@@ -1269,6 +1476,7 @@
   function bestRecruitRegion(country, runtime, minimumSoldiers = 500) {
     return (country.regionIds || [])
       .map((regionId) => ({ regionId: Number(regionId), profile: runtime.regionProfiles[String(regionId)] }))
+      .filter((item) => Number(controllerOfRegion(item.regionId)?.id) === Number(country.id))
       .filter((item) => item.profile && item.profile.readySoldiers >= minimumSoldiers)
       .sort((a, b) => b.profile.readySoldiers - a.profile.readySoldiers)[0] || null;
   }
@@ -1278,6 +1486,7 @@
     const enemyRegions = new Set(enemy.regionIds.map(Number));
     const frontline = (country.regionIds || [])
       .map((regionId) => ({ regionId: Number(regionId), profile: runtime.regionProfiles[String(regionId)] }))
+      .filter((item) => Number(controllerOfRegion(item.regionId)?.id) === Number(country.id))
       .filter((item) => item.profile && item.profile.readySoldiers >= minimumSoldiers)
       .filter((item) => [...adjacentRegionIds(item.regionId)].some((neighbor) => enemyRegions.has(Number(neighbor))))
       .sort((a, b) => b.profile.readySoldiers - a.profile.readySoldiers);
@@ -1318,6 +1527,71 @@
     if (isAntarcticRegion(regionId)) return false;
     if (RUSSIAN_TERRITORY_TRANSFER_LOCKED && isProtectedRussianRegion(regionId) && Number(owner.id) !== Number(controllerCountryId)) return false;
     return true;
+  }
+
+  function dislodgeDefendingArmies(regionId, attackerId) {
+    const defender = ownerOfRegion(regionId);
+    const defenderRuntime = defender && strategyState?.countryStates[String(defender.id)];
+    if (!defender || !defenderRuntime || Number(defender.id) === Number(attackerId)) return;
+    const fallback = [...adjacentRegionIds(regionId)].find((neighborId) =>
+      Number(controllerOfRegion(neighborId)?.id) === Number(defender.id));
+    defenderRuntime.armies = defenderRuntime.armies.filter((army) => {
+      if (Number(army.regionId) !== Number(regionId)) return true;
+      if (fallback) {
+        army.regionId = Number(fallback);
+        army.movingTo = null;
+        army.route = [];
+        army.eta = 0;
+        army.order = "Отход после боя";
+        army.readiness = clamp(Number(army.readiness || 0) - 45, 5, 100);
+        army.soldiers = Math.max(0, Math.floor(Number(army.soldiers || 0) * 0.55));
+        return army.soldiers >= 100;
+      }
+      return false;
+    });
+  }
+
+  // This ranking intentionally remains internal: it represents training,
+  // command, logistics, technology and industrial support in addition to the
+  // visible number of soldiers.
+  function militaryRating(countryId) {
+    const runtime = strategyState?.countryStates[String(countryId)];
+    if (!runtime) return 0;
+    const armyStrength = (runtime.armies || []).reduce((sum, army) =>
+      sum + Number(army.soldiers || 0) * (0.55 + Number(army.readiness || 0) / 200), 0);
+    const technology = (runtime.technologies || []).length * 45;
+    const industry = Number(runtime.factories || 0) * 22;
+    const logistics = Number(runtime.supply?.level || 0) * 2 + Number(runtime.commandPower || 0) * 0.35;
+    const navy = Number(runtime.navyPower || 0) * 8;
+    return Math.round(250 + armyStrength / 12 + technology + industry + logistics + navy);
+  }
+
+  function militaryRank(countryId) {
+    const ratings = gameData?.scenario?.countries
+      .filter((country) => country.regionIds?.length)
+      .map((country) => ({ id: Number(country.id), rating: militaryRating(country.id) }))
+      .sort((left, right) => right.rating - left.rating) || [];
+    return ratings.findIndex((item) => item.id === Number(countryId)) + 1;
+  }
+
+  function canMilitaryOvercome(attackerId, defenderId, attackingArmy = null) {
+    const attackerRating = militaryRating(attackerId);
+    const defenderRating = militaryRating(defenderId);
+    const attackerRank = militaryRank(attackerId);
+    const defenderRank = militaryRank(defenderId);
+    const strategicGap = defenderRating > attackerRating * 1.15 || attackerRank - defenderRank > 10;
+    if (!strategicGap) return true;
+    const attackerRuntime = strategyState?.countryStates[String(attackerId)];
+    const defenderRuntime = strategyState?.countryStates[String(defenderId)];
+    const attackerForce = attackingArmy
+      ? Number(attackingArmy.soldiers || 0) * (0.55 + Number(attackingArmy.readiness || 0) / 200)
+      : (attackerRuntime?.armies || []).reduce((sum, army) => sum + Number(army.soldiers || 0) * (0.55 + Number(army.readiness || 0) / 200), 0);
+    const defenderArmies = defenderRuntime?.armies || [];
+    const defenderForce = defenderArmies.reduce((sum, army) => sum + Number(army.soldiers || 0) * (0.55 + Number(army.readiness || 0) / 200), 0) /
+      Math.max(1, defenderArmies.length);
+    // Equal formations cannot break a much better army; a clear local force
+    // advantage is required to offset a large strategic-quality gap.
+    return attackerForce > defenderForce * 1.35;
   }
 
   function adjacentRegionIds(regionId) {
@@ -1413,30 +1687,42 @@
     return regions;
   }
 
-  function frontTargetRegions(country, enemy, limit = 8, army = null, allowNaval = false) {
+  function frontTargetRegions(country, enemy, limit = 8, army = null, allowNaval = false, preferLiberation = true) {
     if (!enemy) return [];
     const occupied = new Set((gameData.scenario.occupations || []).map((occupation) => Number(occupation.regionId)));
     const controlled = controlledRegionSet(country.id);
     const armyAdjacent = army ? adjacentRegionIds(army.regionId) : new Set();
+    // Recovering homeland comes before taking new territory.
+    const liberationTargets = (gameData.scenario.occupations || [])
+      .filter((occupation) => {
+        const owner = ownerOfRegion(occupation.regionId);
+        // In a coalition war, an ally's occupied land is a front objective too.
+        return owner && (Number(owner.id) === Number(country.id) || areMilitaryAllies(country.id, owner.id)) &&
+          isAtWar(owner.id, enemy.id);
+      })
+      .filter((occupation) => Number(occupation.controllerCountryId) === Number(enemy.id))
+      .map((occupation) => Number(occupation.regionId));
     const targetable = (enemy.regionIds || [])
       .map(Number)
       .filter((regionId) => !occupied.has(regionId) && canAutoTargetRegion(regionId, country.id));
     if (army) {
-      return targetable
+      const orderedTargets = preferLiberation ? [...liberationTargets, ...targetable] : [...targetable, ...liberationTargets];
+      return orderedTargets
         .map((regionId) => ({
           regionId,
           route: armyAdjacent.has(regionId)
             ? [regionId]
             : armyRoute(strategyState.countryStates[String(country.id)], army, regionId, allowNaval),
         }))
-        .filter((item) => item.route?.length && !isSeaRegion(army.regionId) && !isSeaRegion(item.regionId))
+        .filter((item) => item.route?.length && !isSeaRegion(army.regionId) && !isSeaRegion(item.regionId) && canMilitaryOvercome(country.id, enemy.id, army))
         .sort((a, b) => {
           return a.route.length - b.route.length;
         })
         .slice(0, limit)
         .map((item) => item.regionId);
     }
-    const borderTargets = targetable.filter((regionId) => {
+    const orderedTargets = preferLiberation ? [...liberationTargets, ...targetable] : [...targetable, ...liberationTargets];
+    const borderTargets = orderedTargets.filter((regionId) => {
       const neighbors = adjacentRegionIds(regionId);
       return [...neighbors].some((neighborId) => controlled.has(Number(neighborId)));
     });
@@ -1448,14 +1734,62 @@
     const owner = ownerOfRegion(regionId);
     if (!owner || Number(owner.id) === Number(country.id) || !isAtWar(country.id, owner.id)) return false;
     if (!canAutoTargetRegion(regionId, country.id)) return false;
+    if (!canMilitaryOvercome(country.id, owner.id, army)) return false;
     const alreadyOccupied = (gameData.scenario.occupations || []).some((occupation) => Number(occupation.regionId) === regionId);
     if (alreadyOccupied) return false;
     const readinessNeed = minister.mode === "aggressive" ? 35 : minister.mode === "mobilization" ? 42 : 48;
     if (army.readiness < readinessNeed) return false;
     gameData.scenario.occupations.push({ regionId, controllerCountryId: Number(country.id) });
+    dislodgeDefendingArmies(regionId, country.id);
+    checkForLiberationOpportunity(country.id, regionId);
     markMapDirty();
     army.readiness = clamp(army.readiness - 10, 5, 100);
     if (logForPlayer) addLog(`${minister.name} установил оккупацию региона ${gameData.regionById.get(regionId)?.name || regionId}. Территория не присоединена.`);
+    return true;
+  }
+
+  function deoccupyArmyRegion(country, army, minister, logForPlayer) {
+    const regionId = Number(army.regionId);
+    const occupation = (gameData.scenario.occupations || []).find((item) => Number(item.regionId) === regionId);
+    const owner = ownerOfRegion(regionId);
+    if (!occupation || !owner || (Number(owner.id) !== Number(country.id) && !areMilitaryAllies(country.id, owner.id))) return false;
+    if (!isAtWar(country.id, occupation.controllerCountryId)) return false;
+    const readinessNeed = minister.mode === "aggressive" ? 28 : minister.mode === "mobilization" ? 34 : 40;
+    if (army.readiness < readinessNeed) return false;
+    gameData.scenario.occupations = gameData.scenario.occupations.filter((item) => Number(item.regionId) !== regionId);
+    checkForGovernmentInExileLiberation(country.id, regionId);
+    army.readiness = clamp(army.readiness - 7, 5, 100);
+    markMapDirty();
+    if (logForPlayer) addLog(`${minister.name} освободил регион ${gameData.regionById.get(regionId)?.name || regionId}.`);
+    return true;
+  }
+
+  function strategicDefenseRegions(country, enemyId) {
+    const occupied = new Set((gameData.scenario.occupations || []).map((item) => Number(item.regionId)));
+    return (country.regionIds || []).map(Number).filter((regionId) => {
+      if (Number(controllerOfRegion(regionId)?.id) !== Number(country.id)) return false;
+      const profile = gameData.regionGeoProfiles?.get(regionId);
+      const threatened = [...adjacentRegionIds(regionId)].some((neighborId) =>
+        Number(controllerOfRegion(neighborId)?.id) === Number(enemyId) || occupied.has(Number(neighborId)));
+      return threatened || Number(regionId) === Number(country.capitalRegionId) ||
+        profile?.tags?.includes("land_chokepoint") || profile?.tags?.includes("strait");
+    });
+  }
+
+  function retreatArmyIfEncircled(country, runtime, army, enemyId) {
+    if (army.movingTo || Number(controllerOfRegion(army.regionId)?.id) !== Number(country.id)) return false;
+    const neighbors = [...adjacentRegionIds(army.regionId)];
+    const hostile = neighbors.filter((regionId) => Number(controllerOfRegion(regionId)?.id) === Number(enemyId));
+    const safe = neighbors.filter((regionId) => Number(controllerOfRegion(regionId)?.id) === Number(country.id));
+    const cutOff = hostile.length >= 2 && safe.length <= 1;
+    if (!cutOff && Number(army.readiness || 0) >= 24) return false;
+    const fallback = safe.sort((left, right) => {
+      const leftScore = Number(left === country.capitalRegionId) * 100 + strategicDefenseRegions(country, enemyId).includes(left) * 30;
+      const rightScore = Number(right === country.capitalRegionId) * 100 + strategicDefenseRegions(country, enemyId).includes(right) * 30;
+      return rightScore - leftScore;
+    })[0];
+    if (!fallback || !setArmyRoute(runtime, army, fallback, "retreat")) return false;
+    army.order = "Отход: избежать окружения";
     return true;
   }
 
@@ -1471,19 +1805,44 @@
       if (created && options.logForPlayer) addLog(`${minister.name} сформировал ${created.name}.`);
       if (!created) break;
     }
-    runtime.armies.forEach((army) => autoOccupyArmyRegion(country, runtime, army, minister, options.logForPlayer));
+    runtime.armies.forEach((army) => {
+      if (activeWar && retreatArmyIfEncircled(country, runtime, army, Number(activeWar.attackerId) === Number(country.id) ? activeWar.defenderId : activeWar.attackerId)) return;
+      deoccupyArmyRegion(country, army, minister, options.logForPlayer);
+      autoOccupyArmyRegion(country, runtime, army, minister, options.logForPlayer);
+    });
     if (!activeWar || !runtime.armies.length) return;
     const enemyId = Number(activeWar.attackerId) === Number(country.id) ? activeWar.defenderId : activeWar.attackerId;
     const enemy = countryById(enemyId);
+    const alliedOccupationCount = (gameData.scenario.occupations || []).filter((occupation) => {
+      const owner = ownerOfRegion(occupation.regionId);
+      return owner && areMilitaryAllies(country.id, owner.id) && Number(occupation.controllerCountryId) === Number(enemyId);
+    }).length;
+    runtime.coalitionRole = alliedOccupationCount ? "liberator" : runtime.aiAgenda === "security" ? "defender" : "attacker";
     const freeArmies = runtime.armies.filter((item) => !item.movingTo);
     const ordersPerTick = minister.mode === "aggressive" ? 5 : minister.mode === "mobilization" ? 4 : 3;
     const assignedTargets = new Set();
+    const defenseTargets = strategicDefenseRegions(country, enemyId);
+    const pressureTargets = frontTargetRegions(country, enemy, Math.max(ordersPerTick * 3, 10), freeArmies[0], true, false);
+    const mainAxis = pressureTargets[0];
     freeArmies
       .sort((a, b) => b.readiness - a.readiness)
       .slice(0, ordersPerTick)
-      .forEach((army) => {
-      const targetRegions = frontTargetRegions(country, enemy, Math.max(ordersPerTick * 3, 10), army, true);
-      const targetRegion = targetRegions.find((regionId) => !assignedTargets.has(regionId)) || targetRegions[0];
+      .forEach((army, index) => {
+      const defenseSlots = Math.max(1, Math.floor(Math.min(freeArmies.length, ordersPerTick) / 3));
+      if (index < defenseSlots && defenseTargets.length) {
+        const defenseTarget = defenseTargets.find((regionId) => !assignedTargets.has(regionId)) || defenseTargets[0];
+        if (setArmyRoute(runtime, army, defenseTarget, "general", true)) {
+          assignedTargets.add(Number(defenseTarget));
+          army.order = `Оборона ${gameData.regionById.get(Number(defenseTarget))?.name || "рубежа"}`;
+        }
+        return;
+      }
+      // Reserve only part of the force for liberation. The rest keeps
+      // pressure on the enemy instead of chasing every distant occupation.
+      const liberationShare = runtime.coalitionRole === "liberator" ? 0.7 : runtime.coalitionRole === "defender" ? 0.55 : 0.3;
+      const liberationSlots = Math.max(1, Math.ceil(Math.min(freeArmies.length, ordersPerTick) * liberationShare));
+      const targetRegions = frontTargetRegions(country, enemy, Math.max(ordersPerTick * 3, 10), army, true, index < liberationSlots);
+      const targetRegion = mainAxis && index < ordersPerTick - 1 ? mainAxis : targetRegions.find((regionId) => !assignedTargets.has(regionId)) || targetRegions[0];
       if (!targetRegion) return;
       assignedTargets.add(Number(targetRegion));
       const routed = setArmyRoute(runtime, army, targetRegion, "general", true);
@@ -1519,6 +1878,18 @@
 
   function warGoalFor(war) {
     return WAR_GOALS.find((goal) => goal.id === war?.goal) || WAR_GOALS[0];
+  }
+
+  function aiWarGoal(attacker, defender) {
+    const attackerRuntime = strategyState.countryStates[String(attacker.id)];
+    const lostHomeland = (gameData.scenario.occupations || []).some((occupation) =>
+      Number(ownerOfRegion(occupation.regionId)?.id) === Number(attacker.id) && Number(occupation.controllerCountryId) === Number(defender.id));
+    if (lostHomeland) return "border";
+    const formationTarget = availableFormables(attacker, attackerRuntime).some((formable) =>
+      attackerRuntime?.completedFocuses?.includes(focusIdFor(attacker, formable.requiredFocus)) && formable.requirements?.controlCountries?.includes(defender.name));
+    if (formationTarget || historicalTerritoryPriority(attacker, defender.capitalRegionId) >= 18) return "conquest";
+    if (isDemocraticIdeology(attackerRuntime?.ideology)) return "regime";
+    return attackerRuntime?.aiAgenda === "maritime" ? "blockade" : attackerRuntime?.aiAgenda === "revisionist" ? "conquest" : "border";
   }
 
   function enemyForWar(war, countryId) {
@@ -1625,6 +1996,7 @@
     const attackerRuntime = strategyState.countryStates[String(attacker.id)];
     const defenderRuntime = strategyState.countryStates[String(defender.id)];
     if (!attackerRuntime || !defenderRuntime || isAtWar(attacker.id, defender.id)) return -999;
+    if (hasNonAggressionPact(attacker.id, defender.id)) return -999;
     if (Number(attacker.id) === Number(defender.id)) return -999;
     const democracyPenalty = isDemocraticIdeology(attackerRuntime.ideology) ? Math.max(0, 80 - (attackerRuntime.democracy?.approval || 50)) * 1.8 : 0;
     if (attackerRuntime.warSupport < 35 || attackerRuntime.stability < 28) return -999 - democracyPenalty;
@@ -1632,7 +2004,7 @@
     if (activeWars >= 2) return -999;
     const sharedBorder = (attacker.regionIds || []).some((regionId) =>
       [...adjacentRegionIds(regionId)].some((neighborId) => Number(ownerOfRegion(neighborId)?.id) === Number(defender.id)));
-    const hostility = Math.max(0, -relation);
+    const hostility = Math.max(0, -relation) + Math.max(0, -diplomaticMemoryValue(attacker.id, defender.id));
     const powerBalance = (attackerRuntime.factories + attackerRuntime.armies.length * 2 + attackerRuntime.warSupport / 12) -
       (defenderRuntime.factories + defenderRuntime.armies.length * 2 + defenderRuntime.warSupport / 14);
     const borderBonus = sharedBorder ? 35 : -25;
@@ -1640,7 +2012,11 @@
     const democracyCooldown = isDemocraticIdeology(attackerRuntime.ideology) ? Math.max(0, 65 - (attackerRuntime.democracy?.approval || 50)) * 1.3 : 0;
     const agenda = attackerRuntime.aiAgenda || chooseAiAgenda(attacker, attackerRuntime);
     const agendaBonus = agenda === "revisionist" ? 30 : agenda === "regional" && sharedBorder ? 16 : agenda === "security" ? -24 : agenda === "trade" ? -16 : agenda === "maritime" ? 6 : 0;
-    return hostility + powerBalance + borderBonus + randomTension + agendaBonus - activeWars * 25 - democracyCooldown;
+    const formationTarget = availableFormables(attacker, attackerRuntime).some((formable) =>
+      attackerRuntime.completedFocuses.includes(focusIdFor(attacker, formable.requiredFocus)) &&
+      formable.requirements?.controlCountries?.includes(defender.name));
+    const historicalPriority = sharedBorder ? Math.min(30, Math.max(...(defender.regionIds || []).map((regionId) => historicalTerritoryPriority(attacker, regionId)), 0)) : 0;
+    return hostility + powerBalance + borderBonus + randomTension + agendaBonus + (formationTarget ? 48 : 0) + historicalPriority - activeWars * 25 - democracyCooldown;
   }
 
   function isCountryAtWar(countryId) {
@@ -1705,10 +2081,21 @@
   function aiMaybeDiplomacy(country, runtime) {
     const candidates = gameData.scenario.countries
       .filter((candidate) => Number(candidate.id) !== Number(country.id) && !isAtWar(country.id, candidate.id))
-      .map((candidate) => ({ candidate, relation: getRelation(country.id, candidate.id) }))
+      .map((candidate) => ({ candidate, relation: getRelation(country.id, candidate.id) + diplomaticMemoryValue(country.id, candidate.id) }))
       .sort((a, b) => b.relation - a.relation);
     const best = candidates[0];
     if (!best) return;
+    if (runtime.aiAgenda === "revisionist" && runtime.politicalPower >= 20) {
+      const targetRegion = (best.candidate.regionIds || []).map(Number)
+        .filter((regionId) => [...adjacentRegionIds(regionId)].some((neighborId) => Number(ownerOfRegion(neighborId)?.id) === Number(country.id)))
+        .sort((a, b) => historicalTerritoryPriority(country, b) - historicalTerritoryPriority(country, a))[0];
+      if (targetRegion && !activeTerritorialClaim(country.id, best.candidate.id, targetRegion)) {
+        runtime.politicalPower -= 20;
+        strategyState.claims.push({ claimantId: Number(country.id), targetId: Number(best.candidate.id), regionId: targetRegion, created: strategyState.date.toISOString().slice(0, 10), active: true, source: "ai" });
+        setRelation(country.id, best.candidate.id, getRelation(country.id, best.candidate.id) - 10);
+        addLog(`${country.name} выдвинула территориальную претензию к ${best.candidate.name}.`);
+      }
+    }
     if (runtime.aiAgenda === "trade" || isDemocraticIdeology(runtime.ideology)) {
       if (best.relation < 15) return;
       setRelation(country.id, best.candidate.id, clamp(best.relation + 3, -100, 100));
@@ -1750,9 +2137,10 @@
         defenderId: Number(defender.id),
         start: strategyState.date.toISOString().slice(0, 10),
         active: true,
-        goal: strategyState.countryStates[String(attacker.id)]?.aiAgenda === "maritime" ? "blockade" : strategyState.countryStates[String(attacker.id)]?.aiAgenda === "revisionist" ? "conquest" : "border",
+        goal: aiWarGoal(attacker, defender),
       });
       const attackerRuntime = strategyState.countryStates[String(attacker.id)];
+      rememberDiplomaticAction(attacker.id, defender.id, -42, "aggression");
       if (attackerRuntime?.aiAgenda === "maritime" && Number(attackerRuntime.navyPower || 0) > 0) attackerRuntime.navalMission = { type: "blockade", targetId: Number(defender.id), started: strategyState.date.toISOString().slice(0, 10) };
       aiAlliesImposeSanctions(attacker.id, defender.id);
       activateGuaranteesForWar(attacker.id, defender.id);
@@ -1781,7 +2169,7 @@
           if (Number(allyId) === Number(strategyState.playerCountryId) || isAtWar(allyId, enemy.id)) return;
           const ally = countryById(allyId);
           const allyRuntime = strategyState.countryStates[String(allyId)];
-          if (!ally || !allyRuntime || allyRuntime.warSupport < 28 || getRelation(ally.id, side.id) < 25 || getRelation(ally.id, enemy.id) > -15) return;
+          if (!ally || !allyRuntime || hasNonAggressionPact(ally.id, enemy.id) || allyRuntime.warSupport < 28 || getRelation(ally.id, side.id) < 25 || getRelation(ally.id, enemy.id) > -15) return;
           strategyState.wars.push({
             attackerId: Number(side.id) === Number(attacker.id) ? Number(ally.id) : Number(enemy.id),
             defenderId: Number(side.id) === Number(defender.id) ? Number(ally.id) : Number(enemy.id),
@@ -1821,7 +2209,22 @@
       return Number(owner?.id) === Number(actorId) && enemies.includes(Number(occupation.controllerCountryId));
     }).length;
     const ownOccupations = occupiedRegionsControlledBy(actorId).filter((regionId) => enemies.includes(Number(ownerOfRegion(regionId)?.id))).length;
-    return longestWar / 3 + Math.max(0, 55 - runtime.warSupport) + Math.max(0, 45 - runtime.stability) + lostRegions * 18 - ownOccupations * 8;
+    const country = countryById(actorId);
+    const totalRegions = Math.max(1, country?.regionIds?.length || 1);
+    const capitalLost = country && Number(controllerOfRegion(country.capitalRegionId)?.id) !== Number(actorId) ? 65 : 0;
+    const territorialCollapse = lostRegions / totalRegions >= 0.55 ? 55 : lostRegions / totalRegions >= 0.35 ? 24 : 0;
+    return longestWar / 3 + Math.max(0, 55 - runtime.warSupport) + Math.max(0, 45 - runtime.stability) + lostRegions * 18 + capitalLost + territorialCollapse - ownOccupations * 8;
+  }
+
+  function decisiveDefeatInGroup(group) {
+    return group.participants.some((countryId) => {
+      const country = countryById(countryId);
+      if (!country?.regionIds?.length) return false;
+      const total = country.regionIds.length;
+      const controlled = country.regionIds.filter((regionId) => Number(controllerOfRegion(regionId)?.id) === Number(countryId)).length;
+      const capitalLost = Number(controllerOfRegion(country.capitalRegionId)?.id) !== Number(countryId);
+      return controlled === 0 || (capitalLost && controlled / total <= 0.2);
+    });
   }
 
   function finalizePeaceGroup(group, proposerId) {
@@ -1834,14 +2237,16 @@
       demands: generateBotPeaceDemands(group),
       mediator: null,
       title: "Мирный договор",
+      nonAggressionExpires: defaultPostWarPactExpiry(),
     };
     conference.demands.forEach(applyPeaceDemand);
     const clearedOccupations = clearPeaceOccupations(group.participants);
     conference.warIds.forEach((warIndex) => {
       if (strategyState.wars[warIndex]) strategyState.wars[warIndex].active = false;
     });
+    const pactsCreated = createPostWarNonAggressionPacts(conference.warIds, conference.nonAggressionExpires);
     const proposer = countryById(proposerId);
-    addLog(`${proposer?.name || "ИИ"} подписала мирный договор. Связанная война завершена, снято оккупаций: ${clearedOccupations}.`);
+    addLog(`${proposer?.name || "ИИ"} подписала мирный договор. Связанная война завершена, снято оккупаций: ${clearedOccupations}.${pactsCreated ? ` Заключено пактов о ненападении: ${pactsCreated}.` : ""}`);
     markMapDirty();
     if (!advancingDay) renderGameMap();
   }
@@ -1855,9 +2260,9 @@
   }
 
   function aiMaybeProposePeace() {
-    if (strategyState.date.getDate() !== 21 || strategyState.peaceConference) return;
+    if (strategyState.peaceConference) return;
     const currentMonth = strategyState.date.toISOString().slice(0, 7);
-    if (strategyState.lastAiPeaceMonth === currentMonth) return;
+    const monthlyCheck = strategyState.date.getDate() === 21 && strategyState.lastAiPeaceMonth !== currentMonth;
     const checkedWars = new Set();
     const candidates = [];
     strategyState.wars.forEach((war, index) => {
@@ -1869,9 +2274,10 @@
         .map((id) => ({ id, score: aiPeaceScore(id, group) }))
         .sort((a, b) => b.score - a.score)[0];
       const longestWar = Math.max(0, ...group.warIds.map((warIndex) => warDurationDays(strategyState.wars[warIndex])));
+      const decisiveDefeat = decisiveDefeatInGroup(group);
       // Затяжные войны должны автоматически заканчиваться даже при небольшом
       // преимуществе одной из сторон, иначе карта постепенно застревает в войнах.
-      if (proposer && (proposer.score >= 48 || longestWar >= 60)) candidates.push({ group, proposer });
+      if (proposer && (decisiveDefeat || (monthlyCheck && (proposer.score >= 48 || longestWar >= 60)))) candidates.push({ group, proposer });
     });
     const best = candidates.sort((a, b) => b.proposer.score - a.proposer.score)[0];
     if (!best) return;
@@ -1886,17 +2292,19 @@
         demands: generateBotPeaceDemands(best.group),
         mediator: null,
         title: "Мирный договор",
+        nonAggressionExpires: defaultPostWarPactExpiry(),
       };
       addLog(`${proposer?.name || "ИИ"} предложила мир. Мирная конференция открыта во вкладке войн.`);
       playSound("peace");
     } else {
       finalizePeaceGroup(best.group, best.proposer.id);
     }
-    strategyState.lastAiPeaceMonth = currentMonth;
+    if (monthlyCheck) strategyState.lastAiPeaceMonth = currentMonth;
   }
 
   function runAiTurn() {
     if (!gameData || !strategyState) return;
+    if (isHistoricalPhaseActive()) return;
     aiMaybeStartWars();
     aiMaybeJoinWars();
     aiMaybeProposePeace();
@@ -1904,6 +2312,7 @@
       if (Number(country.id) === Number(strategyState.playerCountryId)) return;
       const runtime = strategyState.countryStates[String(country.id)];
       if (!runtime) return;
+      applyHistoricalAlternativePath(country, runtime);
       if (!runtime.activeResearchId) {
         const nextTech = aiChooseResearchProject(country, runtime);
         if (nextTech) runtime.activeResearchId = nextTech.id;
@@ -1923,6 +2332,7 @@
 
   async function runAiTurnAsync() {
     if (!gameData || !strategyState) return;
+    if (isHistoricalPhaseActive()) return;
     aiMaybeStartWars();
     await yieldToUi();
     if (!gameData || !strategyState) return;
@@ -1935,6 +2345,7 @@
       if (Number(country.id) === Number(strategyState.playerCountryId)) continue;
       const runtime = strategyState.countryStates[String(country.id)];
       if (!runtime) continue;
+      applyHistoricalAlternativePath(country, runtime);
       if (!runtime.activeResearchId) {
         const nextTech = aiChooseResearchProject(country, runtime);
         if (nextTech) runtime.activeResearchId = nextTech.id;
@@ -1991,6 +2402,7 @@
       if (!strategyState || !gameData) return;
       runCharacterDailyEffects();
       advanceOccupationResistance();
+      advanceDiplomaticMemory();
       applyNavalOperations();
       await yieldToUi();
 
@@ -2016,7 +2428,9 @@
         if (!strategyState || !gameData) return;
         const countryRuntime = countryStates[index];
         const country = countryById(countryRuntime.countryId);
-        if (country) completeFocusIfReady(countryRuntime, country);
+        if (country && (Number(country.id) === Number(strategyState.playerCountryId) || !isHistoricalPhaseActive())) {
+          completeFocusIfReady(countryRuntime, country);
+        }
         await yieldEvery(index, 18);
       }
       advanceProduction(runtime);
@@ -2034,7 +2448,10 @@
       if (!strategyState || !gameData) return;
       strategyState.date.setDate(strategyState.date.getDate() + 1);
       runHistoricalEvents();
+      applyImperialDefeats();
+      if (historicalViewerMode && strategyState?.historicalWorldModernized) stopRealtimeClock();
       expireTimedTreaties();
+      maybeOfferGovernmentInExile();
       scheduleRegionalElections();
       scheduleAdministrativeRequests();
       autosaveIfNeeded();
@@ -2051,6 +2468,32 @@
       updateNextTurnControl();
       if (!strategyState || !gameData) turnStatus.textContent = previousTurnStatus;
     }
+  }
+
+  function applyImperialDefeats() {
+    if (Number(gameData?.scenario?.year) !== 1914) return;
+    const successors = {
+      "Российская империя": { name: "СССР", ideology: "communist" },
+      "Австро-Венгрия": { name: "Австрия", ideology: "democratic" },
+      "Османская империя": { name: "Турция", ideology: "national" },
+      "Германская империя": { name: "Германская республика", ideology: "democratic" },
+    };
+    Object.entries(successors).forEach(([imperialName, successor]) => {
+      const country = gameData.scenario.countries.find((item) => item.name === imperialName);
+      const runtime = country && strategyState.countryStates[String(country.id)];
+      if (!country || !runtime || runtime.imperialDefeatApplied || !country.regionIds?.length) return;
+      const lost = country.regionIds.filter((regionId) => Number(controllerOfRegion(regionId)?.id) !== Number(country.id)).length;
+      const capitalLost = Number(controllerOfRegion(country.capitalRegionId)?.id) !== Number(country.id);
+      const atWar = strategyState.wars.some((war) => war.active && (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)));
+      if (!atWar || !capitalLost || lost < Math.ceil(country.regionIds.length / 2)) return;
+      country.name = successor.name;
+      country.ideology = successor.ideology;
+      runtime.originCountryName = successor.name;
+      runtime.imperialDefeatApplied = true;
+      runtime.stability = Math.min(runtime.stability, 25);
+      setRuntimeIdeology(runtime, country, successor.ideology);
+      addLog(`Поражение в войне: ${imperialName} преобразована в государство «${successor.name}».`);
+    });
   }
 
   function resolveWarPressure() {
@@ -2274,7 +2717,7 @@
     const candidates = allCountryStates()
       .map((runtime) => ({ runtime, country: countryById(runtime.countryId) }))
       .filter((item) => item.country)
-      .filter(({ runtime }) => runtime.stability < 42 || runtime.supply?.level < 70 || runtime.resources.food < 6 || sanctionsAgainst(runtime.countryId).length >= 2)
+      .filter(({ runtime }) => runtime.stability < 42 || runtime.supply?.level < 70 || runtime.resources.food < 6)
       .sort((a, b) => (a.runtime.stability + (a.runtime.supply?.level || 100)) - (b.runtime.stability + (b.runtime.supply?.level || 100)));
     const picked = candidates[0];
     if (!picked) return;
@@ -2296,6 +2739,15 @@
       runtime.politicalPower = Math.max(0, runtime.politicalPower - 12);
       runtime.stability = clamp(runtime.stability - 3, 0, 100);
       crisis = "политический кризис";
+    }
+    if (runtime.stability < 25) {
+      runtime.warSupport = clamp(runtime.warSupport - 5, 0, 100);
+      runtime.armies.forEach((army) => { army.readiness = clamp(Number(army.readiness || 0) - 6, 5, 100); });
+      runtime.unrest = Math.min(100, Number(runtime.unrest || 0) + 14);
+      crisis = "острый внутренний кризис";
+      if (runtime.unrest >= 55 && runtime.allies?.[0]) removeAlliance(strategyState, country.id, runtime.allies[0]);
+    } else {
+      runtime.unrest = Math.max(0, Number(runtime.unrest || 0) - 4);
     }
     strategyState.crises.unshift({
       date: strategyState.date.toISOString().slice(0, 10),
@@ -2447,6 +2899,55 @@
     );
   }
 
+  function defaultPostWarPactExpiry() {
+    const expiry = new Date(strategyState.date);
+    expiry.setFullYear(expiry.getFullYear() + 1);
+    return expiry.toISOString().slice(0, 10);
+  }
+
+  function addNonAggressionPact(firstId, secondId, expires, source = "diplomacy") {
+    const first = Number(firstId);
+    const second = Number(secondId);
+    const expiry = String(expires || "").slice(0, 10);
+    if (!first || !second || first === second || !expiry || new Date(`${expiry}T23:59:59`) < strategyState.date) return false;
+    strategyState.nonAggressionPacts ||= [];
+    const existing = strategyState.nonAggressionPacts.find((pact) =>
+      (Number(pact.a) === first && Number(pact.b) === second) ||
+      (Number(pact.a) === second && Number(pact.b) === first));
+    if (existing) {
+      existing.active = true;
+      existing.signed = strategyState.date.toISOString().slice(0, 10);
+      existing.expires = expiry;
+      existing.source = source;
+      delete existing.broken;
+      return true;
+    }
+    strategyState.nonAggressionPacts.push({
+      a: first,
+      b: second,
+      signed: strategyState.date.toISOString().slice(0, 10),
+      expires: expiry,
+      active: true,
+      source,
+    });
+    if (source === "diplomacy") rememberDiplomaticAction(first, second, 10, "non_aggression_pact");
+    return true;
+  }
+
+  function createPostWarNonAggressionPacts(warIds, expires) {
+    if (!expires) return 0;
+    const pairs = new Set();
+    (warIds || []).forEach((warIndex) => {
+      const war = strategyState.wars[warIndex];
+      if (!war) return;
+      pairs.add([Number(war.attackerId), Number(war.defenderId)].sort((a, b) => a - b).join(":"));
+    });
+    return [...pairs].reduce((created, pair) => {
+      const [firstId, secondId] = pair.split(":").map(Number);
+      return created + (addNonAggressionPact(firstId, secondId, expires, "peace") ? 1 : 0);
+    }, 0);
+  }
+
   function breakNonAggressionPact(firstId, secondId) {
     const pact = (strategyState.nonAggressionPacts || []).find((item) =>
       item.active !== false &&
@@ -2470,16 +2971,9 @@
     }
     if (hasNonAggressionPact(strategyState.playerCountryId, target.id)) return;
     runtime.politicalPower -= 20;
-    const signedAt = new Date(strategyState.date);
     const expiresAt = new Date(strategyState.date);
     expiresAt.setMonth(expiresAt.getMonth() + clamp(Number(months) || 12, 1, 24));
-    strategyState.nonAggressionPacts.push({
-      a: Number(strategyState.playerCountryId),
-      b: Number(target.id),
-      signed: signedAt.toISOString().slice(0, 10),
-      expires: expiresAt.toISOString().slice(0, 10),
-      active: true,
-    });
+    addNonAggressionPact(strategyState.playerCountryId, target.id, expiresAt.toISOString().slice(0, 10));
     setRelation(strategyState.playerCountryId, target.id, getRelation(strategyState.playerCountryId, target.id) + 12);
     addLog(`Подписан пакт о ненападении с ${target.name} сроком на ${clamp(Number(months) || 12, 1, 24)} мес.`);
     renderStrategyPanel();
@@ -2493,6 +2987,42 @@
       const second = countryById(pact.b);
       addLog(`Истек срок пакта о ненападении: ${first?.name || "страна"} — ${second?.name || "страна"}.`);
     });
+  }
+
+  function activeTerritorialClaim(claimantId, targetId, regionId) {
+    return (strategyState.claims || []).find((claim) => claim.active !== false &&
+      Number(claim.claimantId) === Number(claimantId) && Number(claim.targetId) === Number(targetId) &&
+      Number(claim.regionId) === Number(regionId));
+  }
+
+  function createTerritorialClaim(targetId, regionId) {
+    const player = currentPlayerCountry();
+    const target = countryById(targetId);
+    const runtime = currentPlayerState();
+    const region = gameData?.regionById?.get(Number(regionId));
+    const owner = ownerOfRegion(regionId);
+    if (!player || !target || !runtime || !region || Number(owner?.id) !== Number(target.id) || Number(target.id) === Number(player.id)) return;
+    if (runtime.politicalPower < 20) {
+      addLog("Территориальная претензия требует 20 политической силы.");
+      renderStrategyPanel();
+      return;
+    }
+    if (activeTerritorialClaim(player.id, target.id, regionId)) {
+      addLog(`Претензия на регион ${region.name} уже существует.`);
+      renderStrategyPanel();
+      return;
+    }
+    runtime.politicalPower -= 20;
+    strategyState.claims.push({ claimantId: Number(player.id), targetId: Number(target.id), regionId: Number(regionId), created: strategyState.date.toISOString().slice(0, 10), active: true });
+    setRelation(player.id, target.id, getRelation(player.id, target.id) - 12);
+    rememberDiplomaticAction(player.id, target.id, -14, "territorial_claim");
+    addLog(`${player.name} выдвинула территориальную претензию на регион ${region.name}. Получен повод для войны и скидка на его требование в мире.`);
+    renderStrategyPanel();
+  }
+
+  function territorialClaimDiscount(actorId, targetId, regionIds = []) {
+    const claimed = (regionIds || []).filter((regionId) => activeTerritorialClaim(actorId, targetId, regionId)).length;
+    return claimed * 12;
   }
 
   function guaranteeIndependence(targetId) {
@@ -2509,6 +3039,7 @@
       active: true,
     });
     setRelation(strategyState.playerCountryId, target.id, getRelation(strategyState.playerCountryId, target.id) + 16);
+    rememberDiplomaticAction(strategyState.playerCountryId, target.id, 14, "guarantee");
     addLog(`${currentPlayerCountry().name} гарантирует независимость ${target.name}.`);
     renderStrategyPanel();
   }
@@ -2538,6 +3069,7 @@
     targetRuntime.militaryAccess.push(Number(strategyState.playerCountryId));
     targetRuntime.warSupport = clamp(targetRuntime.warSupport + 4, 0, 100);
     setRelation(strategyState.playerCountryId, target.id, getRelation(strategyState.playerCountryId, target.id) + 24);
+    rememberDiplomaticAction(strategyState.playerCountryId, target.id, 20, "security_guarantee");
     addLog(`Подписаны гарантии безопасности для ${target.name}: военный доступ открыт, оборонная поддержка усилена.`);
     renderStrategyPanel();
   }
@@ -2548,7 +3080,7 @@
       .forEach((item) => {
         const guarantorId = Number(item.guarantorId);
         const enemyId = Number(attackerId);
-        if (guarantorId === enemyId || isAtWar(guarantorId, enemyId)) return;
+        if (guarantorId === enemyId || isAtWar(guarantorId, enemyId) || hasNonAggressionPact(guarantorId, enemyId)) return;
         const targetRuntime = strategyState.countryStates[String(targetId)];
         const guarantorRuntime = strategyState.countryStates[String(guarantorId)];
         if (item.type === "security") {
@@ -2619,11 +3151,21 @@
     renderStrategyPanel();
   }
 
+  function addSubjectsToWar(overlordId, enemyId, overlordAttacks = true) {
+    gameData.scenario.countries.forEach((country) => {
+      const runtime = strategyState.countryStates[String(country.id)];
+      if (Number(runtime?.subjectOf) !== Number(overlordId) || runtime.capitulated || isAtWar(country.id, enemyId)) return;
+      strategyState.wars.push({ attackerId: overlordAttacks ? Number(country.id) : Number(enemyId), defenderId: overlordAttacks ? Number(enemyId) : Number(country.id), start: strategyState.date.toISOString().slice(0, 10), active: true, subjectWar: true });
+    });
+  }
+
   function declareWar(targetId, goalId = "border") {
     const runtime = currentPlayerState();
     const target = gameData.scenario.countries.find((country) => Number(country.id) === Number(targetId));
     const targetRuntime = target ? strategyState.countryStates[String(target.id)] : null;
-    if (!target || !target.regionIds?.length || targetRuntime?.capitulated || runtime.politicalPower < 50 || runtime.warSupport < 25) return;
+    const claimsAgainstTarget = (strategyState.claims || []).filter((claim) => claim.active !== false && Number(claim.claimantId) === Number(strategyState.playerCountryId) && Number(claim.targetId) === Number(targetId));
+    const warCost = claimsAgainstTarget.length ? 30 : 50;
+    if (!target || !target.regionIds?.length || targetRuntime?.capitulated || runtime.politicalPower < warCost || runtime.warSupport < 25) return;
     const duplicate = strategyState.wars.some((war) => war.active && war.attackerId === strategyState.playerCountryId && war.defenderId === Number(targetId));
     if (duplicate) return;
     if (runtime.democracy?.active && runtime.democracy.approval < 45) {
@@ -2632,15 +3174,12 @@
       return;
     }
     if (hasNonAggressionPact(strategyState.playerCountryId, target.id)) {
-      if (getRelation(strategyState.playerCountryId, target.id) <= -70) {
-        breakNonAggressionPact(strategyState.playerCountryId, target.id);
-        runtime.politicalPower = Math.max(0, runtime.politicalPower - 12);
-        addLog("Пакт о ненападении разорван на фоне обвала отношений.");
-      } else {
-        addLog("Война заблокирована пактом о ненападении. Сначала доведите отношения до серьезного кризиса.");
-        renderStrategyPanel();
-        return;
-      }
+      const pact = (strategyState.nonAggressionPacts || []).find((item) => item.active !== false &&
+        ((Number(item.a) === Number(strategyState.playerCountryId) && Number(item.b) === Number(target.id)) ||
+        (Number(item.a) === Number(target.id) && Number(item.b) === Number(strategyState.playerCountryId))));
+      addLog(`Война заблокирована пактом о ненападении до ${pact?.expires || "окончания договора"}.`);
+      renderStrategyPanel();
+      return;
     }
     const unCharterPenalty = treatyActive("un_charter") && getRelation(strategyState.playerCountryId, targetId) > -25;
     if (unCharterPenalty && (runtime.politicalPower < 85 || runtime.warSupport < 40)) {
@@ -2648,9 +3187,10 @@
       renderStrategyPanel();
       return;
     }
-    runtime.politicalPower -= unCharterPenalty ? 85 : 50;
+    runtime.politicalPower -= unCharterPenalty ? Math.max(60, warCost + 35) : warCost;
     runtime.warSupport = clamp(runtime.warSupport + 5, 0, 100);
     setRelation(strategyState.playerCountryId, targetId, -100);
+    rememberDiplomaticAction(strategyState.playerCountryId, targetId, -42, "aggression");
     if (unCharterPenalty) {
       gameData.scenario.countries.forEach((country) => {
         if (Number(country.id) !== Number(strategyState.playerCountryId) && Number(country.id) !== Number(targetId)) {
@@ -2667,7 +3207,10 @@
       start: strategyState.date.toISOString().slice(0, 10),
       active: true,
       goal: WAR_GOALS.some((goal) => goal.id === goalId) ? goalId : "border",
+      casusBelli: claimsAgainstTarget.length ? "territorial_claim" : "none",
+      claimRegionIds: claimsAgainstTarget.map((claim) => Number(claim.regionId)),
     });
+    addSubjectsToWar(strategyState.playerCountryId, targetId, true);
     aiAlliesImposeSanctions(strategyState.playerCountryId, targetId);
     activateGuaranteesForWar(strategyState.playerCountryId, targetId);
     addLog(`Объявлена война: ${currentPlayerCountry().name} против ${target.name}. Цель: ${warGoalFor(strategyState.wars.at(-1)).name}.`);
@@ -2687,6 +3230,11 @@
     }
     if (getRelation(player.id, ally.id) < 0 || getRelation(ally.id, enemy.id) > -10) {
       addLog("Страна отказалась вступать в войну: нужны нейтральные отношения с вами и плохие с врагом.");
+      renderStrategyPanel();
+      return;
+    }
+    if (hasNonAggressionPact(ally.id, enemy.id)) {
+      addLog(`${ally.name} соблюдает пакт о ненападении с ${enemy.name} и не вступит в войну.`);
       renderStrategyPanel();
       return;
     }
@@ -2717,6 +3265,11 @@
     const enemyId = Number(war.attackerId) === Number(side.id) ? Number(war.defenderId) : Number(war.attackerId);
     const enemy = countryById(enemyId);
     if (!enemy || isAtWar(player.id, enemy.id)) return;
+    if (hasNonAggressionPact(player.id, enemy.id)) {
+      addLog(`Вступление в войну заблокировано пактом о ненападении с ${enemy.name}.`);
+      renderStrategyPanel();
+      return;
+    }
     runtime.politicalPower -= 25;
     runtime.warSupport = clamp(runtime.warSupport + 4, 0, 100);
     setRelation(player.id, side.id, getRelation(player.id, side.id) + 24);
@@ -2758,7 +3311,16 @@
       renderStrategyPanel();
       return;
     }
+    const attackingArmy = (strategyState.countryStates[String(player.id)]?.armies || [])
+      .find((army) => !army.movingTo && Number(army.regionId) === Number(regionId));
+    if (!canMilitaryOvercome(player.id, target.id, attackingArmy)) {
+      addLog("Наступление остановлено: равная по численности армия не может прорвать более сильную военную систему противника. Нарастите силы, подготовку или технологии.");
+      renderStrategyPanel();
+      return;
+    }
     gameData.scenario.occupations.push({ regionId, controllerCountryId: player.id });
+    dislodgeDefendingArmies(regionId, player.id);
+    checkForLiberationOpportunity(player.id, regionId);
     markMapDirty();
     addLog(`Установлена оккупация региона: ${gameData.regionById.get(regionId)?.name || regionId}. Присоединение возможно позже отдельным решением.`);
     playSound("occupy");
@@ -2849,25 +3411,41 @@
     renderStrategyPanel();
   }
 
-  function requestForeignBase(targetId) {
+  function requestForeignBase(targetId, regionIdOverride, baseType = "joint") {
     const player = currentPlayerCountry();
     const target = countryById(targetId);
     const runtime = currentPlayerState();
-    if (!player || !target || runtime.budget < 25) return;
+    const targetRuntime = strategyState.countryStates[String(target?.id)];
+    const isAlly = runtime?.allies?.includes(Number(target?.id)) || targetRuntime?.allies?.includes(Number(player?.id));
+    const isVassal = Number(targetRuntime?.subjectOf) === Number(player?.id);
+    if (!player || !target || !targetRuntime || (!isAlly && !isVassal) || runtime.budget < 25) {
+      addLog("Военную базу можно разместить только у союзника или вассала.");
+      renderStrategyPanel();
+      return;
+    }
     if (getRelation(player.id, target.id) < 20) {
       addLog("База отклонена: нужны отношения не ниже +20.");
       renderStrategyPanel();
       return;
     }
-    const regionId = Number(target.capitalRegionId || target.regionIds?.[0]);
+    const regionId = Number(regionIdOverride || target.capitalRegionId || target.regionIds?.[0]);
+    if (!target.regionIds?.some((id) => Number(id) === regionId)) return;
     if (treatyActive("antarctic") && isAntarcticRegion(regionId)) {
       addLog("База отклонена: Договор об Антарктике запрещает военную инфраструктуру в этих регионах.");
       renderStrategyPanel();
       return;
     }
     runtime.budget -= 25;
-    runtime.bases.push({ regionId, hostCountryId: Number(target.id), ownerCountryId: Number(player.id), level: 1 });
-    strategyState.countryStates[String(target.id)]?.bases.push({ regionId, hostCountryId: Number(target.id), ownerCountryId: Number(player.id), level: 1 });
+    const base = { regionId, hostCountryId: Number(target.id), ownerCountryId: Number(player.id), level: 1, type: ["army", "navy", "air", "joint"].includes(baseType) ? baseType : "joint", capacity: { army: 6, navy: 4, air: 8 } };
+    if ((runtime.bases || []).some((item) => Number(item.regionId) === regionId && Number(item.hostCountryId) === Number(target.id))) return;
+    runtime.bases.push(base);
+    targetRuntime.bases = targetRuntime.bases || [];
+    targetRuntime.bases.push({ ...base });
+    if (!runtime.regionProfiles[String(regionId)]) {
+      const hostProfile = targetRuntime.regionProfiles?.[String(regionId)] || {};
+      runtime.regionProfiles[String(regionId)] = { ...createRegionProfile(regionId, target, runtime), ...hostProfile, regionId: Number(regionId), base: true };
+    } else runtime.regionProfiles[String(regionId)].base = true;
+    runtime.militaryAccess = [...new Set([...(runtime.militaryAccess || []), Number(target.id)])];
     addLog(`Размещена военная база в стране ${target.name}.`);
     renderStrategyPanel();
   }
@@ -2877,6 +3455,12 @@
     const runtime = currentPlayerState();
     const profile = runtime.regionProfiles[String(regionId)];
     if (!player || !runtime || !profile) return null;
+    const foreignBase = (runtime.bases || []).some((base) => Number(base.regionId) === Number(regionId) && Number(base.ownerCountryId) === Number(player.id));
+    if (Number(controllerOfRegion(regionId)?.id) !== Number(player.id) && !foreignBase) {
+      addLog("Набор невозможен: регион находится под оккупацией.");
+      renderStrategyPanel();
+      return null;
+    }
     const soldiers = Math.min(500, Math.floor(profile.readySoldiers));
     const cost = Math.max(5, Math.ceil(soldiers / 60));
     if (runtime.budget < cost || soldiers < 100) {
@@ -2971,6 +3555,7 @@
     }
     country.name = formable.name;
     country.color = formable.color || country.color;
+    country.flag = formable.flag || country.flag;
     runtime.formedNation = formableId;
     applyFocusReward(runtime, formable.reward || {});
     markMapDirty();

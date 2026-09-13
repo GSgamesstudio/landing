@@ -238,6 +238,7 @@
     nextTurnButton.textContent = ready ? "Перейти к переговорам" : t("nextDay");
     nextTurnButton.dataset.action = ready ? "peace-date" : "next-day";
     nextTurnButton.disabled = false;
+    nextTurnButton.hidden = historicalViewerMode;
   }
 
   async function lockLandscapeOrientation() {
@@ -340,6 +341,7 @@
   }
 
   function saveGame(reason = "autosave") {
+    if (historicalViewerMode) return false;
     if (!gameData || !strategyState || !selectedMap || !selectedScenario) return false;
     const payload = {
       version: 1,
@@ -877,6 +879,16 @@
         lastSupply: 100,
       });
     });
+    scenario.countries.forEach((country) => {
+      const runtime = countryStates[stateKey(country)];
+      const overlordId = Number(country.subjectOf);
+      if (!runtime || !overlordId || overlordId === Number(country.id) || !countryStates[String(overlordId)]) return;
+      runtime.subjectOf = overlordId;
+      runtime.subjectType = ["puppet", "vassal", "colony"].includes(country.subjectType) ? country.subjectType : "puppet";
+      runtime.subjectAutonomy = clamp(Number(country.subjectAutonomy), 0, 3);
+      runtime.subjectLoyalty = 68;
+      runtime.subjectSince = `${Number(scenario.year) || 2026}-01-01`;
+    });
     const state = {
       date: new Date(Number(scenario.year) || 2026, 0, 1),
       playerCountryId: Number(playerCountry.id),
@@ -890,6 +902,10 @@
       guarantees: [],
       nonAggressionPacts: [],
       historicalEvents: [],
+      diplomaticMemory: [],
+      coldWar: { soviet: 0, nato: 0, resolved: null },
+      historicalDiverged: false,
+      historicalDivergenceDate: null,
       wars: [],
       navalIncidents: [],
       peaceConference: null,
@@ -937,6 +953,7 @@
 
   function normalizeCountryRuntime(runtime, country, gameDate) {
     if (!runtime || !country) return;
+    runtime.countryId = Number(country.id);
     runtime.taxRate = clamp(Number.isFinite(Number(runtime.taxRate)) ? Number(runtime.taxRate) : 22, 10, 50);
     if (!runtime.appliedIdeologyId) runtime.appliedIdeologyId = runtime.ideology || "neutral";
     if (!runtime.democracy) {
@@ -1034,6 +1051,8 @@
       if (!WAR_GOALS.some((goal) => goal.id === war.goal)) war.goal = "border";
     });
     if (!Array.isArray(state.guarantees)) state.guarantees = [];
+    if (!Array.isArray(state.claims)) state.claims = [];
+    state.claims = state.claims.filter((claim) => claim && claim.active !== false && Number.isFinite(Number(claim.claimantId)) && Number.isFinite(Number(claim.targetId)) && Number.isFinite(Number(claim.regionId)));
     if (!Array.isArray(state.nonAggressionPacts)) state.nonAggressionPacts = [];
     if (!Array.isArray(state.historicalEvents)) state.historicalEvents = [];
     if (!Array.isArray(state.crises)) state.crises = [];
@@ -1238,6 +1257,25 @@
     return strategyState?.relations[relationKey(a, b)] ?? 0;
   }
 
+  function diplomaticMemoryValue(a, b) {
+    return (strategyState?.diplomaticMemory || [])
+      .filter((item) => (Number(item.a) === Number(a) && Number(item.b) === Number(b)) || (Number(item.a) === Number(b) && Number(item.b) === Number(a)))
+      .reduce((sum, item) => sum + Number(item.value || 0), 0);
+  }
+
+  function rememberDiplomaticAction(a, b, value, type) {
+    if (!strategyState || !a || !b) return;
+    strategyState.diplomaticMemory.push({ a: Number(a), b: Number(b), value: Number(value), type, days: 900 });
+    strategyState.diplomaticMemory = strategyState.diplomaticMemory.slice(-120);
+  }
+
+  function advanceDiplomaticMemory() {
+    if (!strategyState?.diplomaticMemory) return;
+    strategyState.diplomaticMemory = strategyState.diplomaticMemory
+      .map((item) => ({ ...item, days: Number(item.days || 0) - 1, value: Number(item.value || 0) * 0.998 }))
+      .filter((item) => item.days > 0 && Math.abs(item.value) >= 0.5);
+  }
+
   function setRelation(a, b, value) {
     strategyState.relations[relationKey(a, b)] = clamp(value, -100, 100);
   }
@@ -1342,6 +1380,12 @@
       runtime.sanctionForeignAssetPenalty = Math.max(runtime.sanctionForeignAssetPenalty, Number(type.daily?.foreignAssetYield || 0));
       runtime.sanctionResearchPenalty += Number(type.researchPenalty || 0) * severity;
     });
+    // Several countries can impose sanctions at once. Their direct budget effect
+    // must not exceed half of the current daily tax intake, otherwise a peaceful
+    // country with normal taxation is mechanically driven to bankruptcy.
+    const dailyTaxRevenue = Math.max(0, Number(runtime.lastDailyTaxRevenue || 0));
+    if (dailyTaxRevenue > 0) runtime.sanctionBudgetDrain = Math.min(runtime.sanctionBudgetDrain, dailyTaxRevenue * 0.5);
+    runtime.sanctionStabilityDrain = Math.min(runtime.sanctionStabilityDrain, 0.04);
     runtime.budget = Math.max(0, runtime.budget - runtime.sanctionBudgetDrain);
     runtime.politicalPower = Math.max(0, runtime.politicalPower - runtime.sanctionPoliticalPowerDrain);
     runtime.commandPower = clamp(runtime.commandPower - runtime.sanctionCommandDrain, 0, 100);
@@ -1376,6 +1420,7 @@
       active: true,
       imposedAt: strategyState.date.toISOString().slice(0, 10),
     });
+    rememberDiplomaticAction(player.id, target.id, -Math.max(10, type.relationPenalty), "sanctions");
     addLog(`Введены санкции: ${type.name} против ${target.name}.`);
     renderStrategyPanel();
   }
@@ -1405,6 +1450,7 @@
         reason: `реакция союзника на войну против ${countryById(defenderId)?.name || "партнёра"}`,
       });
       setRelation(issuerId, attackerId, getRelation(issuerId, attackerId) - type.relationPenalty);
+      rememberDiplomaticAction(issuerId, attackerId, -Math.max(10, type.relationPenalty), "sanctions");
       if (Number(strategyState.playerCountryId) === Number(attackerId)) addLog(`${issuer.name} вводит экономические санкции против ${attacker.name} в поддержку союзника.`);
     });
   }
@@ -1676,13 +1722,82 @@
   // A scheduled event changes the world only while its historical prerequisites
   // remain intact. This lets a player create a plausible alternative timeline.
   function historicalCountry(name) {
-    return gameData?.scenario?.countries?.find((country) => country.name === name && (country.regionIds || []).length) || null;
+    const aliases = {
+      "Россия": ["Российская империя", "СССР", "Россия", "Российская Федерация"],
+      "СССР": ["СССР", "Российская империя", "Россия", "Российская Федерация"],
+      "Пруссия": ["Королевство Пруссия", "Пруссия", "Германская империя", "Германия"],
+      "Германия": ["Германия", "Германская империя", "Королевство Пруссия"],
+      "Франция": ["Франция", "Вторая Французская империя", "Французская колониальная империя"],
+      "Австрия": ["Австрия", "Австро-Венгрия"],
+      "Италия": ["Италия", "Королевство Италия"],
+      "Сербия": ["Сербия", "Княжество Сербия"],
+      "Корея": ["Корея", "Корейская империя", "Южная Корея", "Республика Корея"],
+      "Южная Корея": ["Южная Корея", "Республика Корея", "Корея"],
+    };
+    const candidates = [name, ...(aliases[name] || [])];
+    return candidates.map((candidate) => gameData?.scenario?.countries?.find((country) =>
+      country.name === candidate && (country.regionIds || []).length
+    )).find(Boolean) || null;
+  }
+
+  async function preloadHistoricalTerritoryProfiles() {
+    if (historicalTerritoryProfilesLoaded) return;
+    const profiles = window.HISTORICAL_TERRITORY_PROFILES || [];
+    const loadModernWorld = fetch(`scenarios/2026.json?v=${Date.now()}`, { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((scenario) => { historicalModernWorldScenario = scenario; })
+      .catch((error) => console.warn("Не удалось загрузить эталон современного мира.", error));
+    await Promise.all([...profiles.map(async (profile) => {
+      const regionIds = new Set((profile.extraRegionIds || []).map(Number));
+      try {
+        const response = await fetch(`${profile.sourceScenario}?v=${Date.now()}`, { cache: "no-store" });
+        if (response.ok) {
+          const scenario = await response.json();
+          const source = scenario.countries?.find((country) => profile.sourceCountries?.includes(country.name));
+          (source?.regionIds || []).forEach((regionId) => regionIds.add(Number(regionId)));
+        }
+      } catch (error) {
+        console.warn("Не удалось загрузить исторический территориальный профиль", profile.id, error);
+      }
+      historicalTerritoryRegionIds.set(profile.id, regionIds);
+    }), loadModernWorld]);
+    historicalTerritoryProfilesLoaded = true;
+  }
+
+  function historicalTerritoryPriority(country, regionId) {
+    if (!country) return 0;
+    return (window.HISTORICAL_TERRITORY_PROFILES || [])
+      .filter((profile) => profile.countryNames?.includes(country.name))
+      .reduce((score, profile) => score + (historicalTerritoryRegionIds.get(profile.id)?.has(Number(regionId)) ? Number(profile.priority || 0) : 0), 0);
   }
 
   function isAtWarByName(firstName, secondName) {
     const first = historicalCountry(firstName);
     const second = historicalCountry(secondName);
     return Boolean(first && second && isAtWar(first.id, second.id));
+  }
+
+  function historicalPhaseForScenario(scenario = gameData?.scenario) {
+    const scenarioYear = Number(scenario?.year);
+    const phase = (window.HISTORICAL_PHASES || []).find((item) => Number(item.scenarioYear) === scenarioYear);
+    return phase ? { ...phase, endsOn: window.HISTORICAL_TIMELINE_END || phase.endsOn } : null;
+  }
+
+  function historicalEventsForScenario(scenario = gameData?.scenario) {
+    const phase = historicalPhaseForScenario(scenario);
+    if (!phase || !scenario) return [];
+    const startDate = `${Number(scenario.year)}-01-01`;
+    return (window.HISTORICAL_EVENT_TIMELINE || []).filter((event) =>
+      event.date >= startDate && event.date <= phase.endsOn
+    );
+  }
+
+  function isHistoricalPhaseActive() {
+    if (!strategyState) return false;
+    if (strategyState.historicalDiverged) return false;
+    const today = strategyState.date.toISOString().slice(0, 10);
+    const events = historicalEventsForScenario();
+    return events.some((event) => event.date >= today && !strategyState.historicalEvents.some((item) => item.id === event.id));
   }
 
   function historicalEventConditionMet(event) {
@@ -1701,6 +1816,12 @@
       const left = historicalCountry(a);
       const right = historicalCountry(b);
       return !left || !right || getRelation(left.id, right.id) < Number(value);
+    })) return false;
+    if (condition.regionsOwnedBy && condition.regionsOwnedBy.some((requirement) => {
+      const country = historicalCountry(requirement.country);
+      return !country || (requirement.regionIds || []).some((regionId) =>
+        Number(directOwnerOfRegion(regionId)?.id) !== Number(country.id)
+      );
     })) return false;
     return true;
   }
@@ -1721,6 +1842,10 @@
   }
 
   function applyHistoricalEventEffect(effect, event) {
+    if (effect.type === "modernWorldSnapshot") {
+      applyModernWorldSnapshot();
+      return;
+    }
     if (effect.type === "integrate") {
       const actor = historicalCountry(effect.to);
       if (actor) integrateCountryIntoActor(effect.from, actor.id);
@@ -1728,6 +1853,45 @@
     }
     if (effect.type === "war") {
       addHistoricalEventWar(effect.attacker, effect.defender, event.title);
+      return;
+    }
+    if (effect.type === "endWar") {
+      const pairs = effect.pairs || [[effect.attacker, effect.defender]];
+      pairs.forEach(([attackerName, defenderName]) => {
+        const attacker = historicalCountry(attackerName);
+        const defender = historicalCountry(defenderName);
+        if (!attacker || !defender) return;
+        strategyState.wars.forEach((war) => {
+          const samePair = (Number(war.attackerId) === Number(attacker.id) && Number(war.defenderId) === Number(defender.id)) ||
+            (Number(war.attackerId) === Number(defender.id) && Number(war.defenderId) === Number(attacker.id));
+          if (!war.active || !samePair) return;
+          war.active = false;
+          war.ended = strategyState.date.toISOString().slice(0, 10);
+          war.historicalResult = effect.result || "settlement";
+        });
+      });
+      return;
+    }
+    if (effect.type === "transferRegions") {
+      const recipient = historicalCountry(effect.to);
+      const source = effect.from ? historicalCountry(effect.from) : null;
+      if (!recipient) return;
+      (effect.regionIds || []).map(Number).forEach((regionId) => {
+        if (source && Number(directOwnerOfRegion(regionId)?.id) !== Number(source.id)) return;
+        moveRegionOwnership(regionId, recipient.id);
+      });
+      return;
+    }
+    if (effect.type === "occupyRegions") {
+      const controller = historicalCountry(effect.controller);
+      if (!controller) return;
+      (effect.regionIds || []).map(Number).forEach((regionId) => {
+        if (!ownerOfRegion(regionId) || isAntarcticRegion(regionId)) return;
+        gameData.scenario.occupations = (gameData.scenario.occupations || [])
+          .filter((occupation) => Number(occupation.regionId) !== regionId);
+        gameData.scenario.occupations.push({ regionId, controllerCountryId: Number(controller.id), historical: true });
+      });
+      markMapDirty();
       return;
     }
     if (effect.type === "relation") {
@@ -1776,14 +1940,58 @@
     }
   }
 
+  function applyModernWorldSnapshot() {
+    if (!historicalModernWorldScenario?.countries?.length || strategyState?.historicalWorldModernized) return false;
+    const previousState = strategyState;
+    const previousPlayer = currentPlayerCountry();
+    const playerName = previousPlayer?.name;
+    const modernScenario = JSON.parse(JSON.stringify(historicalModernWorldScenario));
+    const namedSuccessor = HISTORICAL_SUCCESSOR_COUNTRIES[playerName];
+    const modernPlayer = modernScenario.countries.find((country) => country.name === playerName) ||
+      modernScenario.countries.find((country) => country.name === namedSuccessor) ||
+      modernScenario.countries
+        .map((country) => ({ country, sharedRegions: (country.regionIds || []).filter((regionId) => previousPlayer?.regionIds?.includes(regionId)).length }))
+        .sort((left, right) => right.sharedRegions - left.sharedRegions)[0]?.country;
+    if (!modernPlayer) return false;
+
+    // The reference scenario is the authoritative region-to-country crosswalk.
+    // Rebuilding runtimes avoids retaining armies, occupations or treaties whose
+    // country IDs belonged to states that ceased to exist during the chronology.
+    gameData.scenario = modernScenario;
+    strategyState = createInitialStrategyState(modernScenario, modernPlayer);
+    strategyState.date = previousState.date;
+    strategyState.historicalEvents = previousState.historicalEvents;
+    strategyState.historicalDiverged = false;
+    strategyState.historicalDivergenceDate = null;
+    strategyState.historicalWorldModernized = true;
+    gameCountryName.textContent = modernPlayer.name;
+    relationMapCountryId = Number(modernPlayer.id);
+    rebuildOwnerByRegion();
+    updateSettingsPlayerOptions();
+    addLog({
+      text: "Мир приведён к границам и составу государств 2026 года.",
+      detail: "Страны, названия и владение регионами взяты из эталонного сценария «Мир 2026».",
+      severity: "info",
+    });
+    return true;
+  }
+
   function runHistoricalEvents() {
-    const events = Array.isArray(window.HISTORICAL_EVENT_TIMELINE) ? window.HISTORICAL_EVENT_TIMELINE : [];
+    const events = historicalEventsForScenario();
     if (!strategyState || !events.length) return;
+    // Once the player has broken a prerequisite, remaining dated events must
+    // not force the campaign back onto the original historical track.
+    if (strategyState.historicalDiverged) return;
     const today = strategyState.date.toISOString().slice(0, 10);
     events.filter((event) => event.date === today && !strategyState.historicalEvents.some((item) => item.id === event.id)).forEach((event) => {
       const applied = historicalEventConditionMet(event);
       strategyState.historicalEvents.push({ id: event.id, date: today, status: applied ? "applied" : "skipped" });
       if (!applied) {
+        if (!strategyState.historicalDiverged) {
+          strategyState.historicalDiverged = true;
+          strategyState.historicalDivergenceDate = today;
+          addLog({ text: "Историческая линия нарушена — страны переходят на альтернативные планы ИИ.", detail: "Дальнейшие решения ИИ берутся из отдельного набора альтернативных путей.", severity: "warning" });
+        }
         addLog({ text: `Историческая развилка: «${event.title}» не произошла.`, detail: "Условия события были изменены действиями игроков или развитием войны.", severity: "warning" });
         return;
       }
@@ -1892,6 +2100,8 @@
       severity: item.severity || "info",
       kind: item.kind || "event",
       requestId: item.requestId || null,
+      restorationCountryId: item.restorationCountryId || null,
+      exileCountryId: item.exileCountryId || null,
     }].slice(-12);
     renderNotificationIcons();
   }

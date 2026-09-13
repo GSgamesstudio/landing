@@ -9,6 +9,7 @@
   const peace3dCanvas = document.getElementById("peace3dCanvas");
   const peaceBackButton = document.getElementById("peaceBackButton");
   const playButton = document.getElementById("playButton");
+  const historyViewerButton = document.getElementById("historyViewerButton");
   const howToPlayButton = document.getElementById("howToPlayButton");
   const continueButton = document.getElementById("continueButton");
   const savesButton = document.getElementById("savesButton");
@@ -81,8 +82,8 @@
   const FOCUS_CSV_DIR = "focuses";
   const CATALOG_REFRESH_MS = 30000;
   // Change this number whenever bundled UI/assets change to invalidate browser caches.
-  const CACHE_VERSION = "20260902-172938";
-  const NUCLEAR_CAPABLE_COUNTRIES = new Set(["Россия", "США", "Китай", "Франция", "Великобритания", "Индия", "Пакистан", "КНДР", "Израиль"]);
+  const CACHE_VERSION = "20260913-143000";
+  const NUCLEAR_CAPABLE_COUNTRIES = new Set(["Россия", "СССР", "США", "Китай", "Франция", "Великобритания", "Индия", "Пакистан", "КНДР", "Израиль"]);
 
   let peace3dRenderer = null;
   let peaceVersaillesMesh = null;
@@ -360,29 +361,31 @@
   const FORMABLE_NATIONS = {
     ussr: {
       name: "СССР",
+      flag: "flags/02-исторические-государства/СССР.png",
       requiredCountry: "Россия",
       requiredFocus: "restore-union-state",
       requirements: {
         ideologyAny: ["socialist", "communist"],
         reforms: ["central-planning", "union-treaty", "security-council"],
-        laws: { economy: ["war", "total"], conscription: ["extensive", "service"] },
+        laws: { economy: ["civilian", "war", "total"], conscription: ["volunteer", "extensive", "service"] },
         controlCountries: ["Белоруссия", "Украина", "Молдавия", "Эстония", "Латвия", "Литва", "Казахстан", "Киргизия", "Таджикистан", "Туркмения", "Узбекистан", "Армения", "Азербайджан", "Грузия"],
       },
-      color: "#b71924",
+      color: "#7a0008",
       description: "Восстановить союзное государство после завершения политической ветки фокусов.",
       reward: { politicalPower: 120, stability: 8, factories: 8, manpower: 300, steel: 40, oil: 25 },
     },
     russian_empire: {
       name: "Российская империя",
+      flag: "flags/03-империи-и-колонии/Российская империя.png",
       requiredCountry: "Россия",
       requirements: {
         focusAny: ["ru-continuity-second-empire", "ru-patriotic-second-empire"],
         ideology: "monarchist",
         reforms: ["security-council"],
-        laws: { economy: ["war", "total"], conscription: ["extensive", "service"] },
+        laws: { economy: ["civilian", "war", "total"], conscription: ["volunteer", "extensive", "service"] },
         controlCountries: ["Эстония", "Латвия", "Литва", "Финляндия", "Польша", "Белоруссия", "Украина", "Молдавия", "Казахстан", "Киргизия", "Таджикистан", "Туркмения", "Узбекистан", "Армения", "Азербайджан", "Грузия"],
       },
-      color: "#6f4b2a",
+      color: "#003300",
       description: "Вернуть границы к историческому контуру 1914 года и провозгласить Российскую империю.",
       reward: { politicalPower: 80, stability: 6, commandPower: 25, factories: 3 },
     },
@@ -443,6 +446,20 @@
     austrian_european_confederation: { name: "Европейская конфедерация", requiredCountry: "Австрия", requiredFocus: "at-form-eu", requirements: { controlCountries: ["Германия", "Франция", "Италия", "Бельгия", "Нидерланды", "Люксембург"] }, color: "#2a5da8", description: "Австрийский европейский проект после объединения ключевых западноевропейских стран. Россия и её территории не входят в требования.", reward: { politicalPower: 100, stability: 10, factories: 6, manpower: 250 } },
     alpine_league: { name: "Альпийская лига", requiredCountry: "Австрия", requiredFocus: "at-alpine-league", requirements: { controlCountries: ["Швейцария", "Лихтенштейн", "Словения"] }, color: "#3d7a62", description: "Лига альпийских государств, создаваемая через добровольную унию либо контроль её участников.", reward: { politicalPower: 90, stability: 12, factories: 3, gdp: 35 } },
     danube_federation: { name: "Дунайская федерация", requiredCountry: "Австрия", requiredFocus: "at-form-danube", requirements: { controlCountries: ["Чехия", "Словакия", "Венгрия", "Словения", "Хорватия", "Румыния"] }, color: "#4767a5", description: "Федеральный центральноевропейский проект на Дунае. Россия и её территории не входят в требования.", reward: { politicalPower: 115, stability: 10, factories: 6, manpower: 300 } },
+  };
+
+  // Internal, scenario-level cultural and language affinity weights. They are
+  // deliberately separate from ethnicity and do not represent a racial score.
+  // Scenario authors can extend this table without exposing it in the UI.
+  const REGION_CULTURAL_AFFINITIES = {
+    893: { russia: 48 },
+    894: { russia: 72 },
+    897: { russia: 72 },
+    1610: { russia: 46 },
+    2227: { russia: 48 },
+    2952: { russia: 42 },
+    864: { russia: 34 },
+    2229: { russia: 30 },
   };
 
   const ORGANIZATION_TEMPLATES = [
@@ -1012,7 +1029,32 @@
   let catalogSignature = "";
   let gameZoom = 1;
   let gameData = null;
+  const historicalTerritoryRegionIds = new Map();
+  let historicalTerritoryProfilesLoaded = false;
+  // Preloaded once so the dated 2026 transition is deterministic and does not
+  // depend on a network request during a turn.
+  let historicalModernWorldScenario = null;
+  const HISTORICAL_SUCCESSOR_COUNTRIES = {
+    "СССР": "Россия",
+    "Российская империя": "Россия",
+    "Австро-Венгрия": "Австрия",
+    "Османская империя": "Турция",
+    "Королевство Пруссия": "Германия",
+    "Германская империя": "Германия",
+    "Чехословакия": "Чехия",
+    "Югославия": "Сербия",
+    "Британская империя": "Великобритания",
+    "Французская колониальная империя": "Франция",
+    "Бельгийская колониальная империя": "Бельгия",
+    "Нидерландская колониальная империя": "Нидерланды",
+    "Португальская колониальная империя": "Португалия",
+    "Испанская колониальная империя": "Испания",
+  };
   let soldierImage = null;
+  let artilleryImage = null;
+  let tankImage = null;
+  let aircraftImage = null;
+  let shipImage = null;
   let activeTab = "focuses";
   let mapMode = "political";
   let strategyPanelFullscreen = false;
@@ -1020,6 +1062,9 @@
   let relationMapMode = false;
   let relationMapCountryId = null;
   let relationPair = null;
+  let peaceMapMode = false;
+  let peaceMapRecipientId = null;
+  let peaceLaptopMapVisible = false;
   let strategyState = null;
   let selectedEventId = null;
   let gameWorldStrip = null;
@@ -1039,6 +1084,7 @@
   let gameSpeed = 1;
   let tutorialStep = 0;
   let tutorialCampaign = false;
+  let historicalViewerMode = false;
   let audioContext = null;
   let audioEnabled = false;
   let userSettings = loadUserSettings();

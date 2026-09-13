@@ -4,7 +4,7 @@
   "firstSupportedYear": 1500,
   "width": 1280,
   "height": 720,
-  "count": 2159,
+  "count": 1889,
   "records": [
     {
       "id": "GB-ABD",
@@ -147,58 +147,6 @@
       "name": "Австралийская столичная территория",
       "period": "с 1993",
       "file": "Австралийская столичная территория (с 1993).png"
-    },
-    {
-      "id": "AU",
-      "sourceName": "Australia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1908,
-          1909
-        ],
-        [
-          1909,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q408",
-      "source": "https://github.com/niemela/flags/blob/master/data/AU.json",
-      "name": "Австралия",
-      "period": "1908–1909, с 1909",
-      "file": "Австралия (1908–1909, с 1909).png"
-    },
-    {
-      "id": "AT",
-      "sourceName": "Austria",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1230,
-          1918
-        ],
-        [
-          1945,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q40",
-      "source": "https://github.com/niemela/flags/blob/master/data/AT.json",
-      "name": "Австрия",
-      "period": "1230–1918, с 1945",
-      "file": "Австрия (1230–1918, с 1945).png"
     },
     {
       "id": "austro-hungary",
@@ -453,55 +401,6 @@
       "name": "Азад Кашмир",
       "period": "с 1975",
       "file": "Азад Кашмир (с 1975).png"
-    },
-    {
-      "id": "AZ",
-      "sourceName": "Azerbaijan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1918,
-          1920
-        ],
-        [
-          1991,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q227",
-      "source": "https://github.com/niemela/flags/blob/master/data/AZ.json",
-      "name": "Азербайджан",
-      "period": "1918–1920, с 1991",
-      "file": "Азербайджан (1918–1920, с 1991).png"
-    },
-    {
-      "id": "AZ_presidential",
-      "sourceName": "Azerbaijan (presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2008,
-          null
-        ]
-      ],
-      "variants": [
-        "presidential-standard"
-      ],
-      "wikidata": "Q227",
-      "source": "https://github.com/niemela/flags/blob/master/data/AZ_presidential.json",
-      "name": "Азербайджан",
-      "period": "с 2008",
-      "file": "Азербайджан (с 2008).png"
     },
     {
       "id": "US-ID",
@@ -767,34 +666,6 @@
       "file": "Алахуэла (с 2000).png"
     },
     {
-      "id": "AL",
-      "sourceName": "Albania",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1912,
-          1944
-        ],
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q222",
-      "source": "https://github.com/niemela/flags/blob/master/data/AL.json",
-      "name": "Албания",
-      "period": "1912–1944, с 1992",
-      "file": "Албания (1912–1944, с 1992).png"
-    },
-    {
       "id": "EG-ALX",
       "sourceName": "Alexandria Governorate (Egypt)",
       "types": [
@@ -814,30 +685,6 @@
       "name": "Александрия",
       "period": "с 2000",
       "file": "Александрия (с 2000).png"
-    },
-    {
-      "id": "DZ",
-      "sourceName": "Algeria",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1962,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q262",
-      "source": "https://github.com/niemela/flags/blob/master/data/DZ.json",
-      "name": "Алжир",
-      "period": "с 1962",
-      "file": "Алжир (с 1962).png"
     },
     {
       "id": "LT-AL",
@@ -1308,30 +1155,6 @@
       "file": "Англия (с 1300).png"
     },
     {
-      "id": "AO",
-      "sourceName": "Angola",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q916",
-      "source": "https://github.com/niemela/flags/blob/master/data/AO.json",
-      "name": "Ангола",
-      "period": "с 1975",
-      "file": "Ангола (с 1975).png"
-    },
-    {
       "id": "ES-AN",
       "sourceName": "Andalusia (Spain)",
       "types": [
@@ -1352,28 +1175,6 @@
       "name": "Андалусия",
       "period": "с 1982",
       "file": "Андалусия (с 1982).png"
-    },
-    {
-      "id": "AD",
-      "sourceName": "Andorra",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1866,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q228",
-      "source": "https://github.com/niemela/flags/blob/master/data/AD.json",
-      "name": "Андорра",
-      "period": "с 1866",
-      "file": "Андорра (с 1866).png"
     },
     {
       "id": "KM-A",
@@ -1458,25 +1259,6 @@
       "file": "Ансоатеги (с 1999).png"
     },
     {
-      "id": "AQ",
-      "sourceName": "Antarctica",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1996,
-          null
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q51",
-      "source": "https://github.com/niemela/flags/blob/master/data/AQ.json",
-      "name": "Антарктида",
-      "period": "с 1996",
-      "file": "Антарктида (с 1996).png"
-    },
-    {
       "id": "BE-VAN",
       "sourceName": "Antwerp (Belgium)",
       "types": [
@@ -1494,28 +1276,6 @@
       "name": "Антверпен",
       "period": "с 1997",
       "file": "Антверпен (с 1997).png"
-    },
-    {
-      "id": "AG",
-      "sourceName": "Antigua and Barbuda",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1967,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q781",
-      "source": "https://github.com/niemela/flags/blob/master/data/AG.json",
-      "name": "Антигуа и Барбуда",
-      "period": "с 1967",
-      "file": "Антигуа и Барбуда (с 1967).png"
     },
     {
       "id": "CL-AN",
@@ -1848,30 +1608,6 @@
       "file": "Аргентина (1818–1985).png"
     },
     {
-      "id": "AR",
-      "sourceName": "Argentina",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1818,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q414",
-      "source": "https://github.com/niemela/flags/blob/master/data/AR.json",
-      "name": "Аргентина",
-      "period": "с 1818",
-      "file": "Аргентина (с 1818).png"
-    },
-    {
       "id": "AR_1835",
       "sourceName": "Argentina (1829–1835)",
       "types": [
@@ -2064,34 +1800,6 @@
       "file": "Арканзас (с 1913).png"
     },
     {
-      "id": "AM",
-      "sourceName": "Armenia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1918,
-          1922
-        ],
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q399",
-      "source": "https://github.com/niemela/flags/blob/master/data/AM.json",
-      "name": "Армения",
-      "period": "1918–1922, с 1990",
-      "file": "Армения (1918–1922, с 1990).png"
-    },
-    {
       "id": "UY-AR",
       "sourceName": "Artigas (Uruguay)",
       "types": [
@@ -2112,28 +1820,6 @@
       "name": "Артигас",
       "period": "с 1950",
       "file": "Артигас (с 1950).png"
-    },
-    {
-      "id": "AW",
-      "sourceName": "Aruba",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1976,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q21203",
-      "source": "https://github.com/niemela/flags/blob/master/data/AW.json",
-      "name": "Аруба",
-      "period": "с 1976",
-      "file": "Аруба (с 1976).png"
     },
     {
       "id": "MN-073",
@@ -2411,142 +2097,6 @@
       "file": "Афар (с 1995).png"
     },
     {
-      "id": "AF_1921",
-      "sourceName": "Afghanistan (Emirate, 1919–1921)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1919,
-          1921
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF_1921.json",
-      "name": "Афганистан",
-      "period": "1919–1921",
-      "file": "Афганистан (1919–1921).png"
-    },
-    {
-      "id": "AF_1929",
-      "sourceName": "Afghanistan (1928–1929)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1928,
-          1929
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF_1929.json",
-      "name": "Афганистан",
-      "period": "1928–1929",
-      "file": "Афганистан (1928–1929).png"
-    },
-    {
-      "id": "AF_1973",
-      "sourceName": "Afghanistan (Kingdom, 1931–1973)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1931,
-          1973
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF_1973.json",
-      "name": "Афганистан",
-      "period": "1931–1973",
-      "file": "Афганистан (1931–1973).png"
-    },
-    {
-      "id": "AF_1978",
-      "sourceName": "Afghanistan (Republic, 1974–1978)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1974,
-          1978
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF_1978.json",
-      "name": "Афганистан",
-      "period": "1974–1978",
-      "file": "Афганистан (1974–1978).png"
-    },
-    {
-      "id": "AF_1980",
-      "sourceName": "Afghanistan (Khalq, 1978–1980)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1978,
-          1980
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF_1980.json",
-      "name": "Афганистан",
-      "period": "1978–1980",
-      "file": "Афганистан (1978–1980).png"
-    },
-    {
-      "id": "AF_1992",
-      "sourceName": "Afghanistan (1987–1992)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1987,
-          1992
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF_1992.json",
-      "name": "Афганистан",
-      "period": "1987–1992",
-      "file": "Афганистан (1987–1992).png"
-    },
-    {
-      "id": "AF",
-      "sourceName": "Afghanistan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2013,
-          2021
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q889",
-      "source": "https://github.com/niemela/flags/blob/master/data/AF.json",
-      "name": "Афганистан",
-      "period": "2013–2021",
-      "file": "Афганистан (2013–2021).png"
-    },
-    {
       "id": "afsharid-empire",
       "sourceName": "Afsharid Iran (1736–1796)",
       "types": [
@@ -2694,28 +2244,6 @@
       "name": "Бавария",
       "period": "с 1953",
       "file": "Бавария (с 1953).png"
-    },
-    {
-      "id": "BS",
-      "sourceName": "Bahamas",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1973,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q778",
-      "source": "https://github.com/niemela/flags/blob/master/data/BS.json",
-      "name": "Багамские Острова",
-      "period": "с 1973",
-      "file": "Багамские Острова (с 1973).png"
     },
     {
       "id": "ES-BA",
@@ -2909,30 +2437,6 @@
       "file": "Бали (с 1958).png"
     },
     {
-      "id": "BD",
-      "sourceName": "Bangladesh",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1972,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q902",
-      "source": "https://github.com/niemela/flags/blob/master/data/BD.json",
-      "name": "Бангладеш",
-      "period": "с 1972",
-      "file": "Бангладеш (с 1972).png"
-    },
-    {
       "id": "ID-BB",
       "sourceName": "Bangka Belitung Islands (Indonesia)",
       "types": [
@@ -3038,30 +2542,6 @@
       "name": "Баранья",
       "period": "с 1990",
       "file": "Баранья (с 1990).png"
-    },
-    {
-      "id": "BB",
-      "sourceName": "Barbados",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1966,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q244",
-      "source": "https://github.com/niemela/flags/blob/master/data/BB.json",
-      "name": "Барбадос",
-      "period": "с 1966",
-      "file": "Барбадос (с 1966).png"
     },
     {
       "id": "VE-E",
@@ -3265,30 +2745,6 @@
       "file": "Баха-Верапас (с 1990).png"
     },
     {
-      "id": "BH",
-      "sourceName": "Bahrain",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2002,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q398",
-      "source": "https://github.com/niemela/flags/blob/master/data/BH.json",
-      "name": "Бахрейн",
-      "period": "с 2002",
-      "file": "Бахрейн (с 2002).png"
-    },
-    {
       "id": "HU-BK",
       "sourceName": "Bács-Kiskun (Hungary)",
       "types": [
@@ -3462,28 +2918,6 @@
       "file": "Белгородская область (с 2000).png"
     },
     {
-      "id": "BZ",
-      "sourceName": "Belize",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1981,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q242",
-      "source": "https://github.com/niemela/flags/blob/master/data/BZ.json",
-      "name": "Белиз",
-      "period": "с 1981",
-      "file": "Белиз (с 1981).png"
-    },
-    {
       "id": "HR-07",
       "sourceName": "Bjelovar-Bilogora (Croatia)",
       "types": [
@@ -3546,49 +2980,6 @@
       "name": "Белуджистан",
       "period": "с 2000",
       "file": "Белуджистан (с 2000).png"
-    },
-    {
-      "id": "BE",
-      "sourceName": "Belgium",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1831,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q31",
-      "source": "https://github.com/niemela/flags/blob/master/data/BE.json",
-      "name": "Бельгия",
-      "period": "с 1831",
-      "file": "Бельгия (с 1831).png"
-    },
-    {
-      "id": "BE_royal",
-      "sourceName": "Belgium (Royal Standard of King Philippe)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2013,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q31",
-      "source": "https://github.com/niemela/flags/blob/master/data/BE_royal.json",
-      "name": "Бельгия",
-      "period": "с 2013",
-      "file": "Бельгия (с 2013).png"
     },
     {
       "id": "bengal-subah",
@@ -3674,58 +3065,6 @@
       "name": "Бени-Суэйф",
       "period": "с 2016",
       "file": "Бени-Суэйф (с 2016).png"
-    },
-    {
-      "id": "BJ",
-      "sourceName": "Benin",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          1975
-        ],
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q962",
-      "source": "https://github.com/niemela/flags/blob/master/data/BJ.json",
-      "name": "Бенин",
-      "period": "1959–1975, с 1990",
-      "file": "Бенин (1959–1975, с 1990).png"
-    },
-    {
-      "id": "BJ_1990",
-      "sourceName": "Benin (1975–1990)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          1990
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q962",
-      "source": "https://github.com/niemela/flags/blob/master/data/BJ_1990.json",
-      "name": "Бенин",
-      "period": "1975–1990",
-      "file": "Бенин (1975–1990).png"
     },
     {
       "id": "ET-BE",
@@ -4046,33 +3385,6 @@
       "file": "Бокерон (с 2000).png"
     },
     {
-      "id": "BG",
-      "sourceName": "Bulgaria",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1879,
-          1947
-        ],
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q219",
-      "source": "https://github.com/niemela/flags/blob/master/data/BG.json",
-      "name": "Болгария",
-      "period": "1879–1947, с 1990",
-      "file": "Болгария (1879–1947, с 1990).png"
-    },
-    {
       "id": "EC-B",
       "sourceName": "Bolívar (Ecuador)",
       "types": [
@@ -4131,30 +3443,6 @@
       "name": "Боливар",
       "period": "с 1930",
       "file": "Боливар (с 1930).png"
-    },
-    {
-      "id": "BO",
-      "sourceName": "Bolivia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1851,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q750",
-      "source": "https://github.com/niemela/flags/blob/master/data/BO.json",
-      "name": "Боливия",
-      "period": "с 1851",
-      "file": "Боливия (с 1851).png"
     },
     {
       "id": "GB-ENG-london",
@@ -4317,54 +3605,6 @@
       "file": "Боснийско-Подринский кантон (с 2000).png"
     },
     {
-      "id": "BA",
-      "sourceName": "Bosnia and Herzegovina",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1998,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q225",
-      "source": "https://github.com/niemela/flags/blob/master/data/BA.json",
-      "name": "Босния и Герцеговина",
-      "period": "с 1998",
-      "file": "Босния и Герцеговина (с 1998).png"
-    },
-    {
-      "id": "BW",
-      "sourceName": "Botswana",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1966,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q963",
-      "source": "https://github.com/niemela/flags/blob/master/data/BW.json",
-      "name": "Ботсвана",
-      "period": "с 1966",
-      "file": "Ботсвана (с 1966).png"
-    },
-    {
       "id": "CO-BOY",
       "sourceName": "Boyaca (Colombia)",
       "types": [
@@ -4382,32 +3622,6 @@
       "name": "Бояка",
       "period": "с 1968",
       "file": "Бояка (с 1968).png"
-    },
-    {
-      "id": "BR",
-      "sourceName": "Brazil",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "war",
-        "civil-ensign",
-        "state-ensign",
-        "naval-ensign"
-      ],
-      "wikidata": "Q155",
-      "source": "https://github.com/niemela/flags/blob/master/data/BR.json",
-      "name": "Бразилия",
-      "period": "с 1992",
-      "file": "Бразилия (с 1992).png"
     },
     {
       "id": "DE-BB",
@@ -4599,28 +3813,6 @@
       "file": "Британская Ост-Индская компания (1801–1858).png"
     },
     {
-      "id": "IO",
-      "sourceName": "British Indian Ocean Territory",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q43448",
-      "source": "https://github.com/niemela/flags/blob/master/data/IO.json",
-      "name": "Британская территория в Индийском океане",
-      "period": "с 1990",
-      "file": "Британская территория в Индийском океане (с 1990).png"
-    },
-    {
       "id": "VG",
       "sourceName": "British Virgin Islands (United Kingdom)",
       "types": [
@@ -4703,28 +3895,6 @@
       "name": "Бродско-Посавская жупания",
       "period": "с 1990",
       "file": "Бродско-Посавская жупания (с 1990).png"
-    },
-    {
-      "id": "BN",
-      "sourceName": "Brunei",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q921",
-      "source": "https://github.com/niemela/flags/blob/master/data/BN.json",
-      "name": "Бруней",
-      "period": "с 1959",
-      "file": "Бруней (с 1959).png"
     },
     {
       "id": "BE-BRU",
@@ -4902,54 +4072,6 @@
       "file": "Бургундский крест (1506–1843).png"
     },
     {
-      "id": "BF",
-      "sourceName": "Burkina Faso",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1984,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q965",
-      "source": "https://github.com/niemela/flags/blob/master/data/BF.json",
-      "name": "Буркина-Фасо",
-      "period": "с 1984",
-      "file": "Буркина-Фасо (с 1984).png"
-    },
-    {
-      "id": "BI",
-      "sourceName": "Burundi",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1982,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q967",
-      "source": "https://github.com/niemela/flags/blob/master/data/BI.json",
-      "name": "Бурунди",
-      "period": "с 1982",
-      "file": "Бурунди (с 1982).png"
-    },
-    {
       "id": "RU-BU",
       "sourceName": "Buryatia (Russia)",
       "types": [
@@ -5006,28 +4128,6 @@
       "name": "Бускеруд",
       "period": "1966–2019",
       "file": "Бускеруд (1966–2019).png"
-    },
-    {
-      "id": "BT",
-      "sourceName": "Bhutan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1969,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q917",
-      "source": "https://github.com/niemela/flags/blob/master/data/BT.json",
-      "name": "Бутан",
-      "period": "с 1969",
-      "file": "Бутан (с 1969).png"
     },
     {
       "id": "khanate-of-bukhara",
@@ -5448,30 +4548,6 @@
       "file": "Вандея (с 1970).png"
     },
     {
-      "id": "VU",
-      "sourceName": "Vanuatu",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1980,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q686",
-      "source": "https://github.com/niemela/flags/blob/master/data/VU.json",
-      "name": "Вануату",
-      "period": "с 1980",
-      "file": "Вануату (с 1980).png"
-    },
-    {
       "id": "FR-83",
       "sourceName": "Var (France)",
       "types": [
@@ -5574,30 +4650,6 @@
       "name": "Варсинайс-Суоми",
       "period": "с 1997",
       "file": "Варсинайс-Суоми (с 1997).png"
-    },
-    {
-      "id": "VA",
-      "sourceName": "Vatican City",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1929,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q237",
-      "source": "https://github.com/niemela/flags/blob/master/data/VA.json",
-      "name": "Ватикан",
-      "period": "с 1929",
-      "file": "Ватикан (с 1929).png"
     },
     {
       "id": "CO-VAU",
@@ -5720,196 +4772,6 @@
       "name": "Великий Ливан",
       "period": "1920–1943",
       "file": "Великий Ливан (1920–1943).png"
-    },
-    {
-      "id": "GB_state-ensign",
-      "sourceName": "United Kingdom (Blue Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1801,
-          null
-        ]
-      ],
-      "variants": [
-        "state-ensign",
-        "government"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_state-ensign.json",
-      "name": "Великобритания",
-      "period": "с 1801",
-      "file": "Великобритания (с 1801) — государственный морской, правительственный.png"
-    },
-    {
-      "id": "GB_civil-ensign",
-      "sourceName": "United Kingdom (Red Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1801,
-          null
-        ]
-      ],
-      "variants": [
-        "civil-ensign"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_civil-ensign.json",
-      "name": "Великобритания",
-      "period": "с 1801",
-      "file": "Великобритания (с 1801) — гражданский морской.png"
-    },
-    {
-      "id": "GB_diplomatic",
-      "sourceName": "United Kingdom (Diplomatic Flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1801,
-          null
-        ]
-      ],
-      "variants": [
-        "government"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_diplomatic.json",
-      "name": "Великобритания",
-      "period": "с 1801",
-      "file": "Великобритания (с 1801) — правительственный.png"
-    },
-    {
-      "id": "GB",
-      "sourceName": "United Kingdom",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1801,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB.json",
-      "name": "Великобритания",
-      "period": "с 1801",
-      "file": "Великобритания (с 1801).png"
-    },
-    {
-      "id": "GB_royal",
-      "sourceName": "United Kingdom (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1837,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_royal.json",
-      "name": "Великобритания",
-      "period": "с 1837",
-      "file": "Великобритания (с 1837).png"
-    },
-    {
-      "id": "GB_naval",
-      "sourceName": "United Kingdom (White Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1864,
-          null
-        ]
-      ],
-      "variants": [
-        "naval-ensign",
-        "war"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_naval.json",
-      "name": "Великобритания",
-      "period": "с 1864",
-      "file": "Великобритания (с 1864).png"
-    },
-    {
-      "id": "GB_air-force",
-      "sourceName": "United Kingdom (Royal Air Force Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1921,
-          null
-        ]
-      ],
-      "variants": [
-        "war"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_air-force.json",
-      "name": "Великобритания",
-      "period": "с 1921",
-      "file": "Великобритания (с 1921).png"
-    },
-    {
-      "id": "GB_civil-air",
-      "sourceName": "United Kingdom (Civil Air Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1931,
-          null
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_civil-air.json",
-      "name": "Великобритания",
-      "period": "с 1931",
-      "file": "Великобритания (с 1931).png"
-    },
-    {
-      "id": "GB_rfa",
-      "sourceName": "United Kingdom (Royal Fleet Auxiliary Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1969,
-          null
-        ]
-      ],
-      "variants": [
-        "government"
-      ],
-      "wikidata": "Q145",
-      "source": "https://github.com/niemela/flags/blob/master/data/GB_rfa.json",
-      "name": "Великобритания",
-      "period": "с 1969",
-      "file": "Великобритания (с 1969).png"
     },
     {
       "id": "grand-duchy-of-baden",
@@ -6060,28 +4922,6 @@
       "file": "Венгерская Народная Республика (1957–1989).png"
     },
     {
-      "id": "HU",
-      "sourceName": "Hungary",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1957,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q28",
-      "source": "https://github.com/niemela/flags/blob/master/data/HU.json",
-      "name": "Венгрия",
-      "period": "с 1957",
-      "file": "Венгрия (с 1957).png"
-    },
-    {
       "id": "venda",
       "sourceName": "Venda (1979–1994)",
       "types": [
@@ -6100,49 +4940,6 @@
       "name": "Венда",
       "period": "1979–1994",
       "file": "Венда (1979–1994).png"
-    },
-    {
-      "id": "VE_state",
-      "sourceName": "Venezuela (state flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2006,
-          null
-        ]
-      ],
-      "variants": [
-        "state"
-      ],
-      "wikidata": "Q717",
-      "source": "https://github.com/niemela/flags/blob/master/data/VE_state.json",
-      "name": "Венесуэла",
-      "period": "с 2006",
-      "file": "Венесуэла (с 2006) — государственный.png"
-    },
-    {
-      "id": "VE",
-      "sourceName": "Venezuela",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2006,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q717",
-      "source": "https://github.com/niemela/flags/blob/master/data/VE.json",
-      "name": "Венесуэла",
-      "period": "с 2006",
-      "file": "Венесуэла (с 2006).png"
     },
     {
       "id": "republic-of-venice",
@@ -7367,34 +6164,6 @@
       "file": "Восточный райдинг Йоркшира (с 2013).png"
     },
     {
-      "id": "TL",
-      "sourceName": "Timor-Leste",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          1975
-        ],
-        [
-          2002,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q574",
-      "source": "https://github.com/niemela/flags/blob/master/data/TL.json",
-      "name": "Восточный Тимор",
-      "period": "1975, с 2002",
-      "file": "Восточный Тимор (1975, с 2002).png"
-    },
-    {
       "id": "GB-CHE",
       "sourceName": "Cheshire (United Kingdom)",
       "types": [
@@ -7553,34 +6322,6 @@
       "file": "Вьенна (с 1970).png"
     },
     {
-      "id": "VN",
-      "sourceName": "Vietnam",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1955,
-          1976
-        ],
-        [
-          1976,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q881",
-      "source": "https://github.com/niemela/flags/blob/master/data/VN.json",
-      "name": "Вьетнам",
-      "period": "1955–1976, с 1976",
-      "file": "Вьетнам (1955–1976, с 1976).png"
-    },
-    {
       "id": "empire-of-vietnam",
       "sourceName": "Empire of Vietnam (1945)",
       "types": [
@@ -7618,30 +6359,6 @@
       "name": "Вяйке-Маарья",
       "period": "с 1995",
       "file": "Вяйке-Маарья (с 1995).png"
-    },
-    {
-      "id": "GA",
-      "sourceName": "Gabon",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1000",
-      "source": "https://github.com/niemela/flags/blob/master/data/GA.json",
-      "name": "Габон",
-      "period": "с 1960",
-      "file": "Габон (с 1960).png"
     },
     {
       "id": "US-HI",
@@ -7752,30 +6469,6 @@
       "file": "Гаити (с 1986).png"
     },
     {
-      "id": "GY",
-      "sourceName": "Guyana",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1966,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q734",
-      "source": "https://github.com/niemela/flags/blob/master/data/GY.json",
-      "name": "Гайана",
-      "period": "с 1966",
-      "file": "Гайана (с 1966).png"
-    },
-    {
       "id": "EC-W",
       "sourceName": "Galápagos (Ecuador)",
       "types": [
@@ -7855,30 +6548,6 @@
       "file": "Гамбела (с 1995).png"
     },
     {
-      "id": "GM",
-      "sourceName": "Gambia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1965,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1005",
-      "source": "https://github.com/niemela/flags/blob/master/data/GM.json",
-      "name": "Гамбия",
-      "period": "с 1965",
-      "file": "Гамбия (с 1965).png"
-    },
-    {
       "id": "DE-HH",
       "sourceName": "Hamburg (Germany)",
       "types": [
@@ -7898,34 +6567,6 @@
       "name": "Гамбург",
       "period": "с 1751",
       "file": "Гамбург (с 1751).png"
-    },
-    {
-      "id": "GH",
-      "sourceName": "Ghana",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1957,
-          1964
-        ],
-        [
-          1966,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q117",
-      "source": "https://github.com/niemela/flags/blob/master/data/GH.json",
-      "name": "Гана",
-      "period": "1957–1964, с 1966",
-      "file": "Гана (1957–1964, с 1966).png"
     },
     {
       "id": "hanseatic-league",
@@ -8046,27 +6687,6 @@
       "file": "Гваделупа (с 1970).png"
     },
     {
-      "id": "GT",
-      "sourceName": "Guatemala",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1871,
-          null
-        ]
-      ],
-      "variants": [
-        "state"
-      ],
-      "wikidata": "Q774",
-      "source": "https://github.com/niemela/flags/blob/master/data/GT.json",
-      "name": "Гватемала",
-      "period": "с 1871",
-      "file": "Гватемала (с 1871).png"
-    },
-    {
       "id": "GT-01",
       "sourceName": "Guatemala Department (Guatemala)",
       "types": [
@@ -8084,54 +6704,6 @@
       "name": "Гватемала",
       "period": "с 1990",
       "file": "Гватемала (с 1990).png"
-    },
-    {
-      "id": "GN",
-      "sourceName": "Guinea",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1958,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1006",
-      "source": "https://github.com/niemela/flags/blob/master/data/GN.json",
-      "name": "Гвинея",
-      "period": "с 1958",
-      "file": "Гвинея (с 1958).png"
-    },
-    {
-      "id": "GW",
-      "sourceName": "Guinea-Bissau",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1973,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1007",
-      "source": "https://github.com/niemela/flags/blob/master/data/GW.json",
-      "name": "Гвинея-Бисау",
-      "period": "с 1973",
-      "file": "Гвинея-Бисау (с 1973).png"
     },
     {
       "id": "DDDE_1990",
@@ -8218,79 +6790,6 @@
       "file": "Генуэзская республика (1099–1797).png"
     },
     {
-      "id": "DE",
-      "sourceName": "Germany",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1848,
-          1852
-        ],
-        [
-          1919,
-          1933
-        ],
-        [
-          1949,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q183",
-      "source": "https://github.com/niemela/flags/blob/master/data/DE.json",
-      "name": "Германия",
-      "period": "1848–1852, 1919–1933, с 1949",
-      "file": "Германия (1848–1852, 1919–1933, с 1949).png"
-    },
-    {
-      "id": "DE_state",
-      "sourceName": "Germany (state flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1950,
-          null
-        ]
-      ],
-      "variants": [
-        "state"
-      ],
-      "wikidata": "Q183",
-      "source": "https://github.com/niemela/flags/blob/master/data/DE_state.json",
-      "name": "Германия",
-      "period": "с 1950",
-      "file": "Германия (с 1950).png"
-    },
-    {
-      "id": "DE_naval",
-      "sourceName": "Germany (naval ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1956,
-          null
-        ]
-      ],
-      "variants": [
-        "naval-ensign",
-        "war"
-      ],
-      "wikidata": "Q183",
-      "source": "https://github.com/niemela/flags/blob/master/data/DE_naval.json",
-      "name": "Германия",
-      "period": "с 1956",
-      "file": "Германия (с 1956).png"
-    },
-    {
       "id": "DE_civil-ensign_1949",
       "sourceName": "Germany (merchant flag, 1946–1949)",
       "types": [
@@ -8355,28 +6854,6 @@
       "name": "Гернси",
       "period": "с 1985",
       "file": "Гернси (с 1985) — гражданский морской.png"
-    },
-    {
-      "id": "GG",
-      "sourceName": "Guernsey",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1985,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q3311985",
-      "source": "https://github.com/niemela/flags/blob/master/data/GG.json",
-      "name": "Гернси",
-      "period": "с 1985",
-      "file": "Гернси (с 1985).png"
     },
     {
       "id": "MX-GRO",
@@ -8714,30 +7191,6 @@
       "name": "Гомельская область",
       "period": "с 2005",
       "file": "Гомельская область (с 2005).png"
-    },
-    {
-      "id": "HN",
-      "sourceName": "Honduras",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1866,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q783",
-      "source": "https://github.com/niemela/flags/blob/master/data/HN.json",
-      "name": "Гондурас",
-      "period": "с 1866",
-      "file": "Гондурас (с 1866).png"
     },
     {
       "id": "HK",
@@ -9122,30 +7575,6 @@
       "file": "Граубюнден (с 1933).png"
     },
     {
-      "id": "GD",
-      "sourceName": "Grenada",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1974,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q769",
-      "source": "https://github.com/niemela/flags/blob/master/data/GD.json",
-      "name": "Гренада",
-      "period": "с 1974",
-      "file": "Гренада (с 1974).png"
-    },
-    {
       "id": "GL",
       "sourceName": "Greenland (Denmark)",
       "types": [
@@ -9166,49 +7595,6 @@
       "name": "Гренландия",
       "period": "с 1985",
       "file": "Гренландия (с 1985).png"
-    },
-    {
-      "id": "GR_1978",
-      "sourceName": "Greece (land flag, 1822–1978)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1822,
-          1978
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q41",
-      "source": "https://github.com/niemela/flags/blob/master/data/GR_1978.json",
-      "name": "Греция",
-      "period": "1822–1978",
-      "file": "Греция (1822–1978).png"
-    },
-    {
-      "id": "GR",
-      "sourceName": "Greece",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1978,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q41",
-      "source": "https://github.com/niemela/flags/blob/master/data/GR.json",
-      "name": "Греция",
-      "period": "с 1978",
-      "file": "Греция (с 1978).png"
     },
     {
       "id": "BY-HR",
@@ -9247,53 +7633,6 @@
       "name": "Гронинген",
       "period": "с 1950",
       "file": "Гронинген (с 1950).png"
-    },
-    {
-      "id": "GE_2004",
-      "sourceName": "Georgia (1990–2004)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1918,
-          1921
-        ],
-        [
-          1990,
-          2004
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q230",
-      "source": "https://github.com/niemela/flags/blob/master/data/GE_2004.json",
-      "name": "Грузия",
-      "period": "1918–1921, 1990–2004",
-      "file": "Грузия (1918–1921, 1990–2004).png"
-    },
-    {
-      "id": "GE",
-      "sourceName": "Georgia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2004,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q230",
-      "source": "https://github.com/niemela/flags/blob/master/data/GE.json",
-      "name": "Грузия",
-      "period": "с 2004",
-      "file": "Грузия (с 2004).png"
     },
     {
       "id": "CO-GUV",
@@ -9646,73 +7985,6 @@
       "name": "Дальневосточная республика",
       "period": "1920–1922",
       "file": "Дальневосточная республика (1920–1922).png"
-    },
-    {
-      "id": "DK_naval",
-      "sourceName": "Denmark (Splitflag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1748,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "war",
-        "naval-ensign"
-      ],
-      "wikidata": "Q35",
-      "source": "https://github.com/niemela/flags/blob/master/data/DK_naval.json",
-      "name": "Дания",
-      "period": "с 1748",
-      "file": "Дания (с 1748) — государственный, военный, военно-морской.png"
-    },
-    {
-      "id": "DK",
-      "sourceName": "Denmark",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1748,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q35",
-      "source": "https://github.com/niemela/flags/blob/master/data/DK.json",
-      "name": "Дания",
-      "period": "с 1748",
-      "file": "Дания (с 1748).png"
-    },
-    {
-      "id": "DK_royal",
-      "sourceName": "Denmark (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1972,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q35",
-      "source": "https://github.com/niemela/flags/blob/master/data/DK_royal.json",
-      "name": "Дания",
-      "period": "с 1972",
-      "file": "Дания (с 1972).png"
     },
     {
       "id": "GB-DUR",
@@ -10290,52 +8562,6 @@
       "file": "Джерси (с 1981) — гражданский морской.png"
     },
     {
-      "id": "JE",
-      "sourceName": "Jersey",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1981,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q785",
-      "source": "https://github.com/niemela/flags/blob/master/data/JE.json",
-      "name": "Джерси",
-      "period": "с 1981",
-      "file": "Джерси (с 1981).png"
-    },
-    {
-      "id": "DJ",
-      "sourceName": "Djibouti",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1977,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q977",
-      "source": "https://github.com/niemela/flags/blob/master/data/DJ.json",
-      "name": "Джибути",
-      "period": "с 1977",
-      "file": "Джибути (с 1977).png"
-    },
-    {
       "id": "ID-YO",
       "sourceName": "Yogyakarta (Special Region of Indonesia)",
       "types": [
@@ -10515,50 +8741,6 @@
       "name": "Днепропетровская область",
       "period": "с 2002",
       "file": "Днепропетровская область (с 2002).png"
-    },
-    {
-      "id": "DM",
-      "sourceName": "Dominica",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q784",
-      "source": "https://github.com/niemela/flags/blob/master/data/DM.json",
-      "name": "Доминика",
-      "period": "с 1990",
-      "file": "Доминика (с 1990).png"
-    },
-    {
-      "id": "DO",
-      "sourceName": "Dominican Republic",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1844,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q786",
-      "source": "https://github.com/niemela/flags/blob/master/data/DO.json",
-      "name": "Доминиканская Республика",
-      "period": "с 1844",
-      "file": "Доминиканская Республика (с 1844).png"
     },
     {
       "id": "IE-DL",
@@ -11050,49 +9232,6 @@
       "file": "Европейские сообщества (1986–1993).png"
     },
     {
-      "id": "EG_1984",
-      "sourceName": "Egypt (1972–1984)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1972,
-          1984
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q79",
-      "source": "https://github.com/niemela/flags/blob/master/data/EG_1984.json",
-      "name": "Египет",
-      "period": "1972–1984",
-      "file": "Египет (1972–1984).png"
-    },
-    {
-      "id": "EG",
-      "sourceName": "Egypt",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1984,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q79",
-      "source": "https://github.com/niemela/flags/blob/master/data/EG.json",
-      "name": "Египет",
-      "period": "с 1984",
-      "file": "Египет (с 1984).png"
-    },
-    {
       "id": "MD-ED",
       "sourceName": "Edineț District (Moldova)",
       "types": [
@@ -11396,32 +9535,6 @@
       "file": "Зальцбург (с 1921).png"
     },
     {
-      "id": "ZM",
-      "sourceName": "Zambia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1964,
-          1996
-        ],
-        [
-          1996,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q953",
-      "source": "https://github.com/niemela/flags/blob/master/data/ZM.json",
-      "name": "Замбия",
-      "period": "1964–1996, с 1996",
-      "file": "Замбия (1964–1996, с 1996).png"
-    },
-    {
       "id": "TZ-zanzibar",
       "sourceName": "Zanzibar (Tanzania)",
       "types": [
@@ -11544,28 +9657,6 @@
       "name": "Западная Панама",
       "period": "с 2015",
       "file": "Западная Панама (с 2015).png"
-    },
-    {
-      "id": "EH",
-      "sourceName": "Western Sahara (Sahrawi Arab Democratic Republic)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1976,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q6250",
-      "source": "https://github.com/niemela/flags/blob/master/data/EH.json",
-      "name": "Западная Сахара",
-      "period": "с 1976",
-      "file": "Западная Сахара (с 1976).png"
     },
     {
       "id": "ID-SB",
@@ -11897,30 +9988,6 @@
       "file": "Зеницко-Добойский кантон (с 2000).png"
     },
     {
-      "id": "ZW",
-      "sourceName": "Zimbabwe",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1980,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q954",
-      "source": "https://github.com/niemela/flags/blob/master/data/ZW.json",
-      "name": "Зимбабве",
-      "period": "с 1980",
-      "file": "Зимбабве (с 1980).png"
-    },
-    {
       "id": "rhodesia",
       "sourceName": "Zimbabwe Rhodesia",
       "types": [
@@ -12136,28 +10203,6 @@
       "name": "Изер",
       "period": "с 1970",
       "file": "Изер (с 1970).png"
-    },
-    {
-      "id": "IL",
-      "sourceName": "Israel",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1948,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q801",
-      "source": "https://github.com/niemela/flags/blob/master/data/IL.json",
-      "name": "Израиль",
-      "period": "с 1948",
-      "file": "Израиль (с 1948).png"
     },
     {
       "id": "PE-ICA",
@@ -12424,73 +10469,6 @@
       "file": "Индиана (с 1917).png"
     },
     {
-      "id": "IN",
-      "sourceName": "India",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1947,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q668",
-      "source": "https://github.com/niemela/flags/blob/master/data/IN.json",
-      "name": "Индия",
-      "period": "с 1947",
-      "file": "Индия (с 1947).png"
-    },
-    {
-      "id": "IN_naval",
-      "sourceName": "India (Naval Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2022,
-          null
-        ]
-      ],
-      "variants": [
-        "naval-ensign"
-      ],
-      "wikidata": "Q668",
-      "source": "https://github.com/niemela/flags/blob/master/data/IN_naval.json",
-      "name": "Индия",
-      "period": "с 2022",
-      "file": "Индия (с 2022).png"
-    },
-    {
-      "id": "ID",
-      "sourceName": "Indonesia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1945,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q252",
-      "source": "https://github.com/niemela/flags/blob/master/data/ID.json",
-      "name": "Индонезия",
-      "period": "с 1945",
-      "file": "Индонезия (с 1945).png"
-    },
-    {
       "id": "KR-28",
       "sourceName": "Incheon (South Korea)",
       "types": [
@@ -12530,51 +10508,6 @@
       "file": "Ионическая республика (1815–1864).png"
     },
     {
-      "id": "JO_royal",
-      "sourceName": "Jordan (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1900,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q810",
-      "source": "https://github.com/niemela/flags/blob/master/data/JO_royal.json",
-      "name": "Иордания",
-      "period": "с 1900",
-      "file": "Иордания (с 1900).png"
-    },
-    {
-      "id": "JO",
-      "sourceName": "Jordan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1928,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q810",
-      "source": "https://github.com/niemela/flags/blob/master/data/JO.json",
-      "name": "Иордания",
-      "period": "с 1928",
-      "file": "Иордания (с 1928).png"
-    },
-    {
       "id": "MM-07",
       "sourceName": "Ayeyarwady Region (Myanmar)",
       "types": [
@@ -12595,68 +10528,6 @@
       "name": "Иравади",
       "period": "с 2018",
       "file": "Иравади (с 2018).png"
-    },
-    {
-      "id": "IQ_1963",
-      "sourceName": "Iraq (1959–1963)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          1963
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q796",
-      "source": "https://github.com/niemela/flags/blob/master/data/IQ_1963.json",
-      "name": "Ирак",
-      "period": "1959–1963",
-      "file": "Ирак (1959–1963).png"
-    },
-    {
-      "id": "IQ_1991",
-      "sourceName": "Iraq (1963–1991)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1963,
-          1991
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q796",
-      "source": "https://github.com/niemela/flags/blob/master/data/IQ_1991.json",
-      "name": "Ирак",
-      "period": "1963–1991",
-      "file": "Ирак (1963–1991).png"
-    },
-    {
-      "id": "IQ",
-      "sourceName": "Iraq",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2008,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q796",
-      "source": "https://github.com/niemela/flags/blob/master/data/IQ.json",
-      "name": "Ирак",
-      "period": "с 2008",
-      "file": "Ирак (с 2008).png"
     },
     {
       "id": "IR_1933",
@@ -12725,30 +10596,6 @@
       "file": "Иран (1964–1980).png"
     },
     {
-      "id": "IR",
-      "sourceName": "Iran",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1980,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q794",
-      "source": "https://github.com/niemela/flags/blob/master/data/IR.json",
-      "name": "Иран",
-      "period": "с 1980",
-      "file": "Иран (с 1980).png"
-    },
-    {
       "id": "RU-IRK",
       "sourceName": "Irkutsk Oblast (Russia)",
       "types": [
@@ -12766,30 +10613,6 @@
       "name": "Иркутская область",
       "period": "с 1997",
       "file": "Иркутская область (с 1997).png"
-    },
-    {
-      "id": "IE",
-      "sourceName": "Ireland",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1937,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q27",
-      "source": "https://github.com/niemela/flags/blob/master/data/IE.json",
-      "name": "Ирландия",
-      "period": "с 1937",
-      "file": "Ирландия (с 1937).png"
     },
     {
       "id": "PH-ISA",
@@ -12853,44 +10676,6 @@
       "file": "Исландия (1809).png"
     },
     {
-      "id": "IS_hvitblainn",
-      "sourceName": "Iceland (Hvítbláinn, proposed 1897–1915)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1897,
-          1915
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_hvitblainn.json",
-      "name": "Исландия",
-      "period": "1897–1915",
-      "file": "Исландия (1897–1915).png"
-    },
-    {
-      "id": "IS_proposed",
-      "sourceName": "Iceland (proposed flag, 1914)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1913,
-          1915
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_proposed.json",
-      "name": "Исландия",
-      "period": "1913–1915",
-      "file": "Исландия (1913–1915).png"
-    },
-    {
       "id": "IS_royal",
       "sourceName": "Iceland (Royal Standard, 1921–1944)",
       "types": [
@@ -12935,136 +10720,6 @@
       "file": "Исландия (1941–1944).png"
     },
     {
-      "id": "IS_state_1991",
-      "sourceName": "Iceland (state flag, 1944–1991)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1944,
-          1991
-        ]
-      ],
-      "variants": [
-        "state",
-        "naval-ensign"
-      ],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_state_1991.json",
-      "name": "Исландия",
-      "period": "1944–1991",
-      "file": "Исландия (1944–1991) — государственный, военно-морской.png"
-    },
-    {
-      "id": "IS_1991",
-      "sourceName": "Iceland (1944–1991)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1944,
-          1991
-        ]
-      ],
-      "variants": [
-        "civil"
-      ],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_1991.json",
-      "name": "Исландия",
-      "period": "1944–1991",
-      "file": "Исландия (1944–1991).png"
-    },
-    {
-      "id": "IS_naval",
-      "sourceName": "Iceland (naval ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1944,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "naval-ensign"
-      ],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_naval.json",
-      "name": "Исландия",
-      "period": "с 1944",
-      "file": "Исландия (с 1944) — государственный, военно-морской.png"
-    },
-    {
-      "id": "IS_customs",
-      "sourceName": "Iceland (customs flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1944,
-          null
-        ]
-      ],
-      "variants": [
-        "government"
-      ],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_customs.json",
-      "name": "Исландия",
-      "period": "с 1944",
-      "file": "Исландия (с 1944) — правительственный.png"
-    },
-    {
-      "id": "IS_presidential",
-      "sourceName": "Iceland (presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1944,
-          null
-        ]
-      ],
-      "variants": [
-        "presidential-standard"
-      ],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS_presidential.json",
-      "name": "Исландия",
-      "period": "с 1944",
-      "file": "Исландия (с 1944) — президентский штандарт.png"
-    },
-    {
-      "id": "IS",
-      "sourceName": "Iceland",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1944,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q189",
-      "source": "https://github.com/niemela/flags/blob/master/data/IS.json",
-      "name": "Исландия",
-      "period": "с 1944",
-      "file": "Исландия (с 1944).png"
-    },
-    {
       "id": "ES_1931",
       "sourceName": "Spain (1785–1873; 1875–1931)",
       "types": [
@@ -13087,112 +10742,6 @@
       "name": "Испания",
       "period": "1785–1873, 1875–1931",
       "file": "Испания (1785–1873, 1875–1931).png"
-    },
-    {
-      "id": "ES_1939",
-      "sourceName": "Spain (Second Republic, 1931–1939)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1931,
-          1939
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q29",
-      "source": "https://github.com/niemela/flags/blob/master/data/ES_1939.json",
-      "name": "Испания",
-      "period": "1931–1939",
-      "file": "Испания (1931–1939).png"
-    },
-    {
-      "id": "ES_naval",
-      "sourceName": "Spain (naval jack)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1785,
-          null
-        ]
-      ],
-      "variants": [
-        "jack"
-      ],
-      "wikidata": "Q29",
-      "source": "https://github.com/niemela/flags/blob/master/data/ES_naval.json",
-      "name": "Испания",
-      "period": "с 1785",
-      "file": "Испания (с 1785) — гюйс.png"
-    },
-    {
-      "id": "ES_civil",
-      "sourceName": "Spain (civil flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1785,
-          null
-        ]
-      ],
-      "variants": [
-        "civil"
-      ],
-      "wikidata": "Q29",
-      "source": "https://github.com/niemela/flags/blob/master/data/ES_civil.json",
-      "name": "Испания",
-      "period": "с 1785",
-      "file": "Испания (с 1785).png"
-    },
-    {
-      "id": "ES",
-      "sourceName": "Spain",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1981,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q29",
-      "source": "https://github.com/niemela/flags/blob/master/data/ES.json",
-      "name": "Испания",
-      "period": "с 1981",
-      "file": "Испания (с 1981).png"
-    },
-    {
-      "id": "ES_royal",
-      "sourceName": "Spain (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2014,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q29",
-      "source": "https://github.com/niemela/flags/blob/master/data/ES_royal.json",
-      "name": "Испания",
-      "period": "с 2014",
-      "file": "Испания (с 2014).png"
     },
     {
       "id": "KG-Y",
@@ -13282,50 +10831,6 @@
       "file": "Италия (2003–2006).png"
     },
     {
-      "id": "IT",
-      "sourceName": "Italy",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1946,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q38",
-      "source": "https://github.com/niemela/flags/blob/master/data/IT.json",
-      "name": "Италия",
-      "period": "с 1946",
-      "file": "Италия (с 1946).png"
-    },
-    {
-      "id": "IT_naval",
-      "sourceName": "Italy (naval ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1947,
-          null
-        ]
-      ],
-      "variants": [
-        "naval-ensign",
-        "war"
-      ],
-      "wikidata": "Q38",
-      "source": "https://github.com/niemela/flags/blob/master/data/IT_naval.json",
-      "name": "Италия",
-      "period": "с 1947",
-      "file": "Италия (с 1947).png"
-    },
-    {
       "id": "italian-republic",
       "sourceName": "Italian Republic (1802–1805)",
       "types": [
@@ -13385,30 +10890,6 @@
       "name": "Итапуа",
       "period": "с 2000",
       "file": "Итапуа (с 2000).png"
-    },
-    {
-      "id": "YE",
-      "sourceName": "Yemen",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q805",
-      "source": "https://github.com/niemela/flags/blob/master/data/YE.json",
-      "name": "Йемен",
-      "period": "с 1990",
-      "file": "Йемен (с 1990).png"
     },
     {
       "id": "mutawakkilite-yemen",
@@ -13602,30 +11083,6 @@
       "file": "Кабардино-Балкария (с 1994).png"
     },
     {
-      "id": "CV",
-      "sourceName": "Cape Verde",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1011",
-      "source": "https://github.com/niemela/flags/blob/master/data/CV.json",
-      "name": "Кабо-Верде",
-      "period": "с 1992",
-      "file": "Кабо-Верде (с 1992).png"
-    },
-    {
       "id": "IE-CN",
       "sourceName": "County Cavan (Ireland)",
       "types": [
@@ -13785,28 +11242,6 @@
       "name": "Кадрина",
       "period": "с 1995",
       "file": "Кадрина (с 1995).png"
-    },
-    {
-      "id": "KZ",
-      "sourceName": "Kazakhstan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q232",
-      "source": "https://github.com/niemela/flags/blob/master/data/KZ.json",
-      "name": "Казахстан",
-      "period": "с 1992",
-      "file": "Казахстан (с 1992).png"
     },
     {
       "id": "EG-C",
@@ -14150,91 +11585,6 @@
       "file": "Камберленд (с 2012).png"
     },
     {
-      "id": "KH",
-      "sourceName": "Cambodia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1948,
-          1970
-        ],
-        [
-          1993,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q424",
-      "source": "https://github.com/niemela/flags/blob/master/data/KH.json",
-      "name": "Камбоджа",
-      "period": "1948–1970, с 1993",
-      "file": "Камбоджа (1948–1970, с 1993).png"
-    },
-    {
-      "id": "KH_1975",
-      "sourceName": "Cambodia (Khmer Republic, 1970–1975)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1970,
-          1975
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q424",
-      "source": "https://github.com/niemela/flags/blob/master/data/KH_1975.json",
-      "name": "Камбоджа",
-      "period": "1970–1975",
-      "file": "Камбоджа (1970–1975).png"
-    },
-    {
-      "id": "KH_1979",
-      "sourceName": "Cambodia (Democratic Kampuchea, 1975–1979)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          1979
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q424",
-      "source": "https://github.com/niemela/flags/blob/master/data/KH_1979.json",
-      "name": "Камбоджа",
-      "period": "1975–1979",
-      "file": "Камбоджа (1975–1979).png"
-    },
-    {
-      "id": "KH_1989",
-      "sourceName": "Cambodia (People's Republic of Kampuchea, 1979–1989)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1979,
-          1989
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q424",
-      "source": "https://github.com/niemela/flags/blob/master/data/KH_1989.json",
-      "name": "Камбоджа",
-      "period": "1979–1989",
-      "file": "Камбоджа (1979–1989).png"
-    },
-    {
       "id": "GB-CMA",
       "sourceName": "Cumbria (United Kingdom)",
       "types": [
@@ -14252,30 +11602,6 @@
       "name": "Камбрия",
       "period": "с 2008",
       "file": "Камбрия (с 2008).png"
-    },
-    {
-      "id": "CM",
-      "sourceName": "Cameroon",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1009",
-      "source": "https://github.com/niemela/flags/blob/master/data/CM.json",
-      "name": "Камерун",
-      "period": "с 1975",
-      "file": "Камерун (с 1975).png"
     },
     {
       "id": "IT-72",
@@ -14446,30 +11772,6 @@
       "name": "Канада",
       "period": "1957–1965",
       "file": "Канада (1957–1965).png"
-    },
-    {
-      "id": "CA",
-      "sourceName": "Canada",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1965,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q16",
-      "source": "https://github.com/niemela/flags/blob/master/data/CA.json",
-      "name": "Канада",
-      "period": "с 1965",
-      "file": "Канада (с 1965).png"
     },
     {
       "id": "ES-CN",
@@ -15138,30 +12440,6 @@
       "file": "Катамарка (с 2010).png"
     },
     {
-      "id": "QA",
-      "sourceName": "Qatar",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1971,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q846",
-      "source": "https://github.com/niemela/flags/blob/master/data/QA.json",
-      "name": "Катар",
-      "period": "с 1971",
-      "file": "Катар (с 1971).png"
-    },
-    {
       "id": "CO-CAU",
       "sourceName": "Cauca (Colombia)",
       "types": [
@@ -15530,28 +12808,6 @@
       "file": "Кёнгидо (с 2022).png"
     },
     {
-      "id": "KE",
-      "sourceName": "Kenya",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1963,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q114",
-      "source": "https://github.com/niemela/flags/blob/master/data/KE.json",
-      "name": "Кения",
-      "period": "с 1963",
-      "file": "Кения (с 1963).png"
-    },
-    {
       "id": "KR-48",
       "sourceName": "Gyeongsangnam-do (South Korea)",
       "types": [
@@ -15881,30 +13137,6 @@
       "file": "Киото (с 1976).png"
     },
     {
-      "id": "CY",
-      "sourceName": "Cyprus",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q229",
-      "source": "https://github.com/niemela/flags/blob/master/data/CY.json",
-      "name": "Кипр",
-      "period": "с 1960",
-      "file": "Кипр (с 1960).png"
-    },
-    {
       "id": "LY-cyrenaica",
       "sourceName": "Cyrenaica (Libya)",
       "types": [
@@ -15922,30 +13154,6 @@
       "name": "Киренаика",
       "period": "с 1977",
       "file": "Киренаика (с 1977).png"
-    },
-    {
-      "id": "KI",
-      "sourceName": "Kiribati",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1979,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q710",
-      "source": "https://github.com/niemela/flags/blob/master/data/KI.json",
-      "name": "Кирибати",
-      "period": "с 1979",
-      "file": "Кирибати (с 1979).png"
     },
     {
       "id": "GB-SCT-kirkcudbrightshire",
@@ -16022,31 +13230,6 @@
       "name": "Кировская область",
       "period": "с 2003",
       "file": "Кировская область (с 2003).png"
-    },
-    {
-      "id": "CN",
-      "sourceName": "China",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1949,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign",
-        "naval-ensign"
-      ],
-      "wikidata": "Q148",
-      "source": "https://github.com/niemela/flags/blob/master/data/CN.json",
-      "name": "Китай",
-      "period": "с 1949",
-      "file": "Китай (с 1949).png"
     },
     {
       "id": "empire-of-china",
@@ -16163,30 +13346,6 @@
       "name": "Клэр",
       "period": "с 1920",
       "file": "Клэр (с 1920).png"
-    },
-    {
-      "id": "KP",
-      "sourceName": "North Korea",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1948,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q423",
-      "source": "https://github.com/niemela/flags/blob/master/data/KP.json",
-      "name": "КНДР",
-      "period": "с 1948",
-      "file": "КНДР (с 1948).png"
     },
     {
       "id": "bhopal-state",
@@ -16589,48 +13748,6 @@
       "file": "Колорадо (с 1911).png"
     },
     {
-      "id": "CO_presidential",
-      "sourceName": "Colombia (presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1834,
-          null
-        ]
-      ],
-      "variants": [
-        "presidential-standard"
-      ],
-      "wikidata": "Q739",
-      "source": "https://github.com/niemela/flags/blob/master/data/CO_presidential.json",
-      "name": "Колумбия",
-      "period": "с 1834",
-      "file": "Колумбия (с 1834).png"
-    },
-    {
-      "id": "CO",
-      "sourceName": "Colombia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1861,
-          null
-        ]
-      ],
-      "variants": [
-        "civil"
-      ],
-      "wikidata": "Q739",
-      "source": "https://github.com/niemela/flags/blob/master/data/CO.json",
-      "name": "Колумбия",
-      "period": "с 1861",
-      "file": "Колумбия (с 1861).png"
-    },
-    {
       "id": "HU-KE",
       "sourceName": "Komárom-Esztergom (Hungary)",
       "types": [
@@ -16651,30 +13768,6 @@
       "name": "Комаром-Эстергом",
       "period": "с 1990",
       "file": "Комаром-Эстергом (с 1990).png"
-    },
-    {
-      "id": "KM",
-      "sourceName": "Comoros",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2001,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q970",
-      "source": "https://github.com/niemela/flags/blob/master/data/KM.json",
-      "name": "Коморы",
-      "period": "с 2001",
-      "file": "Коморы (с 2001).png"
     },
     {
       "id": "IE-C",
@@ -17685,50 +14778,6 @@
       "file": "Косрае (с 1981).png"
     },
     {
-      "id": "CR",
-      "sourceName": "Costa Rica",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1848,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q800",
-      "source": "https://github.com/niemela/flags/blob/master/data/CR.json",
-      "name": "Коста-Рика",
-      "period": "с 1848",
-      "file": "Коста-Рика (с 1848).png"
-    },
-    {
-      "id": "CR_state",
-      "sourceName": "Costa Rica (state flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1998,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "state-ensign"
-      ],
-      "wikidata": "Q800",
-      "source": "https://github.com/niemela/flags/blob/master/data/CR_state.json",
-      "name": "Коста-Рика",
-      "period": "с 1998",
-      "file": "Коста-Рика (с 1998).png"
-    },
-    {
       "id": "RU-KOS",
       "sourceName": "Kostroma Oblast (Russia)",
       "types": [
@@ -17765,30 +14814,6 @@
       "name": "Кот-д’Армор",
       "period": "с 1970",
       "file": "Кот-д’Армор (с 1970).png"
-    },
-    {
-      "id": "CI",
-      "sourceName": "Côte d'Ivoire",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1008",
-      "source": "https://github.com/niemela/flags/blob/master/data/CI.json",
-      "name": "Кот-д’Ивуар",
-      "period": "с 1959",
-      "file": "Кот-д’Ивуар (с 1959).png"
     },
     {
       "id": "FR-21",
@@ -18153,54 +15178,6 @@
       "file": "Крымское ханство (1441–1783).png"
     },
     {
-      "id": "CU",
-      "sourceName": "Cuba",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1902,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q241",
-      "source": "https://github.com/niemela/flags/blob/master/data/CU.json",
-      "name": "Куба",
-      "period": "с 1902",
-      "file": "Куба (с 1902).png"
-    },
-    {
-      "id": "KW",
-      "sourceName": "Kuwait",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1961,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q817",
-      "source": "https://github.com/niemela/flags/blob/master/data/KW.json",
-      "name": "Кувейт",
-      "period": "с 1961",
-      "file": "Кувейт (с 1961).png"
-    },
-    {
       "id": "AL-07",
       "sourceName": "Kukës County (Albania)",
       "types": [
@@ -18447,28 +15424,6 @@
       "file": "Куявско-Поморское воеводство (с 1999).png"
     },
     {
-      "id": "KG",
-      "sourceName": "Kyrgyzstan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q813",
-      "source": "https://github.com/niemela/flags/blob/master/data/KG.json",
-      "name": "Кыргызстан",
-      "period": "с 1992",
-      "file": "Кыргызстан (с 1992).png"
-    },
-    {
       "id": "FI-09",
       "sourceName": "Kymenlaakso (Finland)",
       "types": [
@@ -18486,28 +15441,6 @@
       "name": "Кюменлааксо",
       "period": "с 1997",
       "file": "Кюменлааксо (с 1997).png"
-    },
-    {
-      "id": "CW",
-      "sourceName": "Curaçao",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1984,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q25279",
-      "source": "https://github.com/niemela/flags/blob/master/data/CW.json",
-      "name": "Кюрасао",
-      "period": "с 1984",
-      "file": "Кюрасао (с 1984).png"
     },
     {
       "id": "SV-LI",
@@ -18750,47 +15683,6 @@
       "file": "Ланкашир (с 2008).png"
     },
     {
-      "id": "LA_1975",
-      "sourceName": "Laos (Kingdom, 1952–1975)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1952,
-          1975
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q819",
-      "source": "https://github.com/niemela/flags/blob/master/data/LA_1975.json",
-      "name": "Лаос",
-      "period": "1952–1975",
-      "file": "Лаос (1952–1975).png"
-    },
-    {
-      "id": "LA",
-      "sourceName": "Laos",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q819",
-      "source": "https://github.com/niemela/flags/blob/master/data/LA.json",
-      "name": "Лаос",
-      "period": "с 1975",
-      "file": "Лаос (с 1975).png"
-    },
-    {
       "id": "FI-10",
       "sourceName": "Lapland (Finland)",
       "types": [
@@ -18880,33 +15772,6 @@
       "name": "Латвийская ССР",
       "period": "1953–1990",
       "file": "Латвийская ССР (1953–1990).png"
-    },
-    {
-      "id": "LV",
-      "sourceName": "Latvia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1921,
-          1940
-        ],
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q211",
-      "source": "https://github.com/niemela/flags/blob/master/data/LV.json",
-      "name": "Латвия",
-      "period": "1921–1940, с 1990",
-      "file": "Латвия (1921–1940, с 1990).png"
     },
     {
       "id": "IE-LH",
@@ -19032,30 +15897,6 @@
       "file": "Леон (с 1950).png"
     },
     {
-      "id": "LS",
-      "sourceName": "Lesotho",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2006,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1013",
-      "source": "https://github.com/niemela/flags/blob/master/data/LS.json",
-      "name": "Лесото",
-      "period": "с 2006",
-      "file": "Лесото (с 2006).png"
-    },
-    {
       "id": "GB-LEC",
       "sourceName": "Leicestershire (United Kingdom)",
       "types": [
@@ -19095,82 +15936,6 @@
       "name": "Либерецкий край",
       "period": "с 2000",
       "file": "Либерецкий край (с 2000).png"
-    },
-    {
-      "id": "LR",
-      "sourceName": "Liberia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1847,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1014",
-      "source": "https://github.com/niemela/flags/blob/master/data/LR.json",
-      "name": "Либерия",
-      "period": "с 1847",
-      "file": "Либерия (с 1847).png"
-    },
-    {
-      "id": "LB",
-      "sourceName": "Lebanon",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1943,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q822",
-      "source": "https://github.com/niemela/flags/blob/master/data/LB.json",
-      "name": "Ливан",
-      "period": "с 1943",
-      "file": "Ливан (с 1943).png"
-    },
-    {
-      "id": "LY",
-      "sourceName": "Libya",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1951,
-          1969
-        ],
-        [
-          2011,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1016",
-      "source": "https://github.com/niemela/flags/blob/master/data/LY.json",
-      "name": "Ливия",
-      "period": "1951–1969, с 2011",
-      "file": "Ливия (1951–1969, с 2011).png"
     },
     {
       "id": "league-of-nations",
@@ -19370,33 +16135,6 @@
       "file": "Липецкая область (с 2003).png"
     },
     {
-      "id": "LT",
-      "sourceName": "Lithuania",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1918,
-          1940
-        ],
-        [
-          1988,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q37",
-      "source": "https://github.com/niemela/flags/blob/master/data/LT.json",
-      "name": "Литва",
-      "period": "1918–1940, с 1988",
-      "file": "Литва (1918–1940, с 1988).png"
-    },
-    {
       "id": "IE-LM",
       "sourceName": "County Leitrim (Ireland)",
       "types": [
@@ -19434,49 +16172,6 @@
       "name": "Лифляндская губерния",
       "period": "1796–1918",
       "file": "Лифляндская губерния (1796–1918).png"
-    },
-    {
-      "id": "LI",
-      "sourceName": "Liechtenstein",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1937,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q347",
-      "source": "https://github.com/niemela/flags/blob/master/data/LI.json",
-      "name": "Лихтенштейн",
-      "period": "с 1937",
-      "file": "Лихтенштейн (с 1937).png"
-    },
-    {
-      "id": "LI_royal",
-      "sourceName": "Liechtenstein (Princely Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1957,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q347",
-      "source": "https://github.com/niemela/flags/blob/master/data/LI_royal.json",
-      "name": "Лихтенштейн",
-      "period": "с 1957",
-      "file": "Лихтенштейн (с 1957).png"
     },
     {
       "id": "HR-09",
@@ -20077,49 +16772,6 @@
       "file": "Любушское воеводство (с 1999).png"
     },
     {
-      "id": "LU",
-      "sourceName": "Luxembourg",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1845,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q32",
-      "source": "https://github.com/niemela/flags/blob/master/data/LU.json",
-      "name": "Люксембург",
-      "period": "с 1845",
-      "file": "Люксембург (с 1845).png"
-    },
-    {
-      "id": "LU_royal",
-      "sourceName": "Luxembourg (Grand Ducal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2000,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q32",
-      "source": "https://github.com/niemela/flags/blob/master/data/LU_royal.json",
-      "name": "Люксембург",
-      "period": "с 2000",
-      "file": "Люксембург (с 2000).png"
-    },
-    {
       "id": "BE-WLX",
       "sourceName": "Luxembourg (Belgium)",
       "types": [
@@ -20294,28 +16946,6 @@
       "file": "Маарду (с 1991).png"
     },
     {
-      "id": "MU",
-      "sourceName": "Mauritius",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1968,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q1027",
-      "source": "https://github.com/niemela/flags/blob/master/data/MU.json",
-      "name": "Маврикий",
-      "period": "с 1968",
-      "file": "Маврикий (с 1968).png"
-    },
-    {
       "id": "MR_2017",
       "sourceName": "Mauritania (1959-2017)",
       "types": [
@@ -20339,30 +16969,6 @@
       "name": "Мавритания",
       "period": "1959–2017",
       "file": "Мавритания (1959–2017).png"
-    },
-    {
-      "id": "MR",
-      "sourceName": "Mauritania",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2017,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1025",
-      "source": "https://github.com/niemela/flags/blob/master/data/MR.json",
-      "name": "Мавритания",
-      "period": "с 2017",
-      "file": "Мавритания (с 2017).png"
     },
     {
       "id": "RU-MAG",
@@ -20442,30 +17048,6 @@
       "name": "Магуэ",
       "period": "с 2018",
       "file": "Магуэ (с 2018).png"
-    },
-    {
-      "id": "MG",
-      "sourceName": "Madagascar",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1958,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1019",
-      "source": "https://github.com/niemela/flags/blob/master/data/MG.json",
-      "name": "Мадагаскар",
-      "period": "с 1958",
-      "file": "Мадагаскар (с 1958).png"
     },
     {
       "id": "PT-30",
@@ -20636,34 +17218,6 @@
       "file": "Макао (с 1999).png"
     },
     {
-      "id": "MW",
-      "sourceName": "Malawi",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1964,
-          2010
-        ],
-        [
-          2012,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1020",
-      "source": "https://github.com/niemela/flags/blob/master/data/MW.json",
-      "name": "Малави",
-      "period": "1964–2010, с 2012",
-      "file": "Малави (1964–2010, с 2012).png"
-    },
-    {
       "id": "ES-MA",
       "sourceName": "Málaga Province (Spain)",
       "types": [
@@ -20725,30 +17279,6 @@
       "file": "Малаита (с 1981).png"
     },
     {
-      "id": "MY",
-      "sourceName": "Malaysia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1963,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q833",
-      "source": "https://github.com/niemela/flags/blob/master/data/MY.json",
-      "name": "Малайзия",
-      "period": "с 1963",
-      "file": "Малайзия (с 1963).png"
-    },
-    {
       "id": "MY-04",
       "sourceName": "Malacca (Malaysia)",
       "types": [
@@ -20788,28 +17318,6 @@
       "name": "Малампа",
       "period": "с 1994",
       "file": "Малампа (с 1994).png"
-    },
-    {
-      "id": "ML",
-      "sourceName": "Mali",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1961,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q912",
-      "source": "https://github.com/niemela/flags/blob/master/data/ML.json",
-      "name": "Мали",
-      "period": "с 1961",
-      "file": "Мали (с 1961).png"
     },
     {
       "id": "PL-12",
@@ -20854,54 +17362,6 @@
       "name": "Малуку",
       "period": "с 1958",
       "file": "Малуку (с 1958).png"
-    },
-    {
-      "id": "MV",
-      "sourceName": "Maldives",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1965,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q826",
-      "source": "https://github.com/niemela/flags/blob/master/data/MV.json",
-      "name": "Мальдивы",
-      "period": "с 1965",
-      "file": "Мальдивы (с 1965).png"
-    },
-    {
-      "id": "MT",
-      "sourceName": "Malta",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1964,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "state-ensign",
-        "naval-ensign"
-      ],
-      "wikidata": "Q233",
-      "source": "https://github.com/niemela/flags/blob/master/data/MT.json",
-      "name": "Мальта",
-      "period": "с 1964",
-      "file": "Мальта (с 1964).png"
     },
     {
       "id": "EC-M",
@@ -21202,30 +17662,6 @@
       "file": "Марна (с 1970).png"
     },
     {
-      "id": "MA",
-      "sourceName": "Morocco",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1915,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1028",
-      "source": "https://github.com/niemela/flags/blob/master/data/MA.json",
-      "name": "Марокко",
-      "period": "с 1915",
-      "file": "Марокко (с 1915).png"
-    },
-    {
       "id": "MQ_2018",
       "sourceName": "Martinique (France, 1766-2018)",
       "types": [
@@ -21284,30 +17720,6 @@
       "name": "Мартиника",
       "period": "с 2023",
       "file": "Мартиника (с 2023).png"
-    },
-    {
-      "id": "MH",
-      "sourceName": "Marshall Islands",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1979,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q709",
-      "source": "https://github.com/niemela/flags/blob/master/data/MH.json",
-      "name": "Маршалловы Острова",
-      "period": "с 1979",
-      "file": "Маршалловы Острова (с 1979).png"
     },
     {
       "id": "US-MA_1971",
@@ -21509,32 +17921,6 @@
       "name": "Мекленбург-Передняя Померания",
       "period": "с 1991",
       "file": "Мекленбург-Передняя Померания (с 1991).png"
-    },
-    {
-      "id": "MX",
-      "sourceName": "Mexico",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1968,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "war",
-        "civil-ensign",
-        "state-ensign",
-        "naval-ensign"
-      ],
-      "wikidata": "Q96",
-      "source": "https://github.com/niemela/flags/blob/master/data/MX.json",
-      "name": "Мексика",
-      "period": "с 1968",
-      "file": "Мексика (с 1968).png"
     },
     {
       "id": "ES-ML",
@@ -22201,30 +18587,6 @@
       "file": "Моденское герцогство (1814–1859).png"
     },
     {
-      "id": "MZ",
-      "sourceName": "Mozambique",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1983,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1029",
-      "source": "https://github.com/niemela/flags/blob/master/data/MZ.json",
-      "name": "Мозамбик",
-      "period": "с 1983",
-      "file": "Мозамбик (с 1983).png"
-    },
-    {
       "id": "FR-57",
       "sourceName": "Moselle (France)",
       "types": [
@@ -22414,50 +18776,6 @@
       "file": "Монагас (с 2002).png"
     },
     {
-      "id": "MC",
-      "sourceName": "Monaco",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1881,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q235",
-      "source": "https://github.com/niemela/flags/blob/master/data/MC.json",
-      "name": "Монако",
-      "period": "с 1881",
-      "file": "Монако (с 1881).png"
-    },
-    {
-      "id": "MC_princely",
-      "sourceName": "Monaco (Princely Flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1900,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "royal-standard"
-      ],
-      "wikidata": "Q235",
-      "source": "https://github.com/niemela/flags/blob/master/data/MC_princely.json",
-      "name": "Монако",
-      "period": "с 1900",
-      "file": "Монако (с 1900).png"
-    },
-    {
       "id": "IE-MN",
       "sourceName": "County Monaghan (Ireland)",
       "types": [
@@ -22475,28 +18793,6 @@
       "name": "Монахан",
       "period": "с 1920",
       "file": "Монахан (с 1920).png"
-    },
-    {
-      "id": "MN",
-      "sourceName": "Mongolia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q711",
-      "source": "https://github.com/niemela/flags/blob/master/data/MN.json",
-      "name": "Монголия",
-      "period": "с 1992",
-      "file": "Монголия (с 1992).png"
     },
     {
       "id": "bogd-khanate-mongolia",
@@ -22874,68 +19170,6 @@
       "file": "Мурсия (с 1983).png"
     },
     {
-      "id": "MM_1974",
-      "sourceName": "Burma (1948–1974)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1948,
-          1974
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q836",
-      "source": "https://github.com/niemela/flags/blob/master/data/MM_1974.json",
-      "name": "Мьянма",
-      "period": "1948–1974",
-      "file": "Мьянма (1948–1974).png"
-    },
-    {
-      "id": "MM_2010",
-      "sourceName": "Myanmar (1974–2010)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1974,
-          2010
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q836",
-      "source": "https://github.com/niemela/flags/blob/master/data/MM_2010.json",
-      "name": "Мьянма",
-      "period": "1974–2010",
-      "file": "Мьянма (1974–2010).png"
-    },
-    {
-      "id": "MM",
-      "sourceName": "Myanmar",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2010,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q836",
-      "source": "https://github.com/niemela/flags/blob/master/data/MM.json",
-      "name": "Мьянма",
-      "period": "с 2010",
-      "file": "Мьянма (с 2010).png"
-    },
-    {
       "id": "US-ME_1909",
       "sourceName": "Maine (United States, 1901–1909)",
       "types": [
@@ -23287,30 +19521,6 @@
       "file": "Накхонситхаммарат (дата не указана).png"
     },
     {
-      "id": "NA",
-      "sourceName": "Namibia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1030",
-      "source": "https://github.com/niemela/flags/blob/master/data/NA.json",
-      "name": "Намибия",
-      "period": "с 1990",
-      "file": "Намибия (с 1990).png"
-    },
-    {
       "id": "BE-WNA",
       "sourceName": "Namur (Belgium)",
       "types": [
@@ -23505,30 +19715,6 @@
       "name": "Нарынская область",
       "period": "дата не указана",
       "file": "Нарынская область (дата не указана).png"
-    },
-    {
-      "id": "NR",
-      "sourceName": "Nauru",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1968,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q697",
-      "source": "https://github.com/niemela/flags/blob/master/data/NR.json",
-      "name": "Науру",
-      "period": "с 1968",
-      "file": "Науру (с 1968).png"
     },
     {
       "id": "nakhichevan-khanate",
@@ -23837,28 +20023,6 @@
       "file": "Ненецкий автономный округ (с 2007).png"
     },
     {
-      "id": "NP",
-      "sourceName": "Nepal",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1962,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q837",
-      "source": "https://github.com/niemela/flags/blob/master/data/NP.json",
-      "name": "Непал",
-      "period": "с 1962",
-      "file": "Непал (с 1962).png"
-    },
-    {
       "id": "AR-Q",
       "sourceName": "Neuquen (Argentina)",
       "types": [
@@ -23876,52 +20040,6 @@
       "name": "Неукен",
       "period": "с 2009",
       "file": "Неукен (с 2009).png"
-    },
-    {
-      "id": "NE",
-      "sourceName": "Niger",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1032",
-      "source": "https://github.com/niemela/flags/blob/master/data/NE.json",
-      "name": "Нигер",
-      "period": "с 1959",
-      "file": "Нигер (с 1959).png"
-    },
-    {
-      "id": "NG",
-      "sourceName": "Nigeria",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q1033",
-      "source": "https://github.com/niemela/flags/blob/master/data/NG.json",
-      "name": "Нигерия",
-      "period": "с 1960",
-      "file": "Нигерия (с 1960).png"
     },
     {
       "id": "CH-NW",
@@ -23990,51 +20108,6 @@
       "name": "Нидерландские Антильские острова",
       "period": "1986–2010",
       "file": "Нидерландские Антильские острова (1986–2010).png"
-    },
-    {
-      "id": "NL_royal",
-      "sourceName": "Netherlands (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1908,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q55",
-      "source": "https://github.com/niemela/flags/blob/master/data/NL_royal.json",
-      "name": "Нидерланды",
-      "period": "с 1908",
-      "file": "Нидерланды (с 1908).png"
-    },
-    {
-      "id": "NL",
-      "sourceName": "Netherlands",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1937,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q55",
-      "source": "https://github.com/niemela/flags/blob/master/data/NL.json",
-      "name": "Нидерланды",
-      "period": "с 1937",
-      "file": "Нидерланды (с 1937).png"
     },
     {
       "id": "RU-NIZ",
@@ -24176,30 +20249,6 @@
       "file": "Ниигата (с 1963).png"
     },
     {
-      "id": "NI",
-      "sourceName": "Nicaragua",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1908,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q811",
-      "source": "https://github.com/niemela/flags/blob/master/data/NI.json",
-      "name": "Никарагуа",
-      "period": "с 1908",
-      "file": "Никарагуа (с 1908).png"
-    },
-    {
       "id": "UA-48",
       "sourceName": "Mykolaiv Oblast (Ukraine)",
       "types": [
@@ -24260,28 +20309,6 @@
       "file": "Нитранский край (с 2002).png"
     },
     {
-      "id": "NU",
-      "sourceName": "Niue",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q34020",
-      "source": "https://github.com/niemela/flags/blob/master/data/NU.json",
-      "name": "Ниуэ",
-      "period": "с 1975",
-      "file": "Ниуэ (с 1975).png"
-    },
-    {
       "id": "FR-NAQ",
       "sourceName": "Nouvelle-Aquitaine (France)",
       "types": [
@@ -24321,29 +20348,6 @@
       "name": "Новая Долина",
       "period": "2006–2016",
       "file": "Новая Долина (2006–2016).png"
-    },
-    {
-      "id": "NZ",
-      "sourceName": "New Zealand",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1902,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "state-ensign"
-      ],
-      "wikidata": "Q664",
-      "source": "https://github.com/niemela/flags/blob/master/data/NZ.json",
-      "name": "Новая Зеландия",
-      "period": "с 1902",
-      "file": "Новая Зеландия (с 1902).png"
     },
     {
       "id": "viceroyalty-of-new-spain",
@@ -24607,73 +20611,6 @@
       "name": "Нонтхабури",
       "period": "с 1970",
       "file": "Нонтхабури (с 1970).png"
-    },
-    {
-      "id": "NO",
-      "sourceName": "Norway",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1821,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q20",
-      "source": "https://github.com/niemela/flags/blob/master/data/NO.json",
-      "name": "Норвегия",
-      "period": "с 1821",
-      "file": "Норвегия (с 1821).png"
-    },
-    {
-      "id": "NO_royal",
-      "sourceName": "Norway (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1905,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q20",
-      "source": "https://github.com/niemela/flags/blob/master/data/NO_royal.json",
-      "name": "Норвегия",
-      "period": "с 1905",
-      "file": "Норвегия (с 1905) — королевский штандарт.png"
-    },
-    {
-      "id": "NO_naval",
-      "sourceName": "Norway (naval ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1905,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "war",
-        "naval-ensign"
-      ],
-      "wikidata": "Q20",
-      "source": "https://github.com/niemela/flags/blob/master/data/NO_naval.json",
-      "name": "Норвегия",
-      "period": "с 1905",
-      "file": "Норвегия (с 1905).png"
     },
     {
       "id": "FR-NOR",
@@ -25324,51 +21261,6 @@
       "file": "Объединённая Арабская Республика (1958–1971).png"
     },
     {
-      "id": "AE",
-      "sourceName": "United Arab Emirates",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1971,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q878",
-      "source": "https://github.com/niemela/flags/blob/master/data/AE.json",
-      "name": "Объединённые Арабские Эмираты",
-      "period": "с 1971",
-      "file": "Объединённые Арабские Эмираты (с 1971).png"
-    },
-    {
-      "id": "AE_presidential",
-      "sourceName": "United Arab Emirates (presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2008,
-          null
-        ]
-      ],
-      "variants": [
-        "presidential-standard"
-      ],
-      "wikidata": "Q878",
-      "source": "https://github.com/niemela/flags/blob/master/data/AE_presidential.json",
-      "name": "Объединённые Арабские Эмираты",
-      "period": "с 2008",
-      "file": "Объединённые Арабские Эмираты (с 2008).png"
-    },
-    {
       "id": "FR-ARA",
       "sourceName": "Auvergne-Rhone-Alpes (France)",
       "types": [
@@ -25767,30 +21659,6 @@
       "name": "Ольстер",
       "period": "с 1500",
       "file": "Ольстер (с 1500).png"
-    },
-    {
-      "id": "OM",
-      "sourceName": "Oman",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1995,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q842",
-      "source": "https://github.com/niemela/flags/blob/master/data/OM.json",
-      "name": "Оман",
-      "period": "с 1995",
-      "file": "Оман (с 1995).png"
     },
     {
       "id": "RU-OMS",
@@ -26299,28 +22167,6 @@
       "file": "Остров Вознесения (с 2002).png"
     },
     {
-      "id": "IM",
-      "sourceName": "Isle of Man",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1932,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q9676",
-      "source": "https://github.com/niemela/flags/blob/master/data/IM.json",
-      "name": "Остров Мэн",
-      "period": "с 1932",
-      "file": "Остров Мэн (с 1932).png"
-    },
-    {
       "id": "IM_civil-ensign",
       "sourceName": "Isle of Man (civil ensign)",
       "types": [
@@ -26426,30 +22272,6 @@
       "name": "Острова Гилберта и Эллис",
       "period": "1937–1976",
       "file": "Острова Гилберта и Эллис (1937–1976).png"
-    },
-    {
-      "id": "CK",
-      "sourceName": "Cook Islands",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1979,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q26988",
-      "source": "https://github.com/niemela/flags/blob/master/data/CK.json",
-      "name": "Острова Кука",
-      "period": "с 1979",
-      "file": "Острова Кука (с 1979).png"
     },
     {
       "id": "PN",
@@ -26654,28 +22476,6 @@
       "file": "Пайсанду (с 1950).png"
     },
     {
-      "id": "PK",
-      "sourceName": "Pakistan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1947,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q843",
-      "source": "https://github.com/niemela/flags/blob/master/data/PK.json",
-      "name": "Пакистан",
-      "period": "с 1947",
-      "file": "Пакистан (с 1947).png"
-    },
-    {
       "id": "PH-PLW",
       "sourceName": "Palawan (Philippines)",
       "types": [
@@ -26698,30 +22498,6 @@
       "file": "Палаван (с 2000).png"
     },
     {
-      "id": "PW",
-      "sourceName": "Palau",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1981,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q695",
-      "source": "https://github.com/niemela/flags/blob/master/data/PW.json",
-      "name": "Палау",
-      "period": "с 1981",
-      "file": "Палау (с 1981).png"
-    },
-    {
       "id": "ES-P",
       "sourceName": "Palencia Province (Spain)",
       "types": [
@@ -26742,30 +22518,6 @@
       "name": "Паленсия",
       "period": "с 1949",
       "file": "Паленсия (с 1949).png"
-    },
-    {
-      "id": "PA",
-      "sourceName": "Panama",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1925,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q804",
-      "source": "https://github.com/niemela/flags/blob/master/data/PA.json",
-      "name": "Панама",
-      "period": "с 1925",
-      "file": "Панама (с 1925).png"
     },
     {
       "id": "PH-PAN",
@@ -26851,30 +22603,6 @@
       "file": "Папская область (1825–1870).png"
     },
     {
-      "id": "PG",
-      "sourceName": "Papua New Guinea",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1971,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q691",
-      "source": "https://github.com/niemela/flags/blob/master/data/PG.json",
-      "name": "Папуа — Новая Гвинея",
-      "period": "с 1971",
-      "file": "Папуа — Новая Гвинея (с 1971).png"
-    },
-    {
       "id": "ID-PA",
       "sourceName": "Papua (Indonesia)",
       "types": [
@@ -26914,54 +22642,6 @@
       "name": "Пара",
       "period": "с 1889",
       "file": "Пара (с 1889).png"
-    },
-    {
-      "id": "PY_reverse",
-      "sourceName": "Paraguay (reverse)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1842,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q733",
-      "source": "https://github.com/niemela/flags/blob/master/data/PY_reverse.json",
-      "name": "Парагвай",
-      "period": "с 1842",
-      "file": "Парагвай (с 1842) — гражданский, государственный, гражданский морской, государственный морской.png"
-    },
-    {
-      "id": "PY",
-      "sourceName": "Paraguay",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1842,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q733",
-      "source": "https://github.com/niemela/flags/blob/master/data/PY.json",
-      "name": "Парагвай",
-      "period": "с 1842",
-      "file": "Парагвай (с 1842).png"
     },
     {
       "id": "PY-9",
@@ -27445,49 +23125,6 @@
       "file": "Пернамбуку (с 1917).png"
     },
     {
-      "id": "PE_state",
-      "sourceName": "Peru (state flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1825,
-          null
-        ]
-      ],
-      "variants": [
-        "state"
-      ],
-      "wikidata": "Q419",
-      "source": "https://github.com/niemela/flags/blob/master/data/PE_state.json",
-      "name": "Перу",
-      "period": "с 1825",
-      "file": "Перу (с 1825) — государственный.png"
-    },
-    {
-      "id": "PE",
-      "sourceName": "Peru",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1825,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q419",
-      "source": "https://github.com/niemela/flags/blob/master/data/PE.json",
-      "name": "Перу",
-      "period": "с 1825",
-      "file": "Перу (с 1825).png"
-    },
-    {
       "id": "GT-17",
       "sourceName": "Petén Department (Guatemala)",
       "types": [
@@ -27736,27 +23373,6 @@
       "file": "Полтавская область (с 2000).png"
     },
     {
-      "id": "PL",
-      "sourceName": "Poland",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1919,
-          null
-        ]
-      ],
-      "variants": [
-        "civil"
-      ],
-      "wikidata": "Q36",
-      "source": "https://github.com/niemela/flags/blob/master/data/PL.json",
-      "name": "Польша",
-      "period": "с 1919",
-      "file": "Польша (с 1919).png"
-    },
-    {
       "id": "PL-22",
       "sourceName": "Pomeranian Voivodeship (Poland)",
       "types": [
@@ -27839,49 +23455,6 @@
       "name": "Порт-Саид",
       "period": "с 2000",
       "file": "Порт-Саид (с 2000).png"
-    },
-    {
-      "id": "PT_1910",
-      "sourceName": "Portugal (Kingdom, 1830–1910)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1830,
-          1910
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q45",
-      "source": "https://github.com/niemela/flags/blob/master/data/PT_1910.json",
-      "name": "Португалия",
-      "period": "1830–1910",
-      "file": "Португалия (1830–1910).png"
-    },
-    {
-      "id": "PT",
-      "sourceName": "Portugal",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1911,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q45",
-      "source": "https://github.com/niemela/flags/blob/master/data/PT.json",
-      "name": "Португалия",
-      "period": "с 1911",
-      "file": "Португалия (с 1911).png"
     },
     {
       "id": "VE-P",
@@ -30073,58 +25646,6 @@
       "file": "Российская империя (1896–1918).png"
     },
     {
-      "id": "RU",
-      "sourceName": "Russia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1696,
-          1917
-        ],
-        [
-          1991,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q159",
-      "source": "https://github.com/niemela/flags/blob/master/data/RU.json",
-      "name": "Россия",
-      "period": "1696–1917, с 1991",
-      "file": "Россия (1696–1917, с 1991).png"
-    },
-    {
-      "id": "RU_naval",
-      "sourceName": "Russia (Saint Andrew's Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1712,
-          1917
-        ],
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "naval-ensign",
-        "war"
-      ],
-      "wikidata": "Q159",
-      "source": "https://github.com/niemela/flags/blob/master/data/RU_naval.json",
-      "name": "Россия",
-      "period": "1712–1917, с 1992",
-      "file": "Россия (1712–1917, с 1992).png"
-    },
-    {
       "id": "RU_presidential",
       "sourceName": "Russia (Presidential Standard)",
       "types": [
@@ -30210,28 +25731,6 @@
       "file": "РСФСР (1954–1991).png"
     },
     {
-      "id": "RW",
-      "sourceName": "Rwanda",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2001,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q1037",
-      "source": "https://github.com/niemela/flags/blob/master/data/RW.json",
-      "name": "Руанда",
-      "period": "с 2001",
-      "file": "Руанда (с 2001).png"
-    },
-    {
       "id": "NO-11",
       "sourceName": "Rogaland (Norway)",
       "types": [
@@ -30249,34 +25748,6 @@
       "name": "Ругаланн",
       "period": "с 1987",
       "file": "Ругаланн (с 1987).png"
-    },
-    {
-      "id": "RO",
-      "sourceName": "Romania",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1867,
-          1948
-        ],
-        [
-          1989,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q218",
-      "source": "https://github.com/niemela/flags/blob/master/data/RO.json",
-      "name": "Румыния",
-      "period": "1867–1948, с 1989",
-      "file": "Румыния (1867–1948, с 1989).png"
     },
     {
       "id": "EE-689",
@@ -30763,30 +26234,6 @@
       "file": "Саламанка (с 1950).png"
     },
     {
-      "id": "SV",
-      "sourceName": "El Salvador",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1912,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q792",
-      "source": "https://github.com/niemela/flags/blob/master/data/SV.json",
-      "name": "Сальвадор",
-      "period": "с 1912",
-      "file": "Сальвадор (с 1912).png"
-    },
-    {
       "id": "AR-A",
       "sourceName": "Salta (Argentina)",
       "types": [
@@ -30845,30 +26292,6 @@
       "name": "Самарская область",
       "period": "с 1998",
       "file": "Самарская область (с 1998).png"
-    },
-    {
-      "id": "WS",
-      "sourceName": "Samoa",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1962,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q683",
-      "source": "https://github.com/niemela/flags/blob/master/data/WS.json",
-      "name": "Самоа",
-      "period": "с 1962",
-      "file": "Самоа (с 1962).png"
     },
     {
       "id": "EC-Z",
@@ -31004,28 +26427,6 @@
       "file": "Сан-Луис-Потоси (с 2000).png"
     },
     {
-      "id": "SM",
-      "sourceName": "San Marino",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2011,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "state-ensign"
-      ],
-      "wikidata": "Q238",
-      "source": "https://github.com/niemela/flags/blob/master/data/SM.json",
-      "name": "Сан-Марино",
-      "period": "с 2011",
-      "file": "Сан-Марино (с 2011).png"
-    },
-    {
       "id": "GT-12",
       "sourceName": "San Marcos Department (Guatemala)",
       "types": [
@@ -31122,30 +26523,6 @@
       "name": "Сан-Сальвадор",
       "period": "дата не указана",
       "file": "Сан-Сальвадор (дата не указана).png"
-    },
-    {
-      "id": "ST",
-      "sourceName": "São Tomé and Príncipe",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1039",
-      "source": "https://github.com/niemela/flags/blob/master/data/ST.json",
-      "name": "Сан-Томе и Принсипи",
-      "period": "с 1975",
-      "file": "Сан-Томе и Принсипи (с 1975).png"
     },
     {
       "id": "UY-SJ",
@@ -31684,28 +27061,6 @@
       "file": "Сатакунта (с 1997).png"
     },
     {
-      "id": "SA",
-      "sourceName": "Saudi Arabia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1973,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q851",
-      "source": "https://github.com/niemela/flags/blob/master/data/SA.json",
-      "name": "Саудовская Аравия",
-      "period": "с 1973",
-      "file": "Саудовская Аравия (с 1973).png"
-    },
-    {
       "id": "EE-726",
       "sourceName": "Saue (Harju, Estonia)",
       "types": [
@@ -32109,28 +27464,6 @@
       "name": "Северная Каролина",
       "period": "с 1885",
       "file": "Северная Каролина (с 1885).png"
-    },
-    {
-      "id": "MK",
-      "sourceName": "North Macedonia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1995,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q221",
-      "source": "https://github.com/niemela/flags/blob/master/data/MK.json",
-      "name": "Северная Македония",
-      "period": "с 1995",
-      "file": "Северная Македония (с 1995).png"
     },
     {
       "id": "RU-SE",
@@ -32606,30 +27939,6 @@
       "file": "Седжон (с 2012).png"
     },
     {
-      "id": "SC",
-      "sourceName": "Seychelles",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1996,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1042",
-      "source": "https://github.com/niemela/flags/blob/master/data/SC.json",
-      "name": "Сейшельские Острова",
-      "period": "с 1996",
-      "file": "Сейшельские Острова (с 1996).png"
-    },
-    {
       "id": "MY-10",
       "sourceName": "Selangor (Malaysia)",
       "types": [
@@ -32747,98 +28056,6 @@
       "file": "Сена и Марна (с 1970).png"
     },
     {
-      "id": "SN",
-      "sourceName": "Senegal",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q1041",
-      "source": "https://github.com/niemela/flags/blob/master/data/SN.json",
-      "name": "Сенегал",
-      "period": "с 1960",
-      "file": "Сенегал (с 1960).png"
-    },
-    {
-      "id": "VC",
-      "sourceName": "Saint Vincent and the Grenadines",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1985,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q757",
-      "source": "https://github.com/niemela/flags/blob/master/data/VC.json",
-      "name": "Сент-Винсент и Гренадины",
-      "period": "с 1985",
-      "file": "Сент-Винсент и Гренадины (с 1985).png"
-    },
-    {
-      "id": "KN",
-      "sourceName": "Saint Kitts and Nevis",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1983,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q763",
-      "source": "https://github.com/niemela/flags/blob/master/data/KN.json",
-      "name": "Сент-Китс и Невис",
-      "period": "с 1983",
-      "file": "Сент-Китс и Невис (с 1983).png"
-    },
-    {
-      "id": "LC",
-      "sourceName": "Saint Lucia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2002,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q760",
-      "source": "https://github.com/niemela/flags/blob/master/data/LC.json",
-      "name": "Сент-Люсия",
-      "period": "с 2002",
-      "file": "Сент-Люсия (с 2002).png"
-    },
-    {
       "id": "PY-11",
       "sourceName": "Central Department (Paraguay)",
       "types": [
@@ -32876,30 +28093,6 @@
       "name": "Сёр-Трёнделаг",
       "period": "1983–2017",
       "file": "Сёр-Трёнделаг (1983–2017).png"
-    },
-    {
-      "id": "RS",
-      "sourceName": "Serbia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2010,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q403",
-      "source": "https://github.com/niemela/flags/blob/master/data/RS.json",
-      "name": "Сербия",
-      "period": "с 2010",
-      "file": "Сербия (с 2010).png"
     },
     {
       "id": "CSXX_2006",
@@ -33405,28 +28598,6 @@
       "file": "Синалоа (с 2000).png"
     },
     {
-      "id": "SG",
-      "sourceName": "Singapore",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q334",
-      "source": "https://github.com/niemela/flags/blob/master/data/SG.json",
-      "name": "Сингапур",
-      "period": "с 1959",
-      "file": "Сингапур (с 1959).png"
-    },
-    {
       "id": "TH-17",
       "sourceName": "Sing Buri (Thailand)",
       "types": [
@@ -33487,28 +28658,6 @@
       "file": "Синоэ (с 1965).png"
     },
     {
-      "id": "SX",
-      "sourceName": "Sint Maarten",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1985,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q26273",
-      "source": "https://github.com/niemela/flags/blob/master/data/SX.json",
-      "name": "Синт-Мартен",
-      "period": "с 1985",
-      "file": "Синт-Мартен (с 1985).png"
-    },
-    {
       "id": "BQ-SE",
       "sourceName": "Sint Eustatius (Caribbean Netherlands)",
       "types": [
@@ -33529,34 +28678,6 @@
       "name": "Синт-Эстатиус",
       "period": "с 2004",
       "file": "Синт-Эстатиус (с 2004).png"
-    },
-    {
-      "id": "SY",
-      "sourceName": "Syria",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1958,
-          1961
-        ],
-        [
-          1980,
-          2024
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q858",
-      "source": "https://github.com/niemela/flags/blob/master/data/SY.json",
-      "name": "Сирия",
-      "period": "1958–1961, 1980–2024",
-      "file": "Сирия (1958–1961, 1980–2024).png"
     },
     {
       "id": "TH-33",
@@ -33680,54 +28801,6 @@
       "file": "Слайго (с 1920).png"
     },
     {
-      "id": "SK",
-      "sourceName": "Slovakia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q214",
-      "source": "https://github.com/niemela/flags/blob/master/data/SK.json",
-      "name": "Словакия",
-      "period": "с 1992",
-      "file": "Словакия (с 1992).png"
-    },
-    {
-      "id": "SI",
-      "sourceName": "Slovenia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1991,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q215",
-      "source": "https://github.com/niemela/flags/blob/master/data/SI.json",
-      "name": "Словения",
-      "period": "с 1991",
-      "file": "Словения (с 1991).png"
-    },
-    {
       "id": "RU-SMO",
       "sourceName": "Smolensk Oblast (Russia)",
       "types": [
@@ -33844,54 +28917,6 @@
       "name": "Солола",
       "period": "с 1990",
       "file": "Солола (с 1990).png"
-    },
-    {
-      "id": "SB",
-      "sourceName": "Solomon Islands",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1977,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q685",
-      "source": "https://github.com/niemela/flags/blob/master/data/SB.json",
-      "name": "Соломоновы Острова",
-      "period": "с 1977",
-      "file": "Соломоновы Острова (с 1977).png"
-    },
-    {
-      "id": "SO",
-      "sourceName": "Somalia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1954,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1045",
-      "source": "https://github.com/niemela/flags/blob/master/data/SO.json",
-      "name": "Сомали",
-      "period": "с 1954",
-      "file": "Сомали (с 1954).png"
     },
     {
       "id": "ET-SO",
@@ -34361,30 +29386,6 @@
       "file": "Страна Басков (с 1979).png"
     },
     {
-      "id": "SD",
-      "sourceName": "Sudan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1970,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1049",
-      "source": "https://github.com/niemela/flags/blob/master/data/SD.json",
-      "name": "Судан",
-      "period": "с 1970",
-      "file": "Судан (с 1970).png"
-    },
-    {
       "id": "CO-SUC",
       "sourceName": "Sucre (Colombia)",
       "types": [
@@ -34634,30 +29635,6 @@
       "file": "Сурин (с 1946).png"
     },
     {
-      "id": "SR",
-      "sourceName": "Suriname",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q730",
-      "source": "https://github.com/niemela/flags/blob/master/data/SR.json",
-      "name": "Суринам",
-      "period": "с 1975",
-      "file": "Суринам (с 1975).png"
-    },
-    {
       "id": "GB-SRY",
       "sourceName": "Surrey (United Kingdom)",
       "types": [
@@ -34774,44 +29751,6 @@
       "file": "Суэц (с 2000).png"
     },
     {
-      "id": "US_1795",
-      "sourceName": "United States (Betsy Ross flag, 1777–1795)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1777,
-          1795
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q30",
-      "source": "https://github.com/niemela/flags/blob/master/data/US_1795.json",
-      "name": "США",
-      "period": "1777–1795",
-      "file": "США (1777–1795).png"
-    },
-    {
-      "id": "US_1818",
-      "sourceName": "United States (15 stars, 1795–1818)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1795,
-          1818
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q30",
-      "source": "https://github.com/niemela/flags/blob/master/data/US_1818.json",
-      "name": "США",
-      "period": "1795–1818",
-      "file": "США (1795–1818).png"
-    },
-    {
       "id": "US_1847",
       "sourceName": "United States (1846–1847)",
       "types": [
@@ -34830,25 +29769,6 @@
       "name": "США",
       "period": "1846–1847",
       "file": "США (1846–1847).png"
-    },
-    {
-      "id": "US_1863",
-      "sourceName": "United States (34 stars, 1861–1863)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1861,
-          1863
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q30",
-      "source": "https://github.com/niemela/flags/blob/master/data/US_1863.json",
-      "name": "США",
-      "period": "1861–1863",
-      "file": "США (1861–1863).png"
     },
     {
       "id": "US_1877",
@@ -35051,102 +29971,6 @@
       "file": "США (1959–1960).png"
     },
     {
-      "id": "US_jack",
-      "sourceName": "United States (jack)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          2002
-        ],
-        [
-          2019,
-          null
-        ]
-      ],
-      "variants": [
-        "jack"
-      ],
-      "wikidata": "Q30",
-      "source": "https://github.com/niemela/flags/blob/master/data/US_jack.json",
-      "name": "США",
-      "period": "1960–2002, с 2019",
-      "file": "США (1960–2002, с 2019).png"
-    },
-    {
-      "id": "US",
-      "sourceName": "United States",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "war",
-        "civil-ensign",
-        "state-ensign",
-        "naval-ensign"
-      ],
-      "wikidata": "Q30",
-      "source": "https://github.com/niemela/flags/blob/master/data/US.json",
-      "name": "США",
-      "period": "с 1960",
-      "file": "США (с 1960).png"
-    },
-    {
-      "id": "US_vice-presidential",
-      "sourceName": "United States (vice-presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1975,
-          null
-        ]
-      ],
-      "variants": [
-        "vice-presidential-standard"
-      ],
-      "wikidata": "Q30",
-      "source": "https://github.com/niemela/flags/blob/master/data/US_vice-presidential.json",
-      "name": "США",
-      "period": "с 1975",
-      "file": "США (с 1975).png"
-    },
-    {
-      "id": "SL",
-      "sourceName": "Sierra Leone",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1961,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1044",
-      "source": "https://github.com/niemela/flags/blob/master/data/SL.json",
-      "name": "Сьерра-Леоне",
-      "period": "с 1961",
-      "file": "Сьерра-Леоне (с 1961).png"
-    },
-    {
       "id": "ES-CR",
       "sourceName": "Ciudad Real Province (Spain)",
       "types": [
@@ -35205,28 +30029,6 @@
       "name": "Табаско",
       "period": "с 2000",
       "file": "Табаско (с 2000).png"
-    },
-    {
-      "id": "TJ",
-      "sourceName": "Tajikistan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1992,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q863",
-      "source": "https://github.com/niemela/flags/blob/master/data/TJ.json",
-      "name": "Таджикистан",
-      "period": "с 1992",
-      "file": "Таджикистан (с 1992).png"
     },
     {
       "id": "TJ_1931",
@@ -35427,72 +30229,6 @@
       "file": "Таджикская ССР (1953–1991, 1991–1992).png"
     },
     {
-      "id": "TH_naval",
-      "sourceName": "Thailand (Naval Ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1917,
-          null
-        ]
-      ],
-      "variants": [
-        "naval-ensign"
-      ],
-      "wikidata": "Q869",
-      "source": "https://github.com/niemela/flags/blob/master/data/TH_naval.json",
-      "name": "Таиланд",
-      "period": "с 1917",
-      "file": "Таиланд (с 1917) — военно-морской.png"
-    },
-    {
-      "id": "TH",
-      "sourceName": "Thailand",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1917,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q869",
-      "source": "https://github.com/niemela/flags/blob/master/data/TH.json",
-      "name": "Таиланд",
-      "period": "с 1917",
-      "file": "Таиланд (с 1917).png"
-    },
-    {
-      "id": "TH_royal",
-      "sourceName": "Thailand (Royal Flag of King Rama X)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2016,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q869",
-      "source": "https://github.com/niemela/flags/blob/master/data/TH_royal.json",
-      "name": "Таиланд",
-      "period": "с 2016",
-      "file": "Таиланд (с 2016).png"
-    },
-    {
       "id": "TW-TPE",
       "sourceName": "Taipei (Taiwan)",
       "types": [
@@ -35530,31 +30266,6 @@
       "name": "Тайвань",
       "period": "1947–2018",
       "file": "Тайвань (1947–2018).png"
-    },
-    {
-      "id": "TW",
-      "sourceName": "Taiwan (Republic of China)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1928,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign",
-        "war"
-      ],
-      "wikidata": "Q22502",
-      "source": "https://github.com/niemela/flags/blob/master/data/TW.json",
-      "name": "Тайвань",
-      "period": "с 1928",
-      "file": "Тайвань (с 1928).png"
     },
     {
       "id": "TW-TNN",
@@ -35735,30 +30446,6 @@
       "name": "Танганьика",
       "period": "1923–1961",
       "file": "Танганьика (1923–1961).png"
-    },
-    {
-      "id": "TZ",
-      "sourceName": "Tanzania",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1964,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q924",
-      "source": "https://github.com/niemela/flags/blob/master/data/TZ.json",
-      "name": "Танзания",
-      "period": "с 1964",
-      "file": "Танзания (с 1964).png"
     },
     {
       "id": "MM-05",
@@ -36443,30 +31130,6 @@
       "file": "Тласкала (с 2016).png"
     },
     {
-      "id": "TG",
-      "sourceName": "Togo",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1960,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q945",
-      "source": "https://github.com/niemela/flags/blob/master/data/TG.json",
-      "name": "Того",
-      "period": "с 1960",
-      "file": "Того (с 1960).png"
-    },
-    {
       "id": "EE-803",
       "sourceName": "Toila (Ida-Viru, Estonia)",
       "types": [
@@ -36642,30 +31305,6 @@
       "name": "Томская область",
       "period": "с 1997",
       "file": "Томская область (с 1997).png"
-    },
-    {
-      "id": "TO",
-      "sourceName": "Tonga",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1875,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q678",
-      "source": "https://github.com/niemela/flags/blob/master/data/TO.json",
-      "name": "Тонга",
-      "period": "с 1875",
-      "file": "Тонга (с 1875).png"
     },
     {
       "id": "IT-52",
@@ -36979,28 +31618,6 @@
       "copiedFrom": "Болгария.png"
     },
     {
-      "id": "TT",
-      "sourceName": "Trinidad and Tobago",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1962,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q754",
-      "source": "https://github.com/niemela/flags/blob/master/data/TT.json",
-      "name": "Тринидад и Тобаго",
-      "period": "с 1962",
-      "file": "Тринидад и Тобаго (с 1962).png"
-    },
-    {
       "id": "LY-tripolitania",
       "sourceName": "Tripolitania (Libya)",
       "types": [
@@ -37269,34 +31886,6 @@
       "file": "Тунгурауа (с 1860).png"
     },
     {
-      "id": "TN",
-      "sourceName": "Tunisia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1831,
-          1956
-        ],
-        [
-          1956,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q948",
-      "source": "https://github.com/niemela/flags/blob/master/data/TN.json",
-      "name": "Тунис",
-      "period": "1831–1956, с 1956",
-      "file": "Тунис (1831–1956, с 1956).png"
-    },
-    {
       "id": "CH-TG",
       "sourceName": "Thurgau (Switzerland)",
       "types": [
@@ -37401,30 +31990,6 @@
       "name": "Туркменистан",
       "period": "с 2001",
       "file": "Туркменистан (с 2001).png"
-    },
-    {
-      "id": "TR",
-      "sourceName": "Turkey",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1936,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q43",
-      "source": "https://github.com/niemela/flags/blob/master/data/TR.json",
-      "name": "Турция",
-      "period": "с 1936",
-      "file": "Турция (с 1936).png"
     },
     {
       "id": "RU-TY",
@@ -37743,30 +32308,6 @@
       "file": "Увс (с 1970).png"
     },
     {
-      "id": "UG",
-      "sourceName": "Uganda",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1962,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q1036",
-      "source": "https://github.com/niemela/flags/blob/master/data/UG.json",
-      "name": "Уганда",
-      "period": "с 1962",
-      "file": "Уганда (с 1962).png"
-    },
-    {
       "id": "RU-UD",
       "sourceName": "Udmurtia (Russia)",
       "types": [
@@ -38015,28 +32556,6 @@
       "name": "уезд Юньлинь",
       "period": "с 1982",
       "file": "уезд Юньлинь (с 1982).png"
-    },
-    {
-      "id": "UZ",
-      "sourceName": "Uzbekistan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1991,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q265",
-      "source": "https://github.com/niemela/flags/blob/master/data/UZ.json",
-      "name": "Узбекистан",
-      "period": "с 1991",
-      "file": "Узбекистан (с 1991).png"
     },
     {
       "id": "IE-WW",
@@ -38553,30 +33072,6 @@
       "file": "Ури (с 1291).png"
     },
     {
-      "id": "UY",
-      "sourceName": "Uruguay",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1830,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q77",
-      "source": "https://github.com/niemela/flags/blob/master/data/UY.json",
-      "name": "Уругвай",
-      "period": "с 1830",
-      "file": "Уругвай (с 1830).png"
-    },
-    {
       "id": "CZ-42",
       "sourceName": "Ústí nad Labem Region (Czechia)",
       "types": [
@@ -39069,113 +33564,6 @@
       "file": "Фейер (с 1990).png"
     },
     {
-      "id": "FJ_1970",
-      "sourceName": "Fiji (colonial ensign, 1924–1970)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1924,
-          1970
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q712",
-      "source": "https://github.com/niemela/flags/blob/master/data/FJ_1970.json",
-      "name": "Фиджи",
-      "period": "1924–1970",
-      "file": "Фиджи (1924–1970).png"
-    },
-    {
-      "id": "FJ",
-      "sourceName": "Fiji",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1970,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q712",
-      "source": "https://github.com/niemela/flags/blob/master/data/FJ.json",
-      "name": "Фиджи",
-      "period": "с 1970",
-      "file": "Фиджи (с 1970).png"
-    },
-    {
-      "id": "PH_presidential",
-      "sourceName": "Philippines (presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1950,
-          null
-        ]
-      ],
-      "variants": [
-        "presidential-standard"
-      ],
-      "wikidata": "Q928",
-      "source": "https://github.com/niemela/flags/blob/master/data/PH_presidential.json",
-      "name": "Филиппины",
-      "period": "с 1950",
-      "file": "Филиппины (с 1950).png"
-    },
-    {
-      "id": "PH",
-      "sourceName": "Philippines",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1998,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q928",
-      "source": "https://github.com/niemela/flags/blob/master/data/PH.json",
-      "name": "Филиппины",
-      "period": "с 1998",
-      "file": "Филиппины (с 1998).png"
-    },
-    {
-      "id": "PH_vice-presidential",
-      "sourceName": "Philippines (vice-presidential standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2004,
-          null
-        ]
-      ],
-      "variants": [
-        "vice-presidential-standard"
-      ],
-      "wikidata": "Q928",
-      "source": "https://github.com/niemela/flags/blob/master/data/PH_vice-presidential.json",
-      "name": "Филиппины",
-      "period": "с 2004",
-      "file": "Филиппины (с 2004).png"
-    },
-    {
       "id": "FR-29",
       "sourceName": "Finistère (France)",
       "types": [
@@ -39193,94 +33581,6 @@
       "name": "Финистер",
       "period": "с 1970",
       "file": "Финистер (с 1970).png"
-    },
-    {
-      "id": "FI_1918",
-      "sourceName": "Finland (state flag, 1917–1918)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1917,
-          1918
-        ]
-      ],
-      "variants": [
-        "state"
-      ],
-      "wikidata": "Q33",
-      "source": "https://github.com/niemela/flags/blob/master/data/FI_1918.json",
-      "name": "Финляндия",
-      "period": "1917–1918",
-      "file": "Финляндия (1917–1918).png"
-    },
-    {
-      "id": "FI_naval",
-      "sourceName": "Finland (state and war flag)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1918,
-          null
-        ]
-      ],
-      "variants": [
-        "state",
-        "war",
-        "naval-ensign"
-      ],
-      "wikidata": "Q33",
-      "source": "https://github.com/niemela/flags/blob/master/data/FI_naval.json",
-      "name": "Финляндия",
-      "period": "с 1918",
-      "file": "Финляндия (с 1918) — государственный, военный, военно-морской.png"
-    },
-    {
-      "id": "FI",
-      "sourceName": "Finland",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1918,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign"
-      ],
-      "wikidata": "Q33",
-      "source": "https://github.com/niemela/flags/blob/master/data/FI.json",
-      "name": "Финляндия",
-      "period": "с 1918",
-      "file": "Финляндия (с 1918).png"
-    },
-    {
-      "id": "FI_presidential",
-      "sourceName": "Finland (Presidential Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1920,
-          null
-        ]
-      ],
-      "variants": [
-        "presidential-standard"
-      ],
-      "wikidata": "Q33",
-      "source": "https://github.com/niemela/flags/blob/master/data/FI_presidential.json",
-      "name": "Финляндия",
-      "period": "с 1920",
-      "file": "Финляндия (с 1920).png"
     },
     {
       "id": "NO-20",
@@ -39499,35 +33799,6 @@
       "name": "Формоса",
       "period": "с 2000",
       "file": "Формоса (с 2000).png"
-    },
-    {
-      "id": "FR",
-      "sourceName": "France",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1794,
-          1814
-        ],
-        [
-          1830,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign",
-        "naval-ensign"
-      ],
-      "wikidata": "Q142",
-      "source": "https://github.com/niemela/flags/blob/master/data/FR.json",
-      "name": "Франция",
-      "period": "1794–1814, с 1830",
-      "file": "Франция (1794–1814, с 1830).png"
     },
     {
       "id": "GF",
@@ -40296,28 +34567,6 @@
       "file": "Хоккайдо (с 1967).png"
     },
     {
-      "id": "HR",
-      "sourceName": "Croatia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1990,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q224",
-      "source": "https://github.com/niemela/flags/blob/master/data/HR.json",
-      "name": "Хорватия",
-      "period": "с 1990",
-      "file": "Хорватия (с 1990).png"
-    },
-    {
       "id": "croatia-habsburg",
       "sourceName": "Kingdom of Croatia (Habsburg)",
       "types": [
@@ -40537,30 +34786,6 @@
       "file": "Центральная Ява (с 1950).png"
     },
     {
-      "id": "CF",
-      "sourceName": "Central African Republic",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1958,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q929",
-      "source": "https://github.com/niemela/flags/blob/master/data/CF.json",
-      "name": "Центральноафриканская Республика",
-      "period": "с 1958",
-      "file": "Центральноафриканская Республика (с 1958).png"
-    },
-    {
       "id": "ID-KT",
       "sourceName": "Central Kalimantan (Indonesia)",
       "types": [
@@ -40722,30 +34947,6 @@
       "name": "Цуг",
       "period": "с 1319",
       "file": "Цуг (с 1319).png"
-    },
-    {
-      "id": "TD",
-      "sourceName": "Chad",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1959,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q657",
-      "source": "https://github.com/niemela/flags/blob/master/data/TD.json",
-      "name": "Чад",
-      "period": "с 1959",
-      "file": "Чад (с 1959).png"
     },
     {
       "id": "TH-18",
@@ -40944,60 +35145,6 @@
       "file": "Черновицкая область (с 2001).png"
     },
     {
-      "id": "ME",
-      "sourceName": "Montenegro",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2004,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q236",
-      "source": "https://github.com/niemela/flags/blob/master/data/ME.json",
-      "name": "Черногория",
-      "period": "с 2004",
-      "file": "Черногория (с 2004).png"
-    },
-    {
-      "id": "CZ",
-      "sourceName": "Czechia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1920,
-          1939
-        ],
-        [
-          1945,
-          1992
-        ],
-        [
-          1993,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q213",
-      "source": "https://github.com/niemela/flags/blob/master/data/CZ.json",
-      "name": "Чехия",
-      "period": "1920–1939, 1945–1992, с 1993",
-      "file": "Чехия (1920–1939, 1945–1992, с 1993).png"
-    },
-    {
       "id": "CSHH",
       "sourceName": "Czechoslovakia (1918–1992)",
       "types": [
@@ -41099,30 +35246,6 @@
       "name": "Чианграй",
       "period": "с 1970",
       "file": "Чианграй (с 1970).png"
-    },
-    {
-      "id": "CL",
-      "sourceName": "Chile",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1817,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q298",
-      "source": "https://github.com/niemela/flags/blob/master/data/CL.json",
-      "name": "Чили",
-      "period": "с 1817",
-      "file": "Чили (с 1817).png"
     },
     {
       "id": "GT-04",
@@ -41603,28 +35726,6 @@
       "file": "Шведско-норвежская уния (1815–1844).png"
     },
     {
-      "id": "CH",
-      "sourceName": "Switzerland",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1889,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q39",
-      "source": "https://github.com/niemela/flags/blob/master/data/CH.json",
-      "name": "Швейцария",
-      "period": "с 1889",
-      "file": "Швейцария (с 1889).png"
-    },
-    {
       "id": "SE_1905",
       "sourceName": "Sweden (1844-1905)",
       "types": [
@@ -41647,74 +35748,6 @@
       "name": "Швеция",
       "period": "1844–1905",
       "file": "Швеция (1844–1905).png"
-    },
-    {
-      "id": "SE_naval",
-      "sourceName": "Sweden (naval ensign)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1906,
-          null
-        ]
-      ],
-      "variants": [
-        "war",
-        "naval-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q34",
-      "source": "https://github.com/niemela/flags/blob/master/data/SE_naval.json",
-      "name": "Швеция",
-      "period": "с 1906",
-      "file": "Швеция (с 1906) — военный, военно-морской, государственный морской.png"
-    },
-    {
-      "id": "SE_royal",
-      "sourceName": "Sweden (Royal Standard)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1906,
-          null
-        ]
-      ],
-      "variants": [
-        "royal-standard"
-      ],
-      "wikidata": "Q34",
-      "source": "https://github.com/niemela/flags/blob/master/data/SE_royal.json",
-      "name": "Швеция",
-      "period": "с 1906",
-      "file": "Швеция (с 1906) — королевский штандарт.png"
-    },
-    {
-      "id": "SE",
-      "sourceName": "Sweden",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1906,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q34",
-      "source": "https://github.com/niemela/flags/blob/master/data/SE.json",
-      "name": "Швеция",
-      "period": "с 1906",
-      "file": "Швеция (с 1906).png"
     },
     {
       "id": "CH-SZ",
@@ -41883,30 +35916,6 @@
       "file": "Шотландия (с 1500).png"
     },
     {
-      "id": "LK",
-      "sourceName": "Sri Lanka",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1972,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q854",
-      "source": "https://github.com/niemela/flags/blob/master/data/LK.json",
-      "name": "Шри-Ланка",
-      "period": "с 1972",
-      "file": "Шри-Ланка (с 1972).png"
-    },
-    {
       "id": "GB-SHR",
       "sourceName": "Shropshire (United Kingdom)",
       "types": [
@@ -41962,56 +35971,6 @@
       "name": "Шяуляйский уезд",
       "period": "с 1994",
       "file": "Шяуляйский уезд (с 1994).png"
-    },
-    {
-      "id": "EC",
-      "sourceName": "Ecuador",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1900,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "civil-ensign"
-      ],
-      "wikidata": "Q736",
-      "source": "https://github.com/niemela/flags/blob/master/data/EC.json",
-      "name": "Эквадор",
-      "period": "с 1900",
-      "file": "Эквадор (с 1900).png"
-    },
-    {
-      "id": "GQ",
-      "sourceName": "Equatorial Guinea",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1968,
-          1973
-        ],
-        [
-          1979,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q983",
-      "source": "https://github.com/niemela/flags/blob/master/data/GQ.json",
-      "name": "Экваториальная Гвинея",
-      "period": "1968–1973, с 1979",
-      "file": "Экваториальная Гвинея (1968–1973, с 1979).png"
     },
     {
       "id": "EE-171",
@@ -42379,30 +36338,6 @@
       "file": "Эредия (с 2000).png"
     },
     {
-      "id": "ER",
-      "sourceName": "Eritrea",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1993,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q986",
-      "source": "https://github.com/niemela/flags/blob/master/data/ER.json",
-      "name": "Эритрея",
-      "period": "с 1993",
-      "file": "Эритрея (с 1993).png"
-    },
-    {
       "id": "FR-34",
       "sourceName": "Hérault (France)",
       "types": [
@@ -42439,28 +36374,6 @@
       "name": "Эррера",
       "period": "с 2013",
       "file": "Эррера (с 2013).png"
-    },
-    {
-      "id": "SZ",
-      "sourceName": "Eswatini",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1968,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q1050",
-      "source": "https://github.com/niemela/flags/blob/master/data/SZ.json",
-      "name": "Эсватини",
-      "period": "с 1968",
-      "file": "Эсватини (с 1968).png"
     },
     {
       "id": "GT-05",
@@ -42665,49 +36578,6 @@
       "file": "Эуст-Агдер (1958–2019).png"
     },
     {
-      "id": "ET_1974",
-      "sourceName": "Ethiopia (Empire, 1897–1974)",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1897,
-          1974
-        ]
-      ],
-      "variants": [],
-      "wikidata": "Q115",
-      "source": "https://github.com/niemela/flags/blob/master/data/ET_1974.json",
-      "name": "Эфиопия",
-      "period": "1897–1974",
-      "file": "Эфиопия (1897–1974).png"
-    },
-    {
-      "id": "ET",
-      "sourceName": "Ethiopia",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1996,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q115",
-      "source": "https://github.com/niemela/flags/blob/master/data/ET.json",
-      "name": "Эфиопия",
-      "period": "с 1996",
-      "file": "Эфиопия (с 1996).png"
-    },
-    {
       "id": "JP-38",
       "sourceName": "Ehime Prefecture (Japan)",
       "types": [
@@ -42750,30 +36620,6 @@
       "name": "ЮАР",
       "period": "1928–1994",
       "file": "ЮАР (1928–1994).png"
-    },
-    {
-      "id": "ZA",
-      "sourceName": "South Africa",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1994,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q258",
-      "source": "https://github.com/niemela/flags/blob/master/data/ZA.json",
-      "name": "ЮАР",
-      "period": "с 1994",
-      "file": "ЮАР (с 1994).png"
     },
     {
       "id": "ID-SG",
@@ -42881,28 +36727,6 @@
       "name": "Южная Австралия",
       "period": "с 1904",
       "file": "Южная Австралия (с 1904).png"
-    },
-    {
-      "id": "GS",
-      "sourceName": "South Georgia and the South Sandwich Islands",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          1985,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state"
-      ],
-      "wikidata": "Q35086",
-      "source": "https://github.com/niemela/flags/blob/master/data/GS.json",
-      "name": "Южная Георгия и Южные Сандвичевы острова",
-      "period": "с 1985",
-      "file": "Южная Георгия и Южные Сандвичевы острова (с 1985).png"
     },
     {
       "id": "NL-ZH",
@@ -43272,30 +37096,6 @@
       "name": "Южный Синай",
       "period": "с 2000",
       "file": "Южный Синай (с 2000).png"
-    },
-    {
-      "id": "SS",
-      "sourceName": "South Sudan",
-      "types": [
-        "country"
-      ],
-      "periods": [
-        [
-          2005,
-          null
-        ]
-      ],
-      "variants": [
-        "civil",
-        "state",
-        "civil-ensign",
-        "state-ensign"
-      ],
-      "wikidata": "Q958",
-      "source": "https://github.com/niemela/flags/blob/master/data/SS.json",
-      "name": "Южный Судан",
-      "period": "с 2005",
-      "file": "Южный Судан (с 2005).png"
     },
     {
       "id": "ID-SN",
