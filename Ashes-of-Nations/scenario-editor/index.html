@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ashes of Nations — Редактор сценариев</title>
-    <link rel="icon" type="image/png" href="../assets/avatarka.png?v=20260828-114301">
-    <link rel="stylesheet" href="styles.css?v=20260828-114301">
+    <link rel="icon" type="image/png" href="../assets/avatarka.png?v=20260912-153517">
+    <link rel="stylesheet" href="styles.css?v=20260912-153517">
   </head>
   <body>
     <header class="topbar">
       <div>
-        <a href="../index.html?v=20260828-114301">← В игру</a>
+        <a href="../index.html?v=20260912-153517">← В игру</a>
         <h1>Редактор сценариев</h1>
       </div>
       <div class="file-actions">
@@ -18,10 +18,18 @@
           Загрузить карту
           <input id="mapFile" type="file" accept=".json,application/json">
         </label>
+        <select id="projectMapSelect" class="project-select" aria-label="Карта из папки maps">
+          <option value="">Карта из maps…</option>
+        </select>
+        <button id="loadProjectMapButton" class="button" type="button">Открыть</button>
         <label class="button">
           Импорт сценария
           <input id="scenarioFile" type="file" accept=".json,application/json">
         </label>
+        <select id="projectScenarioSelect" class="project-select" aria-label="Сценарий из папки scenarios">
+          <option value="">Сценарий из scenarios…</option>
+        </select>
+        <button id="loadProjectScenarioButton" class="button" type="button">Открыть</button>
         <button id="exportButton" class="button primary" type="button" disabled>Экспорт сценария</button>
       </div>
     </header>
@@ -116,6 +124,26 @@
               <input id="flagFile" type="file" accept="image/*">
             </label>
             <div id="flagPreview" class="flag-preview">Флаг не выбран</div>
+            <fieldset class="subject-editor">
+              <legend>Зависимость</legend>
+              <label class="field">
+                <span>Сюзерен</span>
+                <select id="subjectOverlord"></select>
+              </label>
+              <label class="field">
+                <span>Статус</span>
+                <select id="subjectType">
+                  <option value="puppet">Марионетка</option>
+                  <option value="vassal">Вассал</option>
+                  <option value="colony">Колония</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Автономия: <output id="subjectAutonomyValue">1</output>/3</span>
+                <input id="subjectAutonomy" type="range" min="0" max="3" step="1" value="1">
+              </label>
+              <small>Независимая страна не имеет сюзерена. Сюзерен, его вассалы и колонии образуют иерархию без циклов.</small>
+            </fieldset>
             <div class="selection-summary">
               <strong>Регионы страны</strong>
               <span id="selectedRegionCount">0</span>
@@ -160,7 +188,9 @@
         </section>
       </aside>
     </main>
-        <script src="../data/flags-catalog.js?v=20260828-114301"></script>
-        <script src="app.js?v=20260828-114301"></script>
+        <script src="../data/maps-catalog.js?v=20260912-153517"></script>
+        <script src="../data/scenarios-catalog.js?v=20260912-161222"></script>
+        <script src="../data/flags-catalog.js?v=20260912-173500"></script>
+        <script src="app.js?v=20260912-154513"></script>
   </body>
 </html>

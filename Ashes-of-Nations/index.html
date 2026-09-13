@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="screen-orientation" content="landscape">
     <title>Ashes of Nations</title>
-    <link rel="icon" type="image/png" href="assets/avatarka.png?v=20260902-181700">
-    <link rel="manifest" href="manifest.webmanifest?v=20260902-181700">
-    <link rel="stylesheet" href="styles.css?v=20260902-181700">
+    <link rel="icon" type="image/png" href="assets/avatarka.png?v=20260913-143000">
+    <link rel="manifest" href="manifest.webmanifest?v=20260913-143000">
+    <link rel="stylesheet" href="styles.css?v=20260913-143000">
   </head>
   <body>
     <main class="game-shell">
@@ -19,13 +19,14 @@
           <p class="subtitle">Перепишите историю наций</p>
           <div class="menu-actions">
             <button id="playButton" class="primary-button" type="button">Играть</button>
+            <button id="historyViewerButton" class="menu-button" type="button">Смотреть историю · 1960–2026</button>
             <button id="howToPlayButton" class="menu-button" type="button">Как играть · обучение</button>
             <button id="continueButton" class="menu-button" type="button" disabled>Продолжить</button>
             <button id="savesButton" class="menu-button" type="button">Сохранения</button>
-            <a class="menu-button" href="editor/index.html?v=20260902-181700">Редактор карт</a>
-            <a class="menu-button" href="scenario-editor/index.html?v=20260902-181700">Редактор сценариев</a>
-            <a class="menu-button" href="development.html?v=20260902-181700">Прогресс разработки</a>
-            <a class="menu-button" href="sources.html?v=20260902-181700">Источники и лицензии</a>
+            <a class="menu-button" href="editor/index.html?v=20260913-143000">Редактор карт</a>
+            <a class="menu-button" href="scenario-editor/index.html?v=20260913-143000">Редактор сценариев</a>
+            <a class="menu-button" href="development.html?v=20260913-143000">Прогресс разработки</a>
+            <a class="menu-button" href="sources.html?v=20260913-143000">Источники и лицензии</a>
             <button id="settingsButton" class="menu-button" type="button">Настройки</button>
           </div>
         </div>
@@ -126,6 +127,7 @@
               <div id="gameCanvasStack" class="game-canvas-stack" hidden>
                 <canvas id="gameMapCanvas"></canvas>
                 <canvas id="gameOverlayCanvas"></canvas>
+                <svg id="armyTextLayer" class="army-text-layer" aria-hidden="true"></svg>
               </div>
             </div>
           </div>
@@ -223,8 +225,16 @@
         </div>
       </section>
     </main>
-    <script src="data/historical-events.js?v=20260902-181700"></script>
-    <script src="app.js?v=20260902-181700"></script>
+    <script src="data/historical-events.js?v=20260913-143000"></script>
+    <script src="data/historical-events-1700-1865.js?v=20260913-143000"></script>
+    <script src="data/historical-events-1866-1923.js?v=20260913-143000"></script>
+    <script src="data/historical-events-1924-1945.js?v=20260913-143000"></script>
+    <script src="data/historical-events-campaigns.js?v=20260913-143000"></script>
+    <script src="data/historical-events-1946-2026.js?v=20260913-143000"></script>
+    <script src="data/historical-territory-effects.js?v=20260913-143000"></script>
+    <script src="data/historical-alternatives.js?v=20260913-143000"></script>
+    <script src="data/historical-territories.js?v=20260913-143000"></script>
+    <script src="app.js?v=20260913-143000"></script>
   </body>
 </html>
 

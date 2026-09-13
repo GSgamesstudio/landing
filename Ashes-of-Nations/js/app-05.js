@@ -78,9 +78,10 @@
             const controlled = (country.regionIds || []).filter((regionId) => Number(controllerOfRegion(regionId)?.id) === Number(strategyState.playerCountryId)).length;
             const capitalControlled = Number(controllerOfRegion(country.capitalRegionId)?.id) === Number(strategyState.playerCountryId);
             const ready = canDemandCapitulation(country);
-            return `<button class="danger-button" type="button" data-action="demand-capitulation" data-id="${country.id}" ${ready ? "" : "disabled"}>${ready ? "Принять капитуляцию" : `Капитуляция: ${controlled}/${Math.ceil(total / 2)} регионов${capitalControlled ? "" : " · столица не захвачена"}`} — ${country.name}</button>`;
+            return `<div class="inline-actions"><button class="danger-button" type="button" data-action="demand-capitulation" data-id="${country.id}" ${ready ? "" : "disabled"}>${ready ? "Полная капитуляция" : `Капитуляция: ${controlled}/${Math.ceil(total / 2)} регионов${capitalControlled ? "" : " · столица не захвачена"}`} — ${country.name}</button><button class="mini-button" type="button" data-action="make-subject" data-subject-type="puppet" data-id="${country.id}" ${ready ? "" : "disabled"}>Марионетка</button><button class="mini-button" type="button" data-action="make-subject" data-subject-type="vassal" data-id="${country.id}" ${ready ? "" : "disabled"}>Вассал</button><button class="mini-button" type="button" data-action="make-subject" data-subject-type="colony" data-id="${country.id}" ${ready ? "" : "disabled"}>Колония</button></div>`;
           }).join("")}
         </article>` : ""}
+        ${canFormGovernmentInExile(currentPlayerCountry()) ? `<article class="strategy-card accent-card"><header><strong>Правительство в изгнании</strong><small>столица под угрозой</small></header><p>Подписать капитуляцию, сохранить довоенные границы как законные и обязать союзников освободить страну.</p><button class="danger-button" type="button" data-action="government-exile">Создать правительство в изгнании</button></article>` : ""}
         <article class="strategy-card">
           <strong>Пригласить к войне</strong>
           <select id="inviteTarget" class="strategy-select">${countryOptions()}</select>
@@ -443,11 +444,19 @@
   function upcomingHistoricalEvents(limit = 12) {
     const today = strategyState?.date?.toISOString?.().slice(0, 10) || "";
     const completed = new Set((strategyState?.historicalEvents || []).map((event) => event.id));
-    return (window.HISTORICAL_EVENT_TIMELINE || [])
+    return historicalEventsForScenario()
       .filter((event) => event.date >= today && !completed.has(event.id))
       .slice()
       .sort((left, right) => left.date.localeCompare(right.date))
       .slice(0, limit);
+  }
+
+  function resolvedHistoricalEvents() {
+    const resolved = new Map((strategyState?.historicalEvents || []).map((entry) => [entry.id, entry]));
+    return historicalEventsForScenario()
+      .filter((event) => resolved.has(event.id))
+      .sort((left, right) => right.date.localeCompare(left.date))
+      .map((event) => ({ event, result: resolved.get(event.id) }));
   }
 
   function renderEventLog() {
@@ -457,6 +466,9 @@
     const selectedEvent = log.find((entry) => entry.id === selectedEventId) || log[0] || null;
     const runtime = currentPlayerState();
     const upcoming = upcomingHistoricalEvents();
+    const resolvedHistory = resolvedHistoricalEvents();
+    const historicalPhase = historicalPhaseForScenario();
+    const historicalPhaseActive = isHistoricalPhaseActive();
     return `
       <section class="tab-section">
         <h3>События</h3>
@@ -468,6 +480,13 @@
               <button class="mini-button" type="button" data-action="fix-logistics" ${canFixLogistics(runtime) ? "" : "disabled"}>Наладить снабжение</button>
               <small>Цена: ${logisticsFixCostText(runtime)}</small>
             ` : ""}
+          </article>
+        ` : ""}
+        ${historicalPhase ? `
+          <article class="strategy-card ${historicalPhaseActive ? "accent-card" : ""}">
+            <header><strong>Историческая фаза</strong><small>${historicalPhaseActive ? "активна" : "завершена"}</small></header>
+            <p>${historicalPhase.label}. ${historicalPhaseActive ? "ИИ не начинает и не продвигает национальные фокусы, пока не будет разрешено последнее событие этой фазы." : "Историческая хронология завершена — ИИ перешёл к национальным фокусам."}</p>
+            <small>Плановая граница: ${gameDateLabel(new Date(`${historicalPhase.endsOn}T00:00:00`))}</small>
           </article>
         ` : ""}
         ${(strategyState.crises || []).length ? `
@@ -485,6 +504,15 @@
             <p>Событие сработает в указанную дату, только если его исторические условия не изменены игроком.</p>
             ${upcoming.map((event) => `<small><strong>${gameDateLabel(new Date(`${event.date}T00:00:00`))}</strong> · ${event.title}</small>`).join("")}
           </article>
+        ` : ""}
+        ${resolvedHistory.length ? `
+          <details class="strategy-card historical-chronicle">
+            <summary><strong>Летопись кампании</strong><small>${resolvedHistory.length} исторических событий</small></summary>
+            <p>Полный список уже наступивших событий сохраняется отдельно от короткого журнала уведомлений.</p>
+            <div class="historical-chronicle-list">
+              ${resolvedHistory.map(({ event, result }) => `<small class="${result.status === "skipped" ? "warning-text" : ""}"><strong>${gameDateLabel(new Date(`${event.date}T00:00:00`))}</strong> · ${event.title}${result.status === "skipped" ? " · альтернативная развилка" : ""}</small>`).join("")}
+            </div>
+          </details>
         ` : ""}
         <div class="event-log">
           ${log.map((entry) => `<button class="event-log-item ${entry.id === selectedEvent?.id ? "active" : ""} ${entry.severity || "info"}" type="button" data-event-id="${entry.id}">${entry.text}</button>`).join("")}
@@ -683,43 +711,43 @@
   }
 
   const FRENCH_FLAG_PATHS = Object.freeze({
-    "Франция": "flags/Франция современная.png",
-    "Вторая Французская империя": "flags/Франция современная.png",
-    "Французская Гвиана": "flags/Французская Гвиана.png",
-    "Реюньон": "flags/Реюньон.png",
-    "Сен-Бартелеми": "flags/Сен-Бартелеми.png",
+    "Франция": "flags/01-современные-страны/Франция современная.png",
+    "Вторая Французская империя": "flags/01-современные-страны/Франция современная.png",
+    "Французская Гвиана": "flags/01-современные-страны/Французская Гвиана.png",
+    "Реюньон": "flags/01-современные-страны/Реюньон.png",
+    "Сен-Бартелеми": "flags/01-современные-страны/Сен-Бартелеми.png",
   });
 
   const TREATY_FLAG_PATHS = Object.freeze({
-    antarctic: "flags/Антарктида.png",
-    un_charter: "flags/Устав ООН.png",
-    geneva: "flags/Женевские конвенции.png",
-    npt: "flags/Договор о нераспространении ядерного оружия.png",
-    paris_climate: "flags/Парижское соглашение.png",
+    antarctic: "flags/01-современные-страны/Антарктида.png",
+    un_charter: "flags/05-организации-и-соглашения/Устав ООН.png",
+    geneva: "flags/05-организации-и-соглашения/Женевские конвенции.png",
+    npt: "flags/05-организации-и-соглашения/Договор о нераспространении ядерного оружия.png",
+    paris_climate: "flags/05-организации-и-соглашения/Парижское соглашение.png",
   });
 
   const ORGANIZATION_FLAG_PATHS = Object.freeze({
-    un: "flags/ООН.png",
-    nato: "flags/НАТО.png",
-    csto: "flags/ОДКБ.png",
-    eu: "flags/Европейский союз.png",
-    brics: "flags/БРИКС.png",
-    au: "flags/Африканский союз.png",
-    sco: "flags/ШОС.png",
-    eaeu: "flags/ЕАЭС.png",
-    cis: "flags/СНГ.png",
-    asean: "flags/АСЕАН.png",
-    arab_league: "flags/Лига арабских государств.png",
-    gcc: "flags/Совет сотрудничества арабских государств Залива.png",
-    opec: "flags/ОПЕК.png",
-    oecd: "flags/ОЭСР.png",
-    g7: "flags/G7.png",
-    g20: "flags/G20.png",
-    mercosur: "flags/МЕРКОСУР.png",
-    oas: "flags/ОАГ.png",
-    league_of_nations: "flags/Лига Наций.png",
-    warsaw_pact: "flags/Организация Варшавского договора.png",
-    non_aligned: "flags/Движение неприсоединения.png",
+    un: "flags/05-организации-и-соглашения/ООН.png",
+    nato: "flags/05-организации-и-соглашения/НАТО.png",
+    csto: "flags/05-организации-и-соглашения/ОДКБ.png",
+    eu: "flags/05-организации-и-соглашения/Европейский союз.png",
+    brics: "flags/05-организации-и-соглашения/БРИКС.png",
+    au: "flags/05-организации-и-соглашения/Африканский союз.png",
+    sco: "flags/05-организации-и-соглашения/ШОС.png",
+    eaeu: "flags/05-организации-и-соглашения/ЕАЭС.png",
+    cis: "flags/05-организации-и-соглашения/СНГ.png",
+    asean: "flags/05-организации-и-соглашения/АСЕАН.png",
+    arab_league: "flags/05-организации-и-соглашения/Лига арабских государств.png",
+    gcc: "flags/05-организации-и-соглашения/Совет сотрудничества арабских государств Залива.png",
+    opec: "flags/05-организации-и-соглашения/ОПЕК.png",
+    oecd: "flags/05-организации-и-соглашения/ОЭСР.png",
+    g7: "flags/05-организации-и-соглашения/G7.png",
+    g20: "flags/05-организации-и-соглашения/G20.png",
+    mercosur: "flags/05-организации-и-соглашения/МЕРКОСУР.png",
+    oas: "flags/05-организации-и-соглашения/ОАГ.png",
+    league_of_nations: "flags/05-организации-и-соглашения/Лига Наций.png",
+    warsaw_pact: "flags/05-организации-и-соглашения/Организация Варшавского договора.png",
+    non_aligned: "flags/05-организации-и-соглашения/Движение неприсоединения.png",
   });
 
   function organizationEmblemMarkup(path, name, id) {
@@ -740,8 +768,8 @@
     scenario.countries.forEach((country) => {
       if (country.name === "Французская колониальная империя") {
         country.flag = Number(scenario.year) === 1941
-          ? "flags/Свободная Франция.png"
-          : "flags/Франция современная.png";
+          ? "flags/02-исторические-государства/Свободная Франция.png"
+          : "flags/01-современные-страны/Франция современная.png";
         return;
       }
       const flag = FRENCH_FLAG_PATHS[country.name];
@@ -1158,10 +1186,20 @@
   }
 
   function drawArmyMarker(army, x, y) {
-    const px = Math.round(x);
-    const py = Math.round(y);
+    // The map canvas is scaled with gameZoom. Counter-scale the marker so it
+    // stays a compact UI symbol rather than growing as part of the terrain.
+    const px = 0;
+    const py = 0;
+    const markerScale = 1 / Math.max(0.5, gameZoom);
     const label = String(Math.max(1, Math.round((army.soldiers || army.strength || 1) / 1000)));
+    const isNaval = isSeaRegion(army.regionId);
+    const unitIcons = isNaval
+      ? [shipImage]
+      : [soldierImage, ...(Number(label) > 3 ? [artilleryImage] : []), ...(Number(label) > 10 ? [tankImage] : []), ...(Number(label) > 50 ? [aircraftImage] : [])];
+    const halfWidth = unitIcons.length >= 3 ? 13 : 10;
     gameOverlayCtx.save();
+    gameOverlayCtx.translate(Math.round(x), Math.round(y));
+    gameOverlayCtx.scale(markerScale, markerScale);
     gameOverlayCtx.shadowColor = "rgba(0, 0, 0, .72)";
     gameOverlayCtx.shadowBlur = 4;
     gameOverlayCtx.shadowOffsetY = 2;
@@ -1169,7 +1207,7 @@
     gameOverlayCtx.strokeStyle = "rgba(255, 220, 128, .88)";
     gameOverlayCtx.lineWidth = 1.25;
     gameOverlayCtx.beginPath();
-    drawRoundedRect(gameOverlayCtx, px - 10, py - 14, 20, 24, 4);
+    drawRoundedRect(gameOverlayCtx, px - halfWidth, py - 13, halfWidth * 2, 23, 4);
     gameOverlayCtx.fill();
     gameOverlayCtx.stroke();
     gameOverlayCtx.shadowBlur = 0;
@@ -1180,28 +1218,47 @@
     gameOverlayCtx.beginPath();
     gameOverlayCtx.moveTo(px, py - 11);
     gameOverlayCtx.lineTo(px + 7, py - 7);
-    gameOverlayCtx.lineTo(px + 5, py + 1);
-    gameOverlayCtx.quadraticCurveTo(px, py + 5, px - 5, py + 1);
+    gameOverlayCtx.lineTo(px + 5, py + 2);
+    gameOverlayCtx.quadraticCurveTo(px, py + 5, px - 5, py + 2);
     gameOverlayCtx.lineTo(px - 7, py - 7);
     gameOverlayCtx.closePath();
     gameOverlayCtx.fill();
     gameOverlayCtx.stroke();
 
-    if (soldierImage?.complete && soldierImage.naturalWidth) {
-      gameOverlayCtx.imageSmoothingEnabled = userSettings.smoothing !== "off";
-      gameOverlayCtx.drawImage(soldierImage, px - 6, py - 10, 12, 12);
-    } else {
-      drawFallbackSoldier(px, py - 2);
-    }
-
-    gameOverlayCtx.fillStyle = "rgba(0, 0, 0, .45)";
-    gameOverlayCtx.fillRect(px - 8, py + 5, 16, 6);
-    gameOverlayCtx.fillStyle = "#fff7d6";
-    gameOverlayCtx.font = "bold 7px Georgia, \"Times New Roman\", serif";
-    gameOverlayCtx.textAlign = "center";
-    gameOverlayCtx.textBaseline = "middle";
-    gameOverlayCtx.fillText(label, px, py + 8);
+    const iconSize = unitIcons.length >= 4 ? 6 : unitIcons.length === 3 ? 7 : unitIcons.length === 2 ? 9 : 12;
+    const iconGap = 1;
+    const iconRowWidth = unitIcons.length * iconSize + (unitIcons.length - 1) * iconGap;
+    gameOverlayCtx.imageSmoothingEnabled = true;
+    unitIcons.forEach((image, index) => {
+      const iconX = px - iconRowWidth / 2 + index * (iconSize + iconGap);
+      if (image?.complete && image.naturalWidth) gameOverlayCtx.drawImage(image, iconX, py - 10, iconSize, iconSize);
+      else if (!isNaval && index === 0) drawFallbackSoldier(iconX + iconSize / 2, py - 4);
+    });
     gameOverlayCtx.restore();
+    drawArmyVectorLabel(x, y, label, halfWidth);
+  }
+
+  function drawArmyVectorLabel(x, y, label, halfWidth) {
+    if (!armyTextLayer) return;
+    const ns = "http://www.w3.org/2000/svg";
+    const group = document.createElementNS(ns, "g");
+    group.setAttribute("transform", `translate(${Math.round(x)} ${Math.round(y)}) scale(${1 / Math.max(0.5, gameZoom)})`);
+    const background = document.createElementNS(ns, "rect");
+    background.setAttribute("x", String(-Math.max(8, halfWidth - 1)));
+    background.setAttribute("y", "5");
+    background.setAttribute("width", String(Math.max(16, (halfWidth - 1) * 2)));
+    background.setAttribute("height", "6");
+    background.setAttribute("rx", "1.5");
+    background.setAttribute("fill", "rgba(0,0,0,.62)");
+    const text = document.createElementNS(ns, "text");
+    text.setAttribute("x", "0");
+    text.setAttribute("y", "8.5");
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "8");
+    text.setAttribute("fill", "#fff7d6");
+    text.textContent = label;
+    group.append(background, text);
+    armyTextLayer.append(group);
   }
 
   function addCountryLabelAggregate(stats, country, sample) {
@@ -1311,7 +1368,9 @@
     if (!flagTextureCache.has(path)) {
       const canvas = document.createElement("canvas");
       canvas.width = 192;
-      canvas.height = 128;
+      // Keep the source flag at 16:9 so map-mode sampling never introduces
+      // an independent horizontal/vertical stretch.
+      canvas.height = 108;
       const context = canvas.getContext("2d", { willReadFrequently: true });
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       flagTextureCache.set(path, context.getImageData(0, 0, canvas.width, canvas.height));
@@ -1325,7 +1384,7 @@
       const image = flagImage(item.country.flag);
       if (!image) return;
       const width = Math.max(24, Math.min(96, Math.sqrt(item.count) * 2.7));
-      const height = Math.round(width * 0.62);
+      const height = Math.round(width * (image.naturalHeight / Math.max(1, image.naturalWidth)));
       const x = item.x / item.count - width / 2;
       const y = item.y / item.count - height / 2;
       gameOverlayCtx.fillStyle = "rgba(10, 12, 12, .7)";
@@ -1620,8 +1679,15 @@
         const bounds = flagCountry ? flagBounds.get(Number(flagCountry.id)) : null;
         const texture = bounds ? flagTexture(flagCountry.flag) : null;
         if (texture) {
-          const textureX = Math.max(0, Math.min(texture.width - 1, Math.floor((x - bounds.minX) / Math.max(1, bounds.maxX - bounds.minX) * texture.width)));
-          const textureY = Math.max(0, Math.min(texture.height - 1, Math.floor((y - bounds.minY) / Math.max(1, bounds.maxY - bounds.minY) * texture.height)));
+          const boundsWidth = Math.max(1, bounds.maxX - bounds.minX);
+          const boundsHeight = Math.max(1, bounds.maxY - bounds.minY);
+          const scale = Math.max(boundsWidth / texture.width, boundsHeight / texture.height);
+          const sampledWidth = boundsWidth / scale;
+          const sampledHeight = boundsHeight / scale;
+          const sourceOffsetX = (texture.width - sampledWidth) / 2;
+          const sourceOffsetY = (texture.height - sampledHeight) / 2;
+          const textureX = Math.max(0, Math.min(texture.width - 1, Math.floor(sourceOffsetX + (x - bounds.minX) / boundsWidth * sampledWidth)));
+          const textureY = Math.max(0, Math.min(texture.height - 1, Math.floor(sourceOffsetY + (y - bounds.minY) / boundsHeight * sampledHeight)));
           const offset = (textureY * texture.width + textureX) * 4;
           if (texture.data[offset + 3] > 32) packed = packRgba(texture.data[offset], texture.data[offset + 1], texture.data[offset + 2]);
         }
@@ -1648,6 +1714,7 @@
     }
     gameMapCtx.putImageData(image, 0, 0);
     gameOverlayCtx.clearRect(0, 0, map.width, map.height);
+    armyTextLayer.replaceChildren();
 
     function strokeBorders(countryBorders) {
       gameOverlayCtx.beginPath();
@@ -1746,6 +1813,11 @@
       renderStrategyPanel();
       return;
     }
+    if (peaceMapMode) {
+      assignPeaceMapRegion(hit.regionId);
+      renderGameMap();
+      return;
+    }
     strategyState.selectedRegionId = Number(hit.regionId);
     activeTab = "regions";
     renderStrategyPanel();
@@ -1788,7 +1860,7 @@
     if (!hit || !strategyState || !gameData?.centers) return null;
     const runtime = currentPlayerState();
     if (!runtime) return null;
-    const radius = Math.max(12, 22 / Math.max(0.75, gameZoom));
+    const radius = Math.max(9, 14 / Math.max(0.75, gameZoom));
     return runtime.armies.find((army) => {
       const center = gameData.centers.get(Number(army.regionId));
       if (!center) return false;
@@ -1964,9 +2036,20 @@
     gameMapCanvas.height = map.height;
     gameOverlayCanvas.width = map.width;
     gameOverlayCanvas.height = map.height;
+    armyTextLayer.setAttribute("viewBox", `0 0 ${map.width} ${map.height}`);
+    armyTextLayer.replaceChildren();
     soldierImage = new Image();
-    soldierImage.src = `assets/soldier.png?v=${CACHE_VERSION}`;
+    soldierImage.src = `assets/армия.png?v=${CACHE_VERSION}`;
     soldierImage.addEventListener("load", renderGameMap, { once: true });
+    [["арта.png", "artilleryImage"], ["танки.png", "tankImage"], ["самолёты.png", "aircraftImage"], ["корабли.png", "shipImage"]].forEach(([fileName, property]) => {
+      const image = new Image();
+      image.src = `assets/${fileName}?v=${CACHE_VERSION}`;
+      image.addEventListener("load", renderGameMap, { once: true });
+      if (property === "artilleryImage") artilleryImage = image;
+      if (property === "tankImage") tankImage = image;
+      if (property === "aircraftImage") aircraftImage = image;
+      if (property === "shipImage") shipImage = image;
+    });
     renderGameMap();
     setGameZoom(Math.min(1.5, 1100 / map.width, 720 / map.height));
     renderStrategyPanel();
@@ -1998,11 +2081,36 @@
       const playerCountry = scenario.countries.find((country) => Number(country.id) === Number(selectedCountry.id)) || scenario.countries[0];
       gameLoading.textContent = "Загрузка национальных фокусов…";
       await preloadScenarioFocusTrees(scenario);
+      await preloadHistoricalTerritoryProfiles();
       enterGame(map, scenario, playerCountry);
-      saveGame("new-game");
+      if (!historicalViewerMode) saveGame("new-game");
     } catch (error) {
       gameLoading.textContent = `Ошибка загрузки игры: ${error.message}`;
       console.error(error);
+    }
+  }
+
+  async function startHistoricalViewer() {
+    historicalViewerMode = true;
+    tutorialCampaign = false;
+    selectedMap = maps.find((map) => map.file === "мир.json") || { file: "мир.json", path: "maps/мир.json", name: "Мир" };
+    selectedScenario = scenarios.find((scenario) => scenario.file === "1960.json") || { file: "1960.json", path: "scenarios/1960.json", name: "Мир 1960", year: 1960 };
+    try {
+      const response = await fetch(`${selectedScenario.path}?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const scenario = await response.json();
+      selectedCountry = scenario.countries.find((country) => country.name === "Швейцария");
+      if (!selectedCountry) throw new Error("В сценарии 1960 не найдена Швейцария");
+      await startGame();
+      if (!gameData || !strategyState) return;
+      gameScenarioName.textContent = "Мир 1960 · просмотр истории";
+      startRealtimeClock();
+      addLog({ text: "Запущен режим просмотра: сохранения отключены.", detail: "Время идёт автоматически; историческая хронология будет показана до 2026 года.", severity: "info" });
+      renderStrategyPanel();
+    } catch (error) {
+      historicalViewerMode = false;
+      console.error("Не удалось запустить режим просмотра истории.", error);
+      window.alert("Не удалось запустить просмотр истории.");
     }
   }
 
@@ -2034,6 +2142,7 @@
       gameScenarioName.textContent = `${selectedScenario.name} · ${scenario.year || ""}`;
       gameLoading.textContent = "Загрузка национальных фокусов…";
       await preloadScenarioFocusTrees(scenario);
+      await preloadHistoricalTerritoryProfiles();
       enterGame(map, scenario, selectedCountry, save.strategyState, save.protectedRussianRegionIds);
       addLog(save.name ? `Загружен слот «${save.name}».` : "Партия загружена из автосохранения.");
       renderStrategyPanel();
@@ -2171,12 +2280,22 @@
     if (action === "add-peace-demand") addPlayerPeaceDemand(document.getElementById("peaceDemandType")?.value, document.getElementById("peaceTarget")?.value, selectedPeaceRegionIds());
     if (action === "finalize-peace") finalizePeaceConference();
     if (action === "demand-capitulation") demandCapitulation(button.dataset.id);
+    if (action === "make-subject") makeSubject(button.dataset.id, button.dataset.subjectType);
+    if (action === "manage-subject") manageSubject(document.getElementById("subjectTarget")?.value, { name: document.getElementById("subjectName")?.value, flag: document.getElementById("subjectFlag")?.value, capitalRegionId: document.getElementById("subjectCapital")?.value, ideology: document.getElementById("subjectIdeology")?.value });
+    if (action === "subject-policy") setSubjectPolicy(document.getElementById("subjectTarget")?.value, { autonomy: document.getElementById("subjectAutonomy")?.value, armyDemand: document.getElementById("subjectArmyDemand")?.value });
+    if (action === "annex-subject") annexSubject(document.getElementById("subjectTarget")?.value);
+    if (action === "government-exile") formGovernmentInExile(currentPlayerCountry());
     if (action === "nuclear-deterrence") nuclearDeterrence(document.getElementById("warTarget")?.value);
     if (action === "invite-war") inviteToWar(document.getElementById("inviteTarget")?.value, document.getElementById("inviteEnemy")?.value);
     if (action === "join-war") joinWarOnSide(document.getElementById("joinWarSide")?.value);
     if (action === "access") requestAccess(document.getElementById("treatyTarget")?.value);
     if (action === "visa") signVisaFree(document.getElementById("treatyTarget")?.value);
-    if (action === "base") requestForeignBase(document.getElementById("treatyTarget")?.value);
+    if (action === "base") requestForeignBase(document.getElementById("treatyTarget")?.value, document.getElementById("baseRegion")?.value, document.getElementById("baseType")?.value);
+    if (action === "claim") {
+      const regionId = Number(document.getElementById("claimRegion")?.value);
+      const owner = ownerOfRegion(regionId);
+      createTerritorialClaim(owner?.id, regionId);
+    }
     if (action === "non-aggression") signNonAggression(document.getElementById("treatyTarget")?.value, document.getElementById("nonAggressionMonths")?.value);
     if (action === "guarantee") guaranteeIndependence(document.getElementById("treatyTarget")?.value);
     if (action === "security-guarantee") giveSecurityGuarantees(document.getElementById("treatyTarget")?.value);
@@ -2260,10 +2379,14 @@
     if (action === "sign") {
       const venue = document.getElementById("peaceVenue");
       if (strategyState?.peaceConference && venue) strategyState.peaceConference.venueRegionId = Number(venue.value) || null;
+      const pactExpiry = document.getElementById("peaceNonAggressionExpires")?.value;
+      if (strategyState?.peaceConference && pactExpiry) strategyState.peaceConference.nonAggressionExpires = pactExpiry;
       const title = document.getElementById("peaceTitle")?.value?.trim();
       if (strategyState?.peaceConference && title) strategyState.peaceConference.title = title;
       finalizePeaceConference();
     }
+    if (action === "map") { peaceLaptopMapVisible = true; renderPeaceSigningScreen(); }
+    if (action === "close-map") { peaceLaptopMapVisible = false; renderPeaceSigningScreen(); }
     if (action === "schedule") schedulePeaceConference();
   });
 
@@ -2305,7 +2428,13 @@
   playButton.addEventListener("click", () => {
     ensureAudio();
     playSound("click");
+    historicalViewerMode = false;
     showScreen(setupScreen);
+  });
+  historyViewerButton.addEventListener("click", () => {
+    ensureAudio();
+    playSound("click");
+    void startHistoricalViewer();
   });
   howToPlayButton.addEventListener("click", () => {
     ensureAudio();
@@ -2388,6 +2517,7 @@
     strategyState = null;
     gameData = null;
     tutorialCampaign = false;
+    historicalViewerMode = false;
     relationMapMode = false;
     relationMapCountryId = null;
     relationPair = null;

@@ -16,7 +16,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1908,
       "color": "#c11f1f",
-      "flag": "flags/pixel/dz.png",
+      "flag": "flags/01-современные-страны/Алжир.png",
       "flagId": "iso:DZ",
       "regionIds": [
         574,
@@ -111,7 +111,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8109,
       "color": "#d72323",
-      "flag": "flags/pixel/ao.png",
+      "flag": "flags/01-современные-страны/Ангола.png",
       "flagId": "iso:AO",
       "regionIds": [
         477,
@@ -147,7 +147,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2875,
       "color": "#de3535",
-      "flag": "flags/pixel/bh.png",
+      "flag": "flags/01-современные-страны/Бахрейн.png",
       "flagId": "iso:BH",
       "regionIds": [
         2875
@@ -159,7 +159,7 @@
       "ideology": "neutral",
       "capitalRegionId": 467,
       "color": "#e24b4b",
-      "flag": "flags/pixel/bj.png",
+      "flag": "flags/01-современные-страны/Бенин.png",
       "flagId": "iso:BJ",
       "regionIds": [
         467,
@@ -175,7 +175,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7424,
       "color": "#e56161",
-      "flag": "flags/pixel/bw.png",
+      "flag": "flags/01-современные-страны/Ботсвана.png",
       "flagId": "iso:BW",
       "regionIds": [
         495,
@@ -208,7 +208,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1149,
       "color": "#e97777",
-      "flag": "flags/pixel/bf.png",
+      "flag": "flags/01-современные-страны/Буркина-Фасо.png",
       "flagId": "iso:BF",
       "regionIds": [
         1131,
@@ -230,7 +230,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1076,
       "color": "#ec8d8d",
-      "flag": "flags/pixel/bi.png",
+      "flag": "flags/01-современные-страны/Бурунди.png",
       "flagId": "iso:BI",
       "regionIds": [
         1076
@@ -242,7 +242,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1503,
       "color": "#c83619",
-      "flag": "flags/pixel/cm.png",
+      "flag": "flags/01-современные-страны/Камерун.png",
       "flagId": "iso:CM",
       "regionIds": [
         1096,
@@ -264,7 +264,7 @@
       "ideology": "neutral",
       "capitalRegionId": 359,
       "color": "#de3c1b",
-      "flag": "flags/pixel/cf.png",
+      "flag": "flags/01-современные-страны/Центральноафриканская Республика.png",
       "flagId": "iso:CF",
       "regionIds": [
         356,
@@ -292,7 +292,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8013,
       "color": "#e54d2e",
-      "flag": "flags/pixel/td.png",
+      "flag": "flags/01-современные-страны/Чад.png",
       "flagId": "iso:TD",
       "regionIds": [
         553,
@@ -333,7 +333,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2656,
       "color": "#e86045",
-      "flag": "flags/pixel/km.png",
+      "flag": "flags/01-современные-страны/Коморы.png",
       "flagId": "iso:KM",
       "regionIds": [
         2656
@@ -345,7 +345,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1596,
       "color": "#eb735c",
-      "flag": "flags/pixel/cy.png",
+      "flag": "flags/01-современные-страны/Кипр.png",
       "flagId": "iso:CY",
       "regionIds": [
         1598,
@@ -358,7 +358,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7037,
       "color": "#ee8772",
-      "flag": "flags/pixel/cd.png",
+      "flag": "flags/01-современные-страны/ДР Конго.png",
       "flagId": "iso:CD",
       "regionIds": [
         61,
@@ -422,7 +422,7 @@
       "ideology": "neutral",
       "capitalRegionId": 367,
       "color": "#f09a89",
-      "flag": "flags/pixel/dj.png",
+      "flag": "flags/01-современные-страны/Джибути.png",
       "flagId": "iso:DJ",
       "regionIds": [
         367
@@ -434,7 +434,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8096,
       "color": "#c1551f",
-      "flag": "flags/pixel/eg.png",
+      "flag": "flags/01-современные-страны/Египет.png",
       "flagId": "iso:EG",
       "regionIds": [
         1369,
@@ -487,7 +487,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1450,
       "color": "#d75f23",
-      "flag": "flags/pixel/gq.png",
+      "flag": "flags/01-современные-страны/Экваториальная Гвинея.png",
       "flagId": "iso:GQ",
       "regionIds": [
         1450
@@ -499,7 +499,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1572,
       "color": "#de6e35",
-      "flag": "flags/pixel/er.png",
+      "flag": "flags/01-современные-страны/Эритрея.png",
       "flagId": "iso:ER",
       "regionIds": [
         376,
@@ -515,7 +515,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7017,
       "color": "#e27d4b",
-      "flag": "flags/pixel/et.png",
+      "flag": "flags/01-современные-страны/Эфиопия.png",
       "flagId": "iso:ET",
       "regionIds": [
         27,
@@ -566,7 +566,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1099,
       "color": "#e99d77",
-      "flag": "flags/pixel/ga.png",
+      "flag": "flags/01-современные-страны/Габон.png",
       "flagId": "iso:GA",
       "regionIds": [
         1097,
@@ -586,7 +586,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1488,
       "color": "#ecad8d",
-      "flag": "flags/pixel/gm.png",
+      "flag": "flags/01-современные-страны/Гамбия.png",
       "flagId": "iso:GM",
       "regionIds": [
         1488
@@ -598,7 +598,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1136,
       "color": "#c87019",
-      "flag": "flags/pixel/gh.png",
+      "flag": "flags/01-современные-страны/Гана.png",
       "flagId": "iso:GH",
       "regionIds": [
         1135,
@@ -619,7 +619,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2396,
       "color": "#de7d1b",
-      "flag": "flags/pixel/gr.png",
+      "flag": "flags/01-современные-страны/Греция.png",
       "flagId": "iso:GR",
       "regionIds": [
         2396,
@@ -632,7 +632,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1179,
       "color": "#e58a2e",
-      "flag": "flags/pixel/gn.png",
+      "flag": "flags/01-современные-страны/Гвинея.png",
       "flagId": "iso:GN",
       "regionIds": [
         345,
@@ -665,7 +665,7 @@
       "ideology": "neutral",
       "capitalRegionId": 967,
       "color": "#eba35c",
-      "flag": "flags/pixel/ir.png",
+      "flag": "flags/01-современные-страны/Иран.png",
       "flagId": "iso:IR",
       "regionIds": [
         399,
@@ -707,7 +707,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7982,
       "color": "#eeb072",
-      "flag": "flags/pixel/iq.png",
+      "flag": "flags/01-современные-страны/Ирак.png",
       "flagId": "iso:IQ",
       "regionIds": [
         380,
@@ -739,7 +739,7 @@
       "ideology": "neutral",
       "capitalRegionId": 19,
       "color": "#f0bd89",
-      "flag": "flags/pixel/il.png",
+      "flag": "flags/01-современные-страны/Израиль.png",
       "flagId": "iso:IL",
       "regionIds": [
         19
@@ -751,7 +751,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2704,
       "color": "#c18b1f",
-      "flag": "flags/pixel/it.png",
+      "flag": "flags/01-современные-страны/Италия.png",
       "flagId": "iso:IT",
       "regionIds": [
         2704
@@ -763,7 +763,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1148,
       "color": "#d79b23",
-      "flag": "flags/pixel/ci.png",
+      "flag": "flags/01-современные-страны/Кот-д'Ивуар.png",
       "flagId": "iso:CI",
       "regionIds": [
         416,
@@ -787,7 +787,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1374,
       "color": "#dea635",
-      "flag": "flags/pixel/jo.png",
+      "flag": "flags/01-современные-страны/Иордания.png",
       "flagId": "iso:JO",
       "regionIds": [
         1375,
@@ -802,7 +802,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8062,
       "color": "#e2b04b",
-      "flag": "flags/pixel/ke.png",
+      "flag": "flags/01-современные-страны/Кения.png",
       "flagId": "iso:KE",
       "regionIds": [
         36,
@@ -827,7 +827,7 @@
       "ideology": "neutral",
       "capitalRegionId": 555,
       "color": "#e5b961",
-      "flag": "flags/pixel/kw.png",
+      "flag": "flags/01-современные-страны/Кувейт.png",
       "flagId": "iso:KW",
       "regionIds": [
         555
@@ -839,7 +839,7 @@
       "ideology": "neutral",
       "capitalRegionId": 83,
       "color": "#e9c377",
-      "flag": "flags/pixel/lb.png",
+      "flag": "flags/01-современные-страны/Ливан.png",
       "flagId": "iso:LB",
       "regionIds": [
         83
@@ -851,7 +851,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1044,
       "color": "#eccd8d",
-      "flag": "flags/pixel/ls.png",
+      "flag": "flags/01-современные-страны/Лесото.png",
       "flagId": "iso:LS",
       "regionIds": [
         1044
@@ -863,7 +863,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1165,
       "color": "#c8ab19",
-      "flag": "flags/pixel/lr.png",
+      "flag": "flags/01-современные-страны/Либерия.png",
       "flagId": "iso:LR",
       "regionIds": [
         354,
@@ -878,7 +878,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1427,
       "color": "#debe1b",
-      "flag": "flags/pixel/ly.png",
+      "flag": "flags/01-современные-страны/Ливия.png",
       "flagId": "iso:LY",
       "regionIds": [
         272,
@@ -934,7 +934,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1723,
       "color": "#e5c72e",
-      "flag": "flags/pixel/mg.png",
+      "flag": "flags/01-современные-страны/Мадагаскар.png",
       "flagId": "iso:MG",
       "regionIds": [
         1713,
@@ -967,7 +967,7 @@
       "ideology": "neutral",
       "capitalRegionId": 338,
       "color": "#e8cd45",
-      "flag": "flags/pixel/mw.png",
+      "flag": "flags/01-современные-страны/Малави.png",
       "flagId": "iso:MW",
       "regionIds": [
         37,
@@ -983,7 +983,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7446,
       "color": "#ebd35c",
-      "flag": "flags/pixel/ml.png",
+      "flag": "flags/01-современные-страны/Мали.png",
       "flagId": "iso:ML",
       "regionIds": [
         460,
@@ -1022,7 +1022,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2695,
       "color": "#eed972",
-      "flag": "flags/pixel/mt.png",
+      "flag": "flags/01-современные-страны/Мальта.png",
       "flagId": "iso:MT",
       "regionIds": [
         2695
@@ -1034,7 +1034,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8105,
       "color": "#f0df89",
-      "flag": "flags/pixel/mr.png",
+      "flag": "flags/01-современные-страны/Мавритания.png",
       "flagId": "iso:MR",
       "regionIds": [
         1397,
@@ -1072,7 +1072,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1916,
       "color": "#c1c11f",
-      "flag": "flags/pixel/ma.png",
+      "flag": "flags/01-современные-страны/Марокко.png",
       "flagId": "iso:MA",
       "regionIds": [
         54,
@@ -1102,7 +1102,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8117,
       "color": "#d7d723",
-      "flag": "flags/pixel/mz.png",
+      "flag": "flags/01-современные-страны/Мозамбик.png",
       "flagId": "iso:MZ",
       "regionIds": [
         589,
@@ -1127,7 +1127,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8123,
       "color": "#dede35",
-      "flag": "flags/pixel/na.png",
+      "flag": "flags/01-современные-страны/Намибия.png",
       "flagId": "iso:NA",
       "regionIds": [
         81,
@@ -1157,7 +1157,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8027,
       "color": "#e2e24b",
-      "flag": "flags/pixel/ne.png",
+      "flag": "flags/01-современные-страны/Нигер.png",
       "flagId": "iso:NE",
       "regionIds": [
         1121,
@@ -1200,7 +1200,7 @@
       "ideology": "neutral",
       "capitalRegionId": 554,
       "color": "#e5e561",
-      "flag": "flags/pixel/ng.png",
+      "flag": "flags/01-современные-страны/Нигерия.png",
       "flagId": "iso:NG",
       "regionIds": [
         466,
@@ -1248,7 +1248,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7991,
       "color": "#e9e977",
-      "flag": "flags/pixel/om.png",
+      "flag": "flags/01-современные-страны/Оман.png",
       "flagId": "iso:OM",
       "regionIds": [
         7990,
@@ -1262,7 +1262,7 @@
       "ideology": "neutral",
       "capitalRegionId": 20,
       "color": "#ecec8d",
-      "flag": "flags/pixel/ps.png",
+      "flag": "flags/01-современные-страны/Палестина.png",
       "flagId": "iso:PS",
       "regionIds": [
         20,
@@ -1275,7 +1275,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1660,
       "color": "#abc819",
-      "flag": "flags/pixel/pt.png",
+      "flag": "flags/01-современные-страны/Португалия.png",
       "flagId": "iso:PT",
       "regionIds": [
         1660
@@ -1287,7 +1287,7 @@
       "ideology": "neutral",
       "capitalRegionId": 493,
       "color": "#bede1b",
-      "flag": "flags/pixel/qa.png",
+      "flag": "flags/01-современные-страны/Катар.png",
       "flagId": "iso:QA",
       "regionIds": [
         493
@@ -1299,7 +1299,7 @@
       "ideology": "neutral",
       "capitalRegionId": 60,
       "color": "#c7e52e",
-      "flag": "flags/pixel/cg.png",
+      "flag": "flags/02-исторические-государства/Республика Конго.png",
       "flagId": "iso:CG",
       "regionIds": [
         60,
@@ -1321,7 +1321,7 @@
       "ideology": "neutral",
       "capitalRegionId": 592,
       "color": "#cde845",
-      "flag": "flags/pixel/rw.png",
+      "flag": "flags/01-современные-страны/Руанда.png",
       "flagId": "iso:RW",
       "regionIds": [
         592
@@ -1333,7 +1333,7 @@
       "ideology": "neutral",
       "capitalRegionId": 360,
       "color": "#d3eb5c",
-      "flag": "flags/pixel/ss.png",
+      "flag": "flags/01-современные-страны/Южный Судан.png",
       "flagId": "iso:SS",
       "regionIds": [
         28,
@@ -1356,7 +1356,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2652,
       "color": "#d9ee72",
-      "flag": "flags/pixel/sh.png",
+      "flag": "flags/01-современные-страны/Остров Святой Елены.png",
       "flagId": "iso:SH",
       "regionIds": [
         2652
@@ -1368,7 +1368,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2666,
       "color": "#dff089",
-      "flag": "flags/pixel/st.png",
+      "flag": "flags/01-современные-страны/Сан-Томе и Принсипи.png",
       "flagId": "iso:ST",
       "regionIds": [
         2666
@@ -1380,7 +1380,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1992,
       "color": "#8bc11f",
-      "flag": "flags/pixel/sa.png",
+      "flag": "flags/01-современные-страны/Саудовская Аравия.png",
       "flagId": "iso:SA",
       "regionIds": [
         494,
@@ -1439,7 +1439,7 @@
       "ideology": "neutral",
       "capitalRegionId": 462,
       "color": "#9bd723",
-      "flag": "flags/pixel/sn.png",
+      "flag": "flags/01-современные-страны/Сенегал.png",
       "flagId": "iso:SN",
       "regionIds": [
         461,
@@ -1458,7 +1458,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2505,
       "color": "#a6de35",
-      "flag": "flags/pixel/sc.png",
+      "flag": "flags/01-современные-страны/Сейшельские Острова.png",
       "flagId": "iso:SC",
       "regionIds": [
         2505
@@ -1470,7 +1470,7 @@
       "ideology": "neutral",
       "capitalRegionId": 344,
       "color": "#b0e24b",
-      "flag": "flags/pixel/sl.png",
+      "flag": "flags/01-современные-страны/Сьерра-Леоне.png",
       "flagId": "iso:SL",
       "regionIds": [
         344,
@@ -1484,7 +1484,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7025,
       "color": "#b9e561",
-      "flag": "flags/pixel/so.png",
+      "flag": "flags/01-современные-страны/Сомали.png",
       "flagId": "iso:SO",
       "regionIds": [
         30,
@@ -1512,7 +1512,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7046,
       "color": "#c3e977",
-      "flag": "flags/pixel/za.png",
+      "flag": "flags/01-современные-страны/ЮАР.png",
       "flagId": "iso:ZA",
       "regionIds": [
         82,
@@ -1549,7 +1549,7 @@
       "ideology": "neutral",
       "capitalRegionId": 2460,
       "color": "#cdec8d",
-      "flag": "flags/pixel/es.png",
+      "flag": "flags/01-современные-страны/Испания.png",
       "flagId": "iso:ES",
       "regionIds": [
         2460,
@@ -1564,7 +1564,7 @@
       "ideology": "neutral",
       "capitalRegionId": 8251,
       "color": "#70c819",
-      "flag": "flags/pixel/sd.png",
+      "flag": "flags/01-современные-страны/Судан.png",
       "flagId": "iso:SD",
       "regionIds": [
         357,
@@ -1629,7 +1629,7 @@
       "ideology": "neutral",
       "capitalRegionId": 85,
       "color": "#8ae52e",
-      "flag": "flags/pixel/sy.png",
+      "flag": "flags/01-современные-страны/Сирия.png",
       "flagId": "iso:SY",
       "regionIds": [
         1367,
@@ -1649,7 +1649,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1139,
       "color": "#96e845",
-      "flag": "flags/pixel/tg.png",
+      "flag": "flags/01-современные-страны/Того.png",
       "flagId": "iso:TG",
       "regionIds": [
         1137,
@@ -1662,7 +1662,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1900,
       "color": "#a3eb5c",
-      "flag": "flags/pixel/tn.png",
+      "flag": "flags/01-современные-страны/Тунис.png",
       "flagId": "iso:TN",
       "regionIds": [
         273,
@@ -1681,7 +1681,7 @@
       "ideology": "neutral",
       "capitalRegionId": 3729,
       "color": "#b0ee72",
-      "flag": "flags/pixel/tr.png",
+      "flag": "flags/01-современные-страны/Турция.png",
       "flagId": "iso:TR",
       "regionIds": [
         381,
@@ -1703,7 +1703,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7886,
       "color": "#bdf089",
-      "flag": "flags/pixel/tm.png",
+      "flag": "flags/01-современные-страны/Туркмения.png",
       "flagId": "iso:TM",
       "regionIds": [
         7886
@@ -1715,7 +1715,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1444,
       "color": "#55c11f",
-      "flag": "flags/pixel/ug.png",
+      "flag": "flags/01-современные-страны/Уганда.png",
       "flagId": "iso:UG",
       "regionIds": [
         3618,
@@ -1736,7 +1736,7 @@
       "ideology": "neutral",
       "capitalRegionId": 443,
       "color": "#5fd723",
-      "flag": "flags/pixel/ae.png",
+      "flag": "flags/01-современные-страны/Объединённые Арабские Эмираты.png",
       "flagId": "iso:AE",
       "regionIds": [
         440,
@@ -1749,7 +1749,7 @@
       "ideology": "neutral",
       "capitalRegionId": 14,
       "color": "#6ede35",
-      "flag": "flags/pixel/gb.png",
+      "flag": "flags/01-современные-страны/Великобритания.png",
       "flagId": "iso:GB",
       "regionIds": [
         14,
@@ -1762,7 +1762,7 @@
       "ideology": "neutral",
       "capitalRegionId": 3773,
       "color": "#7de24b",
-      "flag": "flags/pixel/tz.png",
+      "flag": "flags/01-современные-страны/Танзания.png",
       "flagId": "iso:TZ",
       "regionIds": [
         38,
@@ -1803,7 +1803,7 @@
       "ideology": "neutral",
       "capitalRegionId": 7989,
       "color": "#8de561",
-      "flag": "flags/pixel/ye.png",
+      "flag": "flags/01-современные-страны/Йемен.png",
       "flagId": "iso:YE",
       "regionIds": [
         1380,
@@ -1838,7 +1838,7 @@
       "ideology": "neutral",
       "capitalRegionId": 1060,
       "color": "#9de977",
-      "flag": "flags/pixel/zm.png",
+      "flag": "flags/01-современные-страны/Замбия.png",
       "flagId": "iso:ZM",
       "regionIds": [
         337,
@@ -1864,7 +1864,7 @@
       "ideology": "neutral",
       "capitalRegionId": 496,
       "color": "#adec8d",
-      "flag": "flags/pixel/zw.png",
+      "flag": "flags/01-современные-страны/Зимбабве.png",
       "flagId": "iso:ZW",
       "regionIds": [
         496,
