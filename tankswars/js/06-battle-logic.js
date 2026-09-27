@@ -562,6 +562,16 @@
       return 0;
     }
 
+    function getBattleMasteryAward(level) {
+      const normalizedLevel = normalizeNumber(level);
+
+      if (normalizedLevel >= 4) return { id: "master", title: "\u041c\u0430\u0441\u0442\u0435\u0440", mark: "M" };
+      if (normalizedLevel >= 3) return { id: "first", title: "I \u0441\u0442\u0435\u043f\u0435\u043d\u044c", mark: "I" };
+      if (normalizedLevel >= 2) return { id: "second", title: "II \u0441\u0442\u0435\u043f\u0435\u043d\u044c", mark: "II" };
+      if (normalizedLevel >= 1) return { id: "third", title: "III \u0441\u0442\u0435\u043f\u0435\u043d\u044c", mark: "III" };
+      return null;
+    }
+
     function getReplayTankLabel(tank) {
       if (!tank) {
         return "-";
@@ -3410,6 +3420,7 @@
       }
 
       playerResources.silver = Math.max(0, normalizeNumber(playerResources.silver) + stats.silver);
+      stats.masteryLevel = calculateBattleMasteryLevel(result, stats, tank);
       recordBattleStats(result, stats, tank);
       recordDailyTaskProgress(result, stats, tank);
       recordBattlePassProgress(result, stats);
@@ -3472,6 +3483,34 @@
       return `${number > 0 ? "+" : "-"}${formatStoredNumber(Math.abs(number))}`;
     }
 
+    function createBattleMasteryResultStat(level) {
+      const stat = document.createElement("div");
+      const label = document.createElement("div");
+      const value = document.createElement("div");
+      const mastery = getBattleMasteryAward(level);
+
+      stat.className = "battleResultStat battleMasteryResult";
+      label.className = "battleResultLabel";
+      value.className = "battleResultValue";
+      label.textContent = "\u0417\u043d\u0430\u043a \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u0441\u0442\u0438 \u0437\u0430 \u0431\u043e\u0439";
+
+      if (!mastery) {
+        value.textContent = "\u041d\u0435 \u043f\u043e\u043b\u0443\u0447\u0435\u043d";
+      } else {
+        const badge = document.createElement("span");
+        const title = document.createElement("span");
+        badge.className = `tankMasteryBadge ${mastery.id}`;
+        badge.textContent = mastery.mark;
+        badge.title = `\u0417\u043d\u0430\u043a \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u0441\u0442\u0438 \u0437\u0430 \u044d\u0442\u043e\u0442 \u0431\u043e\u0439: ${mastery.title}`;
+        title.className = "battleMasteryTitle";
+        title.textContent = mastery.title;
+        value.append(badge, title);
+      }
+
+      stat.append(label, value);
+      return stat;
+    }
+
     function renderBattleResultPanel(result, stats) {
       const panel = document.createElement("div");
       const title = document.createElement("div");
@@ -3500,6 +3539,7 @@
       closeButton.addEventListener("click", stopBattle);
 
       grid.append(
+        createBattleMasteryResultStat(stats.masteryLevel),
         createResultStat("\u0423\u0440\u043e\u043d", formatStoredNumber(stats.damage)),
         createResultStat("\u0423\u0440\u043e\u043d \u043f\u043e \u0432\u0430\u0448\u0435\u043c\u0443 \u0437\u0430\u0441\u0432\u0435\u0442\u0443", formatStoredNumber(stats.assistedDamage)),
         createResultStat("\u0417\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u043e", formatStoredNumber(stats.blockedDamage)),

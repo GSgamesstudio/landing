@@ -527,11 +527,12 @@
   }
 
   function focusCsvKey(countryName, scenarioYear) {
-    return `${countryName}[${Number(scenarioYear) || scenarioYear}]`;
+    return `${String(countryName || "").toLocaleLowerCase("ru-RU")}[${Number(scenarioYear) || scenarioYear}]`;
   }
 
   function focusCsvPath(countryName, scenarioYear) {
-    return `${FOCUS_CSV_DIR}/${encodeURIComponent(`${focusCsvKey(countryName, scenarioYear)}.csv`)}`;
+    const key = focusCsvKey(countryName, scenarioYear);
+    return `${FOCUS_CSV_DIR}/${encodeURIComponent(csvFocusFileByKey.get(key) || `${key}.csv`)}`;
   }
 
   async function loadFocusManifest() {
@@ -544,7 +545,10 @@
         const manifest = await response.json();
         (Array.isArray(manifest.files) ? manifest.files : []).forEach((file) => {
           const name = String(file || "").replace(/\.csv$/i, "");
-          if (name) csvFocusAvailable.add(name);
+          if (!name) return;
+          const key = name.toLocaleLowerCase("ru-RU");
+          csvFocusAvailable.add(key);
+          csvFocusFileByKey.set(key, String(file));
         });
       })
       .catch((error) => {
@@ -1333,6 +1337,7 @@
       if (!template || !target) return;
       target.stability = clamp(target.stability + (template.effects.targetStability || 0), 0, 100);
       target.factories = Math.max(0, target.factories + (template.effects.targetFactories || 0));
+      if (template.effects.revealArmies) runtime.armyIntel[String(operation.targetId)] = true;
       setRelation(runtime.countryId, operation.targetId, getRelation(runtime.countryId, operation.targetId) + (template.effects.relation || 0));
       applyModifierEffects(runtime, template.effects);
       if (!options.silent && Number(runtime.countryId) === Number(strategyState.playerCountryId)) addLog(`Операция завершена: ${template.name}.`);

@@ -26,7 +26,7 @@
       const scenarioPct = (scenarioCount / Math.max(1, mapCount * TARGET_SCENARIOS_PER_MAP)) * 100;
       const flagPct = CURRENT_FLAGS / TARGET_FLAGS * 100;
       const focusCountries = new Set(focusFiles.map((file) => file.replace(/\[\d{4}\]\.csv$/u, ""))).size;
-      const currentCountries = scenarios.scenarios.find((item) => item.file === "2026.json")?.countries || 220;
+      const currentCountries = scenarios.scenarios.find((item) => item.file === "Мир 2026.json")?.countries || 220;
       const focusPct = focusCountries / currentCountries * 100;
       overview.innerHTML = [
         `<div class="ring-card">${ring(scenarioPct, "Сценарии", `${scenarioCount} из ${mapCount * TARGET_SCENARIOS_PER_MAP} плановых`)}</div>`,

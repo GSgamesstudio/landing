@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const CACHE_VERSION = '20260913-143000';
+  const CACHE_VERSION = '20260925-000003';
   const modules = ['js/app-01.js', 'js/app-02.js', 'js/app-03.js', 'js/app-04.js', 'js/app-05.js'];
   Promise.all(modules.map(async (path) => {
     const response = await fetch(path + '?v=' + CACHE_VERSION, { cache: 'no-store' });
