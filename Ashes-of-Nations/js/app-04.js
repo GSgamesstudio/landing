@@ -1531,6 +1531,16 @@
     const runtime = currentPlayerState();
     const operation = INTELLIGENCE_OPERATIONS.find((item) => item.id === operationId);
     if (!runtime || !operation || !targetId || !canPayRuntimeCost(runtime, operation.cost)) return;
+    if (operation.effects.revealArmies && runtime.armyIntel?.[String(targetId)]) {
+      addLog("Разведданные о войсках этой страны уже получены.");
+      renderStrategyPanel();
+      return;
+    }
+    if (operation.effects.revealArmies && runtime.operations.some((item) => item.operationId === operation.id && Number(item.targetId) === Number(targetId))) {
+      addLog("Разведка войск этой страны уже проводится.");
+      renderStrategyPanel();
+      return;
+    }
     payRuntimeCost(runtime, operation.cost);
     runtime.operations.push({
       operationId,
@@ -2191,6 +2201,7 @@
             ${INTELLIGENCE_OPERATIONS.map((operation) => `<option value="${operation.id}">${operation.name} · ${operation.days} дн.</option>`).join("")}
           </select>
           <button class="mini-button" type="button" data-action="operation">Начать операцию</button>
+          <small>«Разведка войск» открывает на карте армии выбранной страны после завершения операции.</small>
           ${currentPlayerState().operations.length ? currentPlayerState().operations.map((operation) => {
             const template = INTELLIGENCE_OPERATIONS.find((item) => item.id === operation.operationId);
             const target = countryById(operation.targetId);

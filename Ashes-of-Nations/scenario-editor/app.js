@@ -152,7 +152,7 @@
     const maps = catalogEntries(window.MAPS_CATALOG);
     const scenarios = catalogEntries(window.SCENARIOS_CATALOG);
     maps.forEach((map, index) => projectMapSelect.add(new Option(map.name || map.file, String(index))));
-    scenarios.forEach((scenario, index) => projectScenarioSelect.add(new Option(`${scenario.name || scenario.file} · ${scenario.year || ""}`, String(index))));
+    scenarios.forEach((scenario, index) => projectScenarioSelect.add(new Option(scenario.name || scenario.file, String(index))));
     loadProjectMapButton.disabled = maps.length === 0;
     loadProjectScenarioButton.disabled = scenarios.length === 0;
   }

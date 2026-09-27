@@ -82,7 +82,7 @@
   const FOCUS_CSV_DIR = "focuses";
   const CATALOG_REFRESH_MS = 30000;
   // Change this number whenever bundled UI/assets change to invalidate browser caches.
-  const CACHE_VERSION = "20260913-143000";
+  const CACHE_VERSION = "20260913-151500";
   const NUCLEAR_CAPABLE_COUNTRIES = new Set(["Россия", "СССР", "США", "Китай", "Франция", "Великобритания", "Индия", "Пакистан", "КНДР", "Израиль"]);
 
   let peace3dRenderer = null;
@@ -690,6 +690,7 @@
 
   const INTELLIGENCE_OPERATIONS = [
     { id: "network", name: "Создать сеть агентов", cost: { intel: 15, politicalPower: 25 }, days: 35, effects: { intel: 35 } },
+    { id: "recon-armies", name: "Разведка войск", cost: { intel: 12, politicalPower: 15 }, days: 14, effects: { revealArmies: true } },
     { id: "propaganda", name: "Пропагандистская кампания", cost: { intel: 10, politicalPower: 20 }, days: 28, effects: { targetStability: -4, relation: -8 } },
     { id: "sabotage", name: "Саботаж заводов", cost: { intel: 25, politicalPower: 35 }, days: 45, effects: { targetFactories: -1, relation: -18 } },
     { id: "steal-blueprints", name: "Похитить чертежи", cost: { intel: 30, politicalPower: 30 }, days: 50, effects: { rare: 15, armyXp: 10 } },
@@ -1076,6 +1077,7 @@
   const missingCsvFocusTrees = new Set();
   const csvFocusTreeLoads = new Map();
   const csvFocusAvailable = new Set();
+  const csvFocusFileByKey = new Map();
   let csvFocusManifestLoaded = false;
   let csvFocusManifestLoad = null;
   let gameTimer = null;

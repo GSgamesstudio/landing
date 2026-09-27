@@ -820,6 +820,7 @@
       doctrines: [],
       constructions: [],
       operations: [],
+      armyIntel: {},
       characters: countryCharacters(country, year).map((template, index) => ({
         ...template,
         loyalty: clamp(58 + (hashNumber(`${country.id}:${template.id}`) % 28) - index * 2, 25, 92),
@@ -1020,6 +1021,7 @@
       else runtime.activeGeneralId = null;
     }
     runtime.armies = Array.isArray(runtime.armies) ? runtime.armies : [];
+    if (!runtime.armyIntel || typeof runtime.armyIntel !== "object" || Array.isArray(runtime.armyIntel)) runtime.armyIntel = {};
     runtime.armies.forEach((army) => {
       if (!Object.prototype.hasOwnProperty.call(army, "order")) army.order = "";
       if (!Object.prototype.hasOwnProperty.call(army, "lastSupply")) army.lastSupply = 100;
@@ -1743,7 +1745,7 @@
   async function preloadHistoricalTerritoryProfiles() {
     if (historicalTerritoryProfilesLoaded) return;
     const profiles = window.HISTORICAL_TERRITORY_PROFILES || [];
-    const loadModernWorld = fetch(`scenarios/2026.json?v=${Date.now()}`, { cache: "no-store" })
+    const loadModernWorld = fetch(`scenarios/Мир 2026.json?v=${Date.now()}`, { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((scenario) => { historicalModernWorldScenario = scenario; })
       .catch((error) => console.warn("Не удалось загрузить эталон современного мира.", error));

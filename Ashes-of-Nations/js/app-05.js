@@ -1238,6 +1238,11 @@
     drawArmyVectorLabel(x, y, label, halfWidth);
   }
 
+  function hasArmyIntelligence(countryId) {
+    const playerId = Number(strategyState?.playerCountryId);
+    return Number(countryId) === playerId || Boolean(currentPlayerState()?.armyIntel?.[String(countryId)]);
+  }
+
   function drawArmyVectorLabel(x, y, label, halfWidth) {
     if (!armyTextLayer) return;
     const ns = "http://www.w3.org/2000/svg";
@@ -1367,10 +1372,12 @@
     if (!image) return null;
     if (!flagTextureCache.has(path)) {
       const canvas = document.createElement("canvas");
-      canvas.width = 192;
+      // A country flag can span most of the map. 192×108 made detailed coats
+      // of arms turn into visible block mosaics after that expansion.
+      canvas.width = 640;
       // Keep the source flag at 16:9 so map-mode sampling never introduces
       // an independent horizontal/vertical stretch.
-      canvas.height = 108;
+      canvas.height = 360;
       const context = canvas.getContext("2d", { willReadFrequently: true });
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       flagTextureCache.set(path, context.getImageData(0, 0, canvas.width, canvas.height));
@@ -1607,21 +1614,6 @@
     const usesGeoWaterColor = ["terrain", "water", "strategic", "logistics"].includes(mapMode);
     const countryStats = new Map();
     const flagTerritoryMode = mapMode === "political" && userSettings.politicalMap === "flags";
-    const flagBounds = new Map();
-    if (flagTerritoryMode) {
-      scenario.countries.forEach((country) => {
-        const bounds = { minX: map.width, maxX: 0, minY: map.height, maxY: 0 };
-        (country.regionIds || []).forEach((regionId) => {
-          const sample = gameData.regionLabelSamples.get(Number(regionId));
-          if (!sample?.count) return;
-          bounds.minX = Math.min(bounds.minX, sample.minX);
-          bounds.maxX = Math.max(bounds.maxX, sample.maxX);
-          bounds.minY = Math.min(bounds.minY, sample.minY);
-          bounds.maxY = Math.max(bounds.maxY, sample.maxY);
-        });
-        if (bounds.maxX > bounds.minX && bounds.maxY > bounds.minY) flagBounds.set(Number(country.id), bounds);
-      });
-    }
     scenario.countries.forEach((country) => {
       (country.regionIds || []).forEach((regionId) => ownerByRegion.set(Number(regionId), country));
     });
@@ -1638,6 +1630,39 @@
       }
     });
     gameData.controllerByRegion = controllerByRegion;
+    const flagBoundsByRegion = new Map();
+    if (flagTerritoryMode) {
+      const unvisited = new Set([...controllerByRegion.keys()]);
+      while (unvisited.size) {
+        const firstRegionId = unvisited.values().next().value;
+        const country = controllerByRegion.get(firstRegionId);
+        const component = [];
+        const queue = [firstRegionId];
+        unvisited.delete(firstRegionId);
+        while (queue.length) {
+          const regionId = queue.pop();
+          component.push(regionId);
+          (gameData.regionAdjacency.get(regionId) || []).forEach((neighborId) => {
+            if (unvisited.has(neighborId) && controllerByRegion.get(neighborId) === country) {
+              unvisited.delete(neighborId);
+              queue.push(neighborId);
+            }
+          });
+        }
+        const bounds = { minX: map.width, maxX: 0, minY: map.height, maxY: 0 };
+        component.forEach((regionId) => {
+          const sample = gameData.regionLabelSamples.get(regionId);
+          if (!sample?.count) return;
+          bounds.minX = Math.min(bounds.minX, sample.minX);
+          bounds.maxX = Math.max(bounds.maxX, sample.maxX);
+          bounds.minY = Math.min(bounds.minY, sample.minY);
+          bounds.maxY = Math.max(bounds.maxY, sample.maxY);
+        });
+        if (bounds.maxX > bounds.minX && bounds.maxY > bounds.minY) {
+          component.forEach((regionId) => flagBoundsByRegion.set(regionId, bounds));
+        }
+      }
+    }
     gameData.maxRuntimeGdp = Math.max(...allCountryStates().map((runtime) => runtime.gdp || 1), 1);
     gameData.regionById.forEach((region, regionId) => {
       const country = controllerByRegion.get(regionId);
@@ -1676,7 +1701,7 @@
         const regionId = regionAtPixel[index];
         let packed = regionRenderPacked[regionId];
         const flagCountry = flagTerritoryMode ? controllerByRegion.get(regionId) : null;
-        const bounds = flagCountry ? flagBounds.get(Number(flagCountry.id)) : null;
+        const bounds = flagCountry ? flagBoundsByRegion.get(regionId) : null;
         const texture = bounds ? flagTexture(flagCountry.flag) : null;
         if (texture) {
           const boundsWidth = Math.max(1, bounds.maxX - bounds.minX);
@@ -1752,7 +1777,7 @@
     });
 
     const runtimeArmies = strategyState ? allCountryStates().flatMap((runtime) => runtime.armies) : (scenario.armies || []);
-    runtimeArmies.forEach((army) => {
+    runtimeArmies.filter((army) => hasArmyIntelligence(army.ownerCountryId)).forEach((army) => {
       const drawRegionId = Number(army.regionId);
       const center = centers.get(drawRegionId);
       if (!center) return;
@@ -2094,7 +2119,7 @@
     historicalViewerMode = true;
     tutorialCampaign = false;
     selectedMap = maps.find((map) => map.file === "мир.json") || { file: "мир.json", path: "maps/мир.json", name: "Мир" };
-    selectedScenario = scenarios.find((scenario) => scenario.file === "1960.json") || { file: "1960.json", path: "scenarios/1960.json", name: "Мир 1960", year: 1960 };
+    selectedScenario = scenarios.find((scenario) => scenario.file === "Мир 1960.json") || { file: "Мир 1960.json", path: "scenarios/Мир 1960.json", name: "Мир 1960", year: 1960 };
     try {
       const response = await fetch(`${selectedScenario.path}?v=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);

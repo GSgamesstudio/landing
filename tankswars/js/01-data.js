@@ -492,7 +492,7 @@
 
     function loadPlayerResources() {
       playerResources.blueprints = normalizeNumber(getCookie("blueprints") || 0);
-      playerResources.silver = normalizeNumber(getCookie("silver") || 10000);
+      playerResources.silver = normalizeNumber(getCookie("silver") || 100000);
       playerResources.gold = normalizeNumber(getCookie("gold") || 100);
       setCookie("blueprints", playerResources.blueprints);
       setCookie("silver", playerResources.silver);

@@ -1908,6 +1908,24 @@
       color: #f3d248;
     }
 
+    .battleMasteryResult .battleResultValue {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .battleMasteryResult .tankMasteryBadge {
+      margin: 0;
+      min-width: 40px;
+      height: 34px;
+      font-size: 17px;
+    }
+
+    .battleMasteryTitle {
+      color: #f3d248;
+      font-size: clamp(18px, 1.7vw, 26px);
+    }
+
     .battleResultClose {
       width: 100%;
       min-height: 54px;

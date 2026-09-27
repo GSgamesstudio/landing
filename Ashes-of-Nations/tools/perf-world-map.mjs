@@ -3,7 +3,7 @@ import { performance } from "node:perf_hooks";
 
 const ROOT = new URL("../", import.meta.url);
 const MAP_PATH = new URL("maps/%D0%BC%D0%B8%D1%80.json", ROOT);
-const SCENARIO_PATH = new URL("scenarios/2026.json", ROOT);
+const SCENARIO_PATH = new URL("scenarios/Мир 2026.json", ROOT);
 const RENDER_RUNS = 8;
 const TURN_RUNS = 35;
 
