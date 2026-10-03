@@ -64,7 +64,7 @@
   let selectedAdministrativeRegionId = null;
   let mapMode = "territory";
 
-  const PROJECT_CACHE_VERSION = "20260912-154513";
+  const PROJECT_CACHE_VERSION = "20261001-173203";
 
   function hexToRgb(hex) {
     const value = hex.replace("#", "");

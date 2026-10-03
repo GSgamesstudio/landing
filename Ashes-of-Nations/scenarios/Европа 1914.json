@@ -7,7 +7,7 @@
     "name": "Европа",
     "width": 1500,
     "height": 920,
-    "file": null
+    "file": "Европа.json"
   },
   "countries": [
     {
@@ -90,13 +90,30 @@
         888,
         889,
         890,
+        11194,
+        11195,
         891,
         892,
         893,
+        11183,
+        11184,
+        11185,
+        11186,
+        11187,
         894,
+        11173,
+        11174,
+        11175,
+        11176,
+        11177,
         895,
         896,
         897,
+        11178,
+        11179,
+        11180,
+        11181,
+        11182,
         899,
         903,
         934,
@@ -134,14 +151,22 @@
         1600,
         1609,
         1610,
+        11193,
         1777,
         1778,
         1779,
         1780,
         1781,
         2227,
+        11188,
+        11189,
+        11190,
+        11191,
+        11192,
         2228,
         2229,
+        11196,
+        11197,
         2318,
         2319,
         2326,
@@ -3409,7 +3434,21 @@
     {
       "regionId": 890,
       "countryId": 1,
-      "name": "Сумская область",
+      "name": "Сумская область — север",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11194,
+      "countryId": 1,
+      "name": "Сумская область — юго-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11195,
+      "countryId": 1,
+      "name": "Сумская область — юго-восток",
       "level": "region",
       "parentRegionId": null
     },
@@ -3430,14 +3469,84 @@
     {
       "regionId": 893,
       "countryId": 1,
-      "name": "Харьковская область",
+      "name": "Харьковская область — северо-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11183,
+      "countryId": 1,
+      "name": "Харьковская область — северо-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11184,
+      "countryId": 1,
+      "name": "Харьковская область — центр-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11185,
+      "countryId": 1,
+      "name": "Харьковская область — центр-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11186,
+      "countryId": 1,
+      "name": "Харьковская область — юго-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11187,
+      "countryId": 1,
+      "name": "Харьковская область — юго-восток",
       "level": "region",
       "parentRegionId": null
     },
     {
       "regionId": 894,
       "countryId": 1,
-      "name": "Луганская Народная Республика",
+      "name": "Луганская Народная Республика — северо-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11173,
+      "countryId": 1,
+      "name": "Луганская Народная Республика — северо-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11174,
+      "countryId": 1,
+      "name": "Луганская Народная Республика — центр-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11175,
+      "countryId": 1,
+      "name": "Луганская Народная Республика — центр-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11176,
+      "countryId": 1,
+      "name": "Луганская Народная Республика — юго-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11177,
+      "countryId": 1,
+      "name": "Луганская Народная Республика — юго-восток",
       "level": "region",
       "parentRegionId": null
     },
@@ -3458,7 +3567,42 @@
     {
       "regionId": 897,
       "countryId": 1,
-      "name": "Донецкая Народная Республика",
+      "name": "Донецкая Народная Республика — северо-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11178,
+      "countryId": 1,
+      "name": "Донецкая Народная Республика — северо-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11179,
+      "countryId": 1,
+      "name": "Донецкая Народная Республика — центр-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11180,
+      "countryId": 1,
+      "name": "Донецкая Народная Республика — центр-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11181,
+      "countryId": 1,
+      "name": "Донецкая Народная Республика — юго-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11182,
+      "countryId": 1,
+      "name": "Донецкая Народная Республика — юго-восток",
       "level": "region",
       "parentRegionId": null
     },
@@ -4270,7 +4414,14 @@
     {
       "regionId": 1610,
       "countryId": 1,
-      "name": "Херсонская область",
+      "name": "Херсонская область — правый берег Днепра",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11193,
+      "countryId": 1,
+      "name": "Херсонская область — левый берег Днепра",
       "level": "region",
       "parentRegionId": null
     },
@@ -4711,7 +4862,42 @@
     {
       "regionId": 2227,
       "countryId": 1,
-      "name": "Запорожская область",
+      "name": "Запорожская область — северо-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11188,
+      "countryId": 1,
+      "name": "Запорожская область — северо-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11189,
+      "countryId": 1,
+      "name": "Запорожская область — центр-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11190,
+      "countryId": 1,
+      "name": "Запорожская область — центр-восток",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11191,
+      "countryId": 1,
+      "name": "Запорожская область — юго-запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11192,
+      "countryId": 1,
+      "name": "Запорожская область — юго-восток",
       "level": "region",
       "parentRegionId": null
     },
@@ -4725,7 +4911,21 @@
     {
       "regionId": 2229,
       "countryId": 1,
-      "name": "Николаевская область",
+      "name": "Николаевская область — запад",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11196,
+      "countryId": 1,
+      "name": "Николаевская область — центр",
+      "level": "region",
+      "parentRegionId": null
+    },
+    {
+      "regionId": 11197,
+      "countryId": 1,
+      "name": "Николаевская область — восток",
       "level": "region",
       "parentRegionId": null
     },

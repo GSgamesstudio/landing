@@ -2452,6 +2452,7 @@
       await runAiTurnAsync();
       if (!strategyState || !gameData) return;
       strategyState.date.setDate(strategyState.date.getDate() + 1);
+      applyRecognitionPressure();
       runHistoricalEvents();
       applyImperialDefeats();
       if (historicalViewerMode && strategyState?.historicalWorldModernized) stopRealtimeClock();

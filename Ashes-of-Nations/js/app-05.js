@@ -38,6 +38,7 @@
 
   function renderWars() {
     const activeWars = strategyState.wars.filter((war) => war.active);
+    const novorossiyaProgress = novorossiyaOccupationProgress();
     const capitulationTargets = [...new Map(activeWars.flatMap((war) => [war.attackerId, war.defenderId])
       .map((id) => countryById(id))
       .filter((country) => country && Number(country.id) !== Number(strategyState.playerCountryId))
@@ -52,6 +53,7 @@
     strategyContent.innerHTML = `
       <section class="tab-section">
         <h3>Войны</h3>
+        ${novorossiyaProgress ? `<article class="strategy-card accent-card"><header><strong>Провозглашение Новороссии</strong><small>${novorossiyaProgress.occupied.length}/${novorossiyaProgress.regionIds.length} регионов занято</small></header><p>Условие: полностью занять восемь областей, связанных с первоначальным проектом Новороссии. Крым в цель не входит. После провозглашения государство получит максимальную зависимость от России.</p><button class="primary-button" type="button" data-action="proclaim-novorossiya" ${novorossiyaProgress.complete ? "" : "disabled"}>Провозгласить Новороссию</button></article>` : ""}
         <article class="strategy-card">
           <strong>Объявить войну</strong>
           <select id="warTarget" class="strategy-select">${countryOptions()}</select>
@@ -327,7 +329,7 @@
           <button class="mini-button" type="button" data-action="recruit-selected" ${owner?.id !== player.id || !profile ? "disabled" : ""}>Сформировать армию здесь</button>
           <button class="mini-button" type="button" data-action="integrate" data-id="${id}" ${occupiedByPlayer ? "" : "disabled"}>Интегрировать оккупацию</button>
           <button class="mini-button" type="button" data-action="release-occupation" data-id="${id}" ${occupiedByPlayer ? "" : "disabled"}>Деоккупировать</button>
-          <button class="mini-button" type="button" data-action="create-region-country" data-id="${id}" ${occupiedByPlayer ? "" : "disabled"}>Создать страну</button>
+          ${occupiedByPlayer ? renderOccupationProclamationChoices(id) : ""}
         </article>
         ${occupiedByPlayer ? `
           <article class="strategy-card accent-card">
@@ -406,6 +408,14 @@
             <small>Кризисы: ${assembly.wars} войн, ${assembly.sanctions} санкционных пакетов, ${assembly.countries} затронутых стран.</small>
           ` : `<small>${strategyState.lastUNGeneralAssemblyAt ? `Последняя сессия: ${gameDateLabel(new Date(`${strategyState.lastUNGeneralAssemblyAt}T00:00:00`), { short: true })}` : "Сессий в этом сохранении ещё не было."}</small>`}
         </article>
+        ${Number(gameData?.scenario?.year) >= 1945 && strategyState.recognition?.unMembers?.includes(playerId) ? `
+          <article class="strategy-card">
+            <header><strong>Резолюция Генассамблеи</strong><small>3 политической силы · одна в год</small></header>
+            <p>Внесите рекомендательное решение по досье признания. Голоса моделируются по позициям стран; результат не меняет их признание автоматически.</p>
+            <label class="peace-field"><span>Досье</span><select id="unResolutionEntity" class="strategy-select">${(strategyState.recognition.entities || []).map((entity) => `<option value="${entity.key}">${entity.name}</option>`).join("")}</select></label>
+            <button class="mini-button" type="button" data-action="un-resolution" ${currentPlayerState().politicalPower < 3 ? "disabled" : ""}>Внести резолюцию за текущую позицию</button>
+            ${(strategyState.unResolutionHistory || []).slice(-5).reverse().map((item) => `<small>${item.year} · ${item.entityName}: ${item.passed ? "принята" : "отклонена"} · за ${item.votes.yes.length}, против ${item.votes.no.length}, воздержались ${item.votes.abstain.length}</small>`).join("")}
+          </article>` : ""}
         ${treaties.map((treaty) => `
           <article class="strategy-card done">
             <header class="organization-card-header">
@@ -526,6 +536,55 @@
     return Boolean(element && strategyContent.contains(element) && /^(SELECT|INPUT|BUTTON|TEXTAREA)$/.test(element.tagName));
   }
 
+  function renderUnitedNationsPanel() {
+    const year = Number(gameData?.scenario?.year) || 0;
+    const data = strategyState.recognition;
+    const entities = data.entities || [];
+    if (!entities.some((entity) => entity.key === recognitionTargetKey)) recognitionTargetKey = entities[0]?.key || "";
+    const selected = entities.find((entity) => entity.key === recognitionTargetKey) || entities[0];
+    const playerId = Number(strategyState.playerCountryId);
+    const playerRecognitionPressure = recognitionPressureForCountry(playerId);
+    const playerPosition = selected?.kind === "government" ? selected.governmentBy?.[playerId] : selected?.kind === "territory" ? selected.territoryBy?.[playerId] : "";
+    const playerRecognizes = selected?.kind === "state" && selected.recognizedBy?.includes(playerId);
+    if (selected?.governments?.length && !selected.governments.includes(recognitionMapPosition)) recognitionMapPosition = selected.governments[0];
+    const scenarioCountryCount = gameData.scenario.countries.length;
+    const recognizedCountries = (ids) => ids.map(countryById).filter(Boolean).map((country) => country.name).join(", ") || "Пока никто из стран этого сценария";
+    const positionsByCountry = selected?.kind === "government" ? selected.governmentBy : selected?.kind === "territory" ? selected.territoryBy : null;
+    const positionDetails = positionsByCountry ? Object.entries(positionsByCountry).map(([id, position]) => `${countryById(id)?.name || id}: ${position}`).join(" · ") : "";
+    const positionCounts = positionsByCountry ? Object.entries(positionsByCountry).reduce((counts, [, position]) => { counts[position] = (counts[position] || 0) + 1; return counts; }, {}) : {};
+    const statusLabel = selected?.kind === "territory" ? (playerPosition ? `позиция: ${playerPosition}` : "позиция не задана") : selected?.kind === "government" ? (playerPosition ? `признаёт: ${playerPosition}` : "не признаёт правительство") : (playerRecognizes ? "признаёт" : "не признаёт");
+    strategyContent.innerHTML = `
+      <section class="tab-section recognition-panel">
+        <h3>ООН и дипломатическое признание</h3>
+        ${selected?.key === "transnistria-status" ? `<article class="strategy-card"><header><strong>Принять ПМР под вассалитет</strong><small>10 политической силы</small></header><p>Доступно за Россию после фиксации позиции «Часть России». ПМР станет отдельной зависимой страной на карте.</p><button class="mini-button" type="button" data-action="accept-pmr-vassal" ${canAcceptTransnistriaVassalage() ? "" : "disabled"}>Предложить вассалитет ПМР</button></article>` : ""}
+        <article class="strategy-card accent-card">
+          <header><strong>Статус международных отношений</strong><small>сценарий ${year} · состояние сохраняется в партии</small></header>
+          <p>Членство в ООН, признание государства, признание конкретного правительства и позиция по спорной территории учитываются раздельно. Изменение позиции вашей страны влияет на отношения и отображается на карте.</p>
+          <div class="resource-grid">
+            <span class="resource-pill"><small>Члены ООН в сценарии</small><strong>${data.unMembers.length}</strong></span>
+            <span class="resource-pill"><small>Отдельные досье</small><strong>${entities.length}</strong></span>
+            <span class="resource-pill"><small>Ваша позиция</small><strong>${statusLabel}</strong></span>
+          </div>
+          ${playerRecognitionPressure ? `<small class="status-bad">Месячный дебаф за непризнание: −${Math.min(3, playerRecognitionPressure)} к политической силе и −${(0.25 * Math.min(3, playerRecognitionPressure)).toFixed(2)} стабильности. Давление возникает по государствам, признанным не менее чем 65% членов ООН.</small>` : ""}
+          <label class="peace-field"><span>Объект признания</span><select id="recognitionEntity" class="strategy-select">${entities.map((entity) => `<option value="${entity.key}" ${entity.key === selected?.key ? "selected" : ""}>${entity.name}${entity.nonMember ? " · вне ООН" : ""}${entity.historicalOnly ? " · историческое образование" : ""}</option>`).join("")}</select></label>
+          ${selected ? `<div class="recognition-dossier"><header><strong>${selected.name}</strong><small>${selected.kind === "government" ? "признание правительства" : selected.kind === "territory" ? "статус территории" : selected.nonMember ? "государство вне ООН" : "международный статус"}</small></header>${selected.statusText ? `<small>${selected.statusText}</small>` : ""}
+            ${selected.kind === "government" || selected.kind === "territory" ? `<label class="peace-field"><span>${selected.kind === "government" ? "Какую власть признаёт ваша страна" : "Как ваша страна считает территорию устроенной"}</span><select id="recognitionPosition" class="strategy-select"><option value="">Не признавать ни один вариант</option>${selected.governments.map((government) => `<option value="${government}" ${(selected.governmentBy?.[playerId] || selected.territoryBy?.[playerId]) === government ? "selected" : ""}>${government}</option>`).join("")}</select></label><button class="mini-button" type="button" data-action="recognition-position">Зафиксировать позицию</button>` : `<button class="${playerRecognizes ? "mini-button" : "primary-button"}" type="button" data-action="recognition-toggle" data-id="${selected.key}">${playerRecognizes ? "Отозвать признание" : "Признать государство"}</button>`}
+            <button class="mini-button" type="button" data-action="recognition-map">Показать карту признания</button>
+            <small>${selected.kind === "territory" || selected.kind === "government" ? "Зелёный цвет — выбрана эта позиция; красный — другая позиция; серый — позиция не задана." : "Зелёный цвет — признаёт государство; красный — не признаёт."}</small>
+            <div class="resource-grid"><span class="resource-pill"><small>${selected.kind === "territory" ? "Распределение позиций" : selected.kind === "government" ? "Страны с позицией по власти" : "Признают государство"}</small><strong>${selected.kind === "territory" ? `${Object.keys(selected.territoryBy || {}).length}/${scenarioCountryCount} позиций` : selected.kind === "government" ? `${Object.keys(selected.governmentBy || {}).length}/${scenarioCountryCount}` : `${selected.recognizedBy.length}${selected.referenceRecognizedCount ? ` · ${selected.referenceRecognizedCount}/193 в мире, ${selected.referenceDate}` : ""}`}</strong></span><span class="resource-pill"><small>Членство в ООН</small><strong>${selected.nonMember ? "не является членом" : "отдельное досье"}</strong></span></div>
+            ${selected.kind === "territory" || selected.kind === "government" ? `<small>Позиции: ${Object.entries(positionCounts).map(([position, count]) => `${position} — ${count}`).join("; ") || "не заданы"}.</small>` : `<small>Кто признаёт: ${recognizedCountries(selected.recognizedBy)}.</small>`}
+            ${positionDetails ? `<small>Конкретная позиция стран: ${positionDetails}.</small>` : ""}
+            ${selected.kind === "territory" || selected.kind === "government" ? `<label class="peace-field"><span>Цветом выделить на карте</span><select id="recognitionMapPosition" class="strategy-select">${selected.governments.map((position) => `<option value="${position}" ${position === recognitionMapPosition ? "selected" : ""}>${position}</option>`).join("")}</select></label>` : ""}
+          </div>` : ""}
+        </article>
+        <article class="strategy-card"><header><strong>Досье и позиции</strong><small>${entities.length}</small></header>${entities.map((entity) => `<button class="geo-feature-row ${entity.key === selected?.key ? "active" : ""}" type="button" data-action="recognition-select" data-id="${entity.key}"><span><strong>${entity.name}</strong><small>${entity.historicalOnly ? "историческое образование · альтернативное признание" : entity.kind === "government" ? "выбор власти" : entity.kind === "territory" ? "территориальный статус" : entity.nonMember ? "не член ООН" : "международный статус"}</small></span><small>${entity.kind === "government" ? Object.keys(entity.governmentBy || {}).length : entity.kind === "territory" ? Object.keys(entity.territoryBy || {}).length + " позиций" : entity.recognizedBy.length + " признаний"}</small></button>`).join("")}</article>
+        <article class="strategy-card"><header><strong>Решения Генеральной Ассамблеи</strong><small>модель кампании</small></header><p>Сценарная статистика задаёт стартовые позиции, а не обязательный исход дипломатии. Признание Палестины, например, уже заполнено для стран сценария; ходы игрока сохраняются отдельно в истории.</p>${data.history.slice(-8).reverse().map((entry) => `<small>${entry.date}: ${entry.countryName} ${entry.action} — ${entry.entityName}${entry.position ? ` (${entry.position})` : ""}</small>`).join("") || "<small>Изменений позиции в этой партии ещё не было.</small>"}</article>
+      </section>`;
+    const selector = document.getElementById("recognitionEntity");
+    selector?.addEventListener("change", () => { recognitionTargetKey = selector.value; renderStrategyPanel(); });
+    document.getElementById("recognitionMapPosition")?.addEventListener("change", (event) => { recognitionMapPosition = event.target.value; renderGameMap(); });
+  }
+
   function updateStrategyFullscreenButton() {
     strategyFullscreenButton.hidden = !activeTab;
     strategyFullscreenButton.classList.toggle("active", strategyPanelFullscreen);
@@ -546,6 +605,10 @@
     updateNextTurnControl();
     const player = currentPlayerCountry();
     const runtime = currentPlayerState();
+    strategyTabs.querySelectorAll('[data-era-from]').forEach((button) => {
+      button.hidden = Number(gameData.scenario.year) < Number(button.dataset.eraFrom);
+      if (button.hidden && activeTab === button.dataset.tab) activeTab = null;
+    });
     renderStateSummary(player, runtime);
     renderSelectedRegionSummary();
     strategyTabs.querySelectorAll("button").forEach((button) => {
@@ -574,6 +637,7 @@
     if (activeTab === "regions") renderRegions();
     if (activeTab === "administration") renderAdministrationEditor();
     if (activeTab === "orgs") renderOrganizations();
+    if (activeTab === "un" && Number(gameData.scenario.year) >= 1945) renderUnitedNationsPanel();
     strategyContent.insertAdjacentHTML("beforeend", renderEventLog());
   }
 
@@ -1001,6 +1065,16 @@
 
   function strategicMapColor(country, regionId, baseColor) {
     const profile = geoProfile(regionId);
+    if (mapMode === "recognition") {
+      const entry = strategyState?.recognition?.entities?.find((item) => item.key === recognitionTargetKey);
+      if (!entry || profile?.type === "sea") return baseColor;
+      const countryId = Number(country?.id);
+      if (entry.projectAreas) return entry.mapRegionIds?.includes(Number(regionId)) ? [214, 160, 74] : [78, 87, 94];
+      if (entry.kind === "state") return entry.recognizedBy?.includes(countryId) ? [55, 177, 111] : [207, 70, 61];
+      const position = entry.kind === "government" ? entry.governmentBy?.[countryId] : entry.territoryBy?.[countryId];
+      if (!position) return [103, 111, 120];
+      return position === recognitionMapPosition ? [55, 177, 111] : [207, 70, 61];
+    }
     if (mapMode === "terrain") return terrainRgb(profile, baseColor);
     if (mapMode === "water") return waterRgbForMode(profile, baseColor);
     if (mapMode === "strategic") return strategicGeoRgb(profile, country, baseColor);
@@ -1899,10 +1973,13 @@
     if (!gameData || event.button !== 0) return;
     const army = armyAtMapPoint(mapHitFromEvent(event));
     if (army) {
-      armyDragState = { army, targetRegionId: null, moved: false };
+      armyDragState = { army, targetRegionId: null, moved: false, pointerId: event.pointerId };
       mapDragState = { moved: true };
       gameMapViewport.classList.add("dragging-map");
       event.preventDefault();
+      if (event.pointerId !== undefined && gameMapViewport.setPointerCapture) {
+        gameMapViewport.setPointerCapture(event.pointerId);
+      }
       return;
     }
     mapDragState = {
@@ -1911,12 +1988,17 @@
       scrollLeft: gameMapViewport.scrollLeft,
       scrollTop: gameMapViewport.scrollTop,
       moved: false,
+      pointerId: event.pointerId,
     };
     gameMapViewport.classList.add("dragging-map");
+    if (event.pointerId !== undefined && gameMapViewport.setPointerCapture) {
+      gameMapViewport.setPointerCapture(event.pointerId);
+    }
   }
 
   function updateMapDrag(event) {
     if (armyDragState) {
+      if (armyDragState.pointerId !== undefined && event.pointerId !== armyDragState.pointerId) return;
       const hit = mapHitFromEvent(event);
       const targetRegionId = hit?.regionId ? Number(hit.regionId) : null;
       if (targetRegionId && targetRegionId !== Number(armyDragState.army.regionId)) armyDragState.moved = true;
@@ -1927,6 +2009,11 @@
       return;
     }
     if (!mapDragState) return;
+    if (mapDragState.pointerId !== undefined && event.pointerId !== mapDragState.pointerId) return;
+    // Army drags keep a click-suppression marker in mapDragState, but do not
+    // have pan coordinates. Never let that marker turn into scrollLeft/Top=NaN
+    // (the browser coerces NaN to zero, jumping the map to its upper-left).
+    if (!Number.isFinite(mapDragState.startX) || !Number.isFinite(mapDragState.startY)) return;
     const dx = event.clientX - mapDragState.startX;
     const dy = event.clientY - mapDragState.startY;
     if (Math.abs(dx) > 3 || Math.abs(dy) > 3) mapDragState.moved = true;
@@ -1935,13 +2022,14 @@
     wrapMapScroll();
   }
 
-  function endMapDrag(event) {
+  function endMapDrag(event, cancelled = false) {
     if (armyDragState) {
+      if (armyDragState.pointerId !== undefined && event.pointerId !== armyDragState.pointerId) return;
       const drag = armyDragState;
       const hit = mapHitFromEvent(event);
       const targetRegionId = hit?.regionId ? Number(hit.regionId) : Number(drag.targetRegionId || 0);
       const runtime = currentPlayerState();
-      const target = targetRegionId && runtime ? armyRoute(runtime, drag.army, targetRegionId) : null;
+      const target = !cancelled && targetRegionId && runtime ? armyRoute(runtime, drag.army, targetRegionId) : null;
       if (target?.length) {
         drag.army.route = target;
         drag.army.movingTo = Number(target[0]);
@@ -1959,6 +2047,7 @@
       return;
     }
     if (!mapDragState) return;
+    if (mapDragState.pointerId !== undefined && event.pointerId !== mapDragState.pointerId) return;
     window.setTimeout(() => {
       mapDragState = null;
       gameMapViewport.classList.remove("dragging-map");
@@ -1966,6 +2055,15 @@
   }
 
   function buildRuntimeGameData(map, scenario, protectedRussianRegionIds = null) {
+    const novorossiya = scenario?.countries?.find((country) => country.name === "Новороссия");
+    if (novorossiya) {
+      // Migrate existing saves created before the custom flag was added.
+      novorossiya.flag = "flags/07-альтернативные-выдуманные-флаги/Новороссия.png";
+      const zaporizhzhiaCapital = (map?.regions || []).find((region) =>
+        /Запорожская область.*центр-восток/i.test(region.name || "") &&
+        (novorossiya.regionIds || []).some((id) => Number(id) === Number(region.id)));
+      if (zaporizhzhiaCapital) novorossiya.capitalRegionId = Number(zaporizhzhiaCapital.id);
+    }
     ensureYearTreaties(scenario);
     const protectedRussianRegions = protectedRussianRegionIds
       ? new Set(protectedRussianRegionIds.map(Number))
@@ -2251,6 +2349,33 @@
     if (!button || button.disabled) return;
     playSound("click");
     const action = button.dataset.action;
+    if (action === "recognition-select") { recognitionTargetKey = button.dataset.id; renderStrategyPanel(); }
+    if (action === "recognition-toggle") {
+      const entry = strategyState.recognition.entities.find((item) => item.key === button.dataset.id);
+      if (entry) {
+        const ids = new Set(entry.recognizedBy || []);
+        if (ids.has(Number(strategyState.playerCountryId))) ids.delete(Number(strategyState.playerCountryId)); else ids.add(Number(strategyState.playerCountryId));
+        entry.recognizedBy = [...ids];
+        strategyState.recognition.history.push({ date: strategyState.date.toISOString().slice(0, 10), countryId: Number(strategyState.playerCountryId), countryName: currentPlayerCountry()?.name, action: ids.has(Number(strategyState.playerCountryId)) ? "признала" : "отозвала признание", entityName: entry.name });
+        addLog(`${currentPlayerCountry()?.name || "Ваша страна"} ${ids.has(Number(strategyState.playerCountryId)) ? "признала" : "отозвала признание"}: ${entry.name}.`);
+        renderGameMap(); renderStrategyPanel();
+      }
+    }
+    if (action === "recognition-position") {
+      const entry = strategyState.recognition.entities.find((item) => item.key === recognitionTargetKey);
+      if (entry) {
+        const position = document.getElementById("recognitionPosition")?.value || "";
+        const field = entry.kind === "government" ? "governmentBy" : "territoryBy";
+        if (position) entry[field][Number(strategyState.playerCountryId)] = position; else delete entry[field][Number(strategyState.playerCountryId)];
+        strategyState.recognition.history.push({ date: strategyState.date.toISOString().slice(0, 10), countryId: Number(strategyState.playerCountryId), countryName: currentPlayerCountry()?.name, action: position ? "установила позицию" : "сняла позицию", entityName: entry.name, position });
+        addLog(`${currentPlayerCountry()?.name || "Ваша страна"} установила позицию по досье «${entry.name}»${position ? `: ${position}` : ": нейтралитет"}.`);
+        renderGameMap(); renderStrategyPanel();
+      }
+    }
+    if (action === "accept-pmr-vassal") acceptTransnistriaVassalage();
+    if (action === "proclaim-novorossiya") proclaimNovorossiya();
+    if (action === "recognition-map") { recognitionMapPosition = document.getElementById("recognitionMapPosition")?.value || recognitionMapPosition; mapMode = "recognition"; renderGameMap(); renderStrategyPanel(); }
+    if (action === "un-resolution") { submitUNResolution(document.getElementById("unResolutionEntity")?.value); renderStrategyPanel(); }
     if (action === "focus") startFocus(button.dataset.id);
     if (action === "decision") applyDomesticDecision(button.dataset.id);
     if (action === "form-nation") formNation(button.dataset.id);
@@ -2302,7 +2427,7 @@
     if (action === "open-peace") openPeaceConference();
     if (action === "schedule-peace") schedulePeaceConference();
     if (action === "invite-peace-mediator") invitePeaceMediator(document.getElementById("peaceMediator")?.value || "un");
-    if (action === "add-peace-demand") addPlayerPeaceDemand(document.getElementById("peaceDemandType")?.value, document.getElementById("peaceTarget")?.value, selectedPeaceRegionIds());
+    if (action === "add-peace-demand") addPlayerPeaceDemand(document.getElementById("peaceDemandType")?.value, document.getElementById("peaceTarget")?.value, selectedPeaceRegionIds(), document.getElementById("peaceRecognitionEntity")?.value, document.getElementById("peaceRecognitionPosition")?.value);
     if (action === "finalize-peace") finalizePeaceConference();
     if (action === "demand-capitulation") demandCapitulation(button.dataset.id);
     if (action === "make-subject") makeSubject(button.dataset.id, button.dataset.subjectType);
@@ -2334,8 +2459,7 @@
     if (action === "move-army") moveArmy(button.dataset.id, button.dataset.targetId || strategyState.selectedRegionId);
     if (action === "integrate") integrateOccupation(button.dataset.id);
     if (action === "release-occupation") releaseSelectedOccupation(button.dataset.id);
-    if (action === "create-region-country") createOccupationCountry([button.dataset.id], window.prompt("Название новой страны", gameData.regionById.get(Number(button.dataset.id))?.name || "Новое государство") || "");
-    if (action === "create-occupation-country") createOccupationCountry(selectedPeaceRegionIds(), document.getElementById("releasedCountryName")?.value || "");
+    if (action === "proclaim-occupation-country") createOccupationCountry(button.dataset.id, button.dataset.preset);
     if (action === "construction") startConstruction(document.getElementById("constructionProject")?.value, button.dataset.id);
     if (action === "create-admin-unit") createAdministrativeUnit();
     if (action === "save-admin-unit") saveAdministrativeUnit();
@@ -2399,7 +2523,7 @@
     playSound("click");
     const action = button.dataset.peaceAction;
     if (action === "respond") respondToPeaceDemand(button.dataset.index, button.dataset.accepted === "true");
-    if (action === "add") addPlayerPeaceDemand(document.getElementById("peaceDemandType")?.value, document.getElementById("peaceTarget")?.value, selectedPeaceRegionIds());
+    if (action === "add") addPlayerPeaceDemand(document.getElementById("peaceDemandType")?.value, document.getElementById("peaceTarget")?.value, selectedPeaceRegionIds(), document.getElementById("peaceRecognitionEntity")?.value, document.getElementById("peaceRecognitionPosition")?.value);
     if (action === "submit") submitPeaceOffer();
     if (action === "sign") {
       const venue = document.getElementById("peaceVenue");
@@ -2561,9 +2685,10 @@
     playSound("click");
     setGameZoom(gameZoom + 0.25);
   });
-  gameMapViewport.addEventListener("mousedown", beginMapDrag);
-  window.addEventListener("mousemove", updateMapDrag);
-  window.addEventListener("mouseup", endMapDrag);
+  gameMapViewport.addEventListener("pointerdown", beginMapDrag);
+  window.addEventListener("pointermove", updateMapDrag);
+  window.addEventListener("pointerup", endMapDrag);
+  window.addEventListener("pointercancel", (event) => endMapDrag(event, true));
   gameMapViewport.addEventListener("scroll", wrapMapScroll);
   gameMapViewport.addEventListener("click", selectRegionFromMap);
   gameMapViewport.addEventListener("contextmenu", inspectRelationPairFromMap);

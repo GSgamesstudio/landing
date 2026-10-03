@@ -286,6 +286,10 @@
   }
 
   function peaceDemandText(demand) {
+    if (demand.type === "recognition") {
+      const entry = strategyState.recognition?.entities?.find((item) => item.key === demand.entityKey);
+      return `${countryById(demand.recognizerId || demand.targetId)?.name || "Сторона"} признаёт ${demand.position || entry?.name || "статус"}`;
+    }
     const actor = countryById(demand.actorId);
     const target = countryById(demand.targetId);
     if (demand.type === "annex_occupied") return `${actor?.name || "Страна"} требует закрепить оккупации у ${target?.name || "противника"} (${demand.regionIds?.length || 0} рег.)`;
@@ -396,6 +400,7 @@
 
   function openPeaceConference() {
     if (strategyState.peaceConference) {
+      addNovorossiyaPeaceDemand(strategyState.peaceConference);
       openPeaceSigningScreen();
       return;
     }
@@ -419,8 +424,58 @@
     };
     conference.venueRegionId = peaceVenueChoices(conference)[0]?.regionId || null;
     strategyState.peaceConference = conference;
+    addNovorossiyaPeaceDemand(conference);
     addLog("Повестка мирной конференции подготовлена. Назначьте место и дату во вкладке войны.");
     renderStrategyPanel();
+  }
+
+  function novorossiyaOccupationProgress() {
+    const startYear = Number(gameData?.scenario?.year) || 0;
+    const player = currentPlayerCountry();
+    if (startYear < 1991 || startYear > 2014 || !/Россия/.test(player?.name || "")) return null;
+    const ukraine = gameData.scenario.countries.find((country) => /Украин/.test(country.name));
+    if (!ukraine || !strategyState.wars.some((war) => war.active && ((Number(war.attackerId) === Number(player.id) && Number(war.defenderId) === Number(ukraine.id)) || (Number(war.defenderId) === Number(player.id) && Number(war.attackerId) === Number(ukraine.id))))) return null;
+    if (gameData.scenario.countries.some((country) => country.name === "Новороссия")) return null;
+    const regionPattern = /^(?:Украина: (?:(?:Донецкая|Луганская|Харьковская|Днепропетровская|Запорожская|Херсонская|Николаевская|Одесская) область|Донецкая Народная Республика|Луганская Народная Республика)|Россия: (?:Донецкая Народная Республика|Луганская Народная Республика))/;
+    const ukraineRegions = new Set((ukraine.regionIds || []).map(Number));
+    const regionIds = [...gameData.regionById.entries()]
+      .filter(([id, region]) => ukraineRegions.has(Number(id)) && regionPattern.test(String(region?.name || "")))
+      .map(([id]) => Number(id));
+    const occupied = regionIds.filter((id) => Number(controllerOfRegion(id)?.id) === Number(player.id));
+    return { player, ukraine, regionIds, occupied, complete: regionIds.length > 0 && occupied.length === regionIds.length };
+  }
+
+  function proclaimNovorossiya() {
+    const progress = novorossiyaOccupationProgress();
+    if (!progress?.complete) return false;
+    const country = createCountryFromOccupiedRegions(progress.regionIds, "Новороссия");
+    if (!country) return false;
+    const runtime = strategyState.countryStates[String(country.id)];
+    runtime.subjectOf = Number(progress.player.id);
+    runtime.subjectType = "puppet";
+    runtime.subjectAutonomy = 0;
+    runtime.subjectLoyalty = 100;
+    runtime.subjectSince = strategyState.date.toISOString().slice(0, 10);
+    runtime.subjectArmyDemand = 0;
+    const recognition = strategyState.recognition;
+    recognition.entities.push(
+      { key: "novorossiya-state", name: "Новороссия", kind: "state", nonMember: true, aliases: ["Новороссия"], governments: ["Новороссия"], recognizedBy: [Number(progress.player.id)] },
+      { key: "novorossiya-status", name: "Территориальный статус Новороссии", kind: "territory", nonMember: false, aliases: ["Новороссия"], governments: ["Статус не определён", "Часть Украины", "Часть России", "Новороссия"], territoryBy: { [Number(progress.player.id)]: "Новороссия" } },
+    );
+    recognition.history.push({ date: strategyState.date.toISOString().slice(0, 10), countryId: Number(progress.player.id), countryName: progress.player.name, action: "провозгласила", entityName: "Новороссия" });
+    addLog(`Провозглашена Новороссия на ${progress.regionIds.length} регионах. Она стала марионеткой России с минимальной автономией.`);
+    renderGameMap();
+    renderStrategyPanel();
+    return true;
+  }
+
+  function addNovorossiyaPeaceDemand(conference) {
+    const country = gameData.scenario.countries.find((item) => item.name === "Новороссия");
+    const runtime = country && strategyState.countryStates[String(country.id)];
+    if (!country || Number(runtime?.subjectOf) !== Number(strategyState.playerCountryId)) return;
+    const ukraineId = warEnemies(strategyState.playerCountryId, conference).find((id) => /Украин/.test(countryById(id)?.name || ""));
+    if (!ukraineId || conference.demands.some((demand) => demand.novorossiyaRecognition)) return;
+    conference.demands.push({ source: "player", actorId: Number(strategyState.playerCountryId), targetId: Number(ukraineId), recognizerId: Number(ukraineId), type: "recognition", entityKey: "novorossiya-state", position: "", novorossiyaRecognition: true, status: "pending" });
   }
 
   function selectedPeaceRegionIds() {
@@ -441,19 +496,68 @@
     renderStrategyPanel();
   }
 
-  function createOccupationCountry(regionIds, name = "") {
-    const country = createCountryFromOccupiedRegions(regionIds, name.trim());
+  const OCCUPATION_COUNTRY_PRESETS = [
+    { key: "crimea", name: "Республика Крым", aliases: ["Крым", "Crimea"], minimumYear: 1991 },
+    { key: "kosovo", name: "Косово", aliases: ["Косово", "Kosovo"], minimumYear: 1991 },
+    { key: "taiwan", name: "Тайвань", aliases: ["Тайвань", "Taiwan"], minimumYear: 1949 },
+  ];
+
+  function renderOccupationProclamationChoices(regionId) {
+    const region = gameData.regionById.get(Number(regionId));
+    const name = region?.name?.toLocaleLowerCase("ru") || "";
+    const year = Number(gameData.scenario.year || 0);
+    const choices = OCCUPATION_COUNTRY_PRESETS.filter((preset) => year >= preset.minimumYear &&
+      preset.aliases.some((alias) => name.includes(alias.toLocaleLowerCase("ru"))) &&
+      !gameData.scenario.countries.some((country) => country.proclamationPreset === preset.key));
+    if (!choices.length) return "";
+    return `<div class="inline-actions"><small>Можно провозгласить:</small>${choices.map((preset) => `<button class="mini-button" type="button" data-action="proclaim-occupation-country" data-preset="${preset.key}" data-id="${Number(regionId)}">Провозгласить: ${preset.name}</button>`).join("")}</div>`;
+  }
+
+  function createOccupationCountry(regionId, presetKey) {
+    const preset = OCCUPATION_COUNTRY_PRESETS.find((item) => item.key === presetKey);
+    const region = gameData.regionById.get(Number(regionId));
+    const valid = preset && region && Number(gameData.scenario.year || 0) >= preset.minimumYear &&
+      preset.aliases.some((alias) => region.name.toLocaleLowerCase("ru").includes(alias.toLocaleLowerCase("ru"))) &&
+      !gameData.scenario.countries.some((country) => country.proclamationPreset === preset.key);
+    const country = valid ? createCountryFromOccupiedRegions([Number(regionId)], preset.name, preset.key) : null;
     if (!country) {
-      addLog("Нет выбранных оккупированных регионов для создания страны.");
+      addLog("Для этого региона нет доступного заранее заданного государства.");
       renderStrategyPanel();
       return;
     }
-    addLog(`Создана страна на территории оккупации: ${country.name}.`);
+    if (strategyState.recognition && Number(gameData.scenario.year) >= 1945) {
+      const entityKey = `proclaimed-${preset.key}`;
+      if (!strategyState.recognition.entities.some((entity) => entity.key === entityKey)) {
+        strategyState.recognition.entities.push({
+          key: entityKey,
+          name: country.name,
+          kind: "state",
+          nonMember: true,
+          aliases: [country.name],
+          governments: [country.name],
+          recognizedBy: [Number(strategyState.playerCountryId)],
+        });
+      }
+    }
+    addLog(`Провозглашено государство на оккупированной территории: ${country.name}. Досье добавлено в список стран вне ООН.`);
     renderGameMap();
     renderStrategyPanel();
   }
 
-  function addPlayerPeaceDemand(type, targetId, selectedRegionIds = []) {
+  function peaceRecognitionTargets(conference = strategyState?.peaceConference) {
+    const participantIds = new Set((conference?.participants || []).map(Number));
+    return (strategyState.recognition?.entities || []).filter((entry) => {
+      const aliases = [...(entry.aliases || []), entry.name].map((name) => name.toLocaleLowerCase("ru"));
+      return (gameData.scenario.countries || []).some((country) => {
+        const runtime = strategyState.countryStates[String(country.id)];
+        const involved = participantIds.has(Number(country.id)) || participantIds.has(Number(runtime?.subjectOf || country.subjectOf));
+        const regionInvolved = involved && (country.regionIds || []).some((regionId) => aliases.some((alias) => regionName(regionId).toLocaleLowerCase("ru").includes(alias)));
+        return involved && (aliases.some((alias) => country.name.toLocaleLowerCase("ru").includes(alias) || alias.includes(country.name.toLocaleLowerCase("ru"))) || regionInvolved);
+      });
+    });
+  }
+
+  function addPlayerPeaceDemand(type, targetId, selectedRegionIds = [], entityKey = "", position = "") {
     const conference = strategyState?.peaceConference;
     const playerId = strategyState?.playerCountryId;
     if (!conference || !playerId) return;
@@ -465,6 +569,16 @@
       return;
     }
     const demand = { source: "player", actorId: Number(playerId), targetId: Number(target.id), type, status: "pending" };
+    if (type === "recognition") {
+      const entry = peaceRecognitionTargets(conference).find((item) => item.key === entityKey);
+      if (!entry) { addLog("Признание возможно только для непризнанного участника войны или зависимого от участника субъекта."); renderPeaceSigningScreen(); return; }
+      const targetAlreadyRecognizes = entry.kind === "government" ? Boolean(entry.governmentBy?.[Number(target.id)]) : entry.kind === "territory" ? Boolean(entry.territoryBy?.[Number(target.id)]) : entry.recognizedBy?.includes(Number(target.id));
+      if (targetAlreadyRecognizes) { addLog(`${target.name} уже признаёт выбранный статус; в договор можно включить только изменение его позиции.`); renderPeaceSigningScreen(); return; }
+      demand.entityKey = entry.key;
+      demand.recognizerId = Number(target.id);
+      demand.position = entry.kind === "government" || entry.kind === "territory" ? (entry.governments.includes(position) ? position : "") : "";
+      if ((entry.kind === "government" || entry.kind === "territory") && !demand.position) { addLog("Выберите конкретную власть или территориальный статус."); renderPeaceSigningScreen(); return; }
+    }
     if (type === "annex_occupied") {
       const availableRegions = peaceOccupiedRegionsForTarget(target.id, conference).map(({ regionId }) => regionId);
       demand.regionIds = selectedRegionIds.length
@@ -580,7 +694,7 @@
     playerDemands.forEach((demand) => {
       const balance = hiddenWarBalance(playerId, demand.targetId);
       const relationPenalty = Math.max(0, -getRelation(playerId, demand.targetId) - 25) * 0.22;
-      demand.status = demand.type === "annex_occupied" || balance + relationPenalty >= peaceDemandCost(demand) ? "accepted" : "rejected";
+      demand.status = demand.novorossiyaRecognition || demand.type === "annex_occupied" || balance + relationPenalty >= peaceDemandCost(demand) ? "accepted" : "rejected";
       const target = countryById(demand.targetId);
       addLog(`${target?.name || "Противник"} ${demand.status === "accepted" ? "приняла" : "отклонила"} ваше предложение.`);
     });
@@ -793,7 +907,7 @@
     return changed;
   }
 
-  function createCountryFromOccupiedRegions(regionIds, name) {
+  function createCountryFromOccupiedRegions(regionIds, name, proclamationPreset = "novorossiya") {
     const player = currentPlayerCountry();
     if (!player || !regionIds.length) return null;
     const validRegionIds = [...new Set(regionIds.map(Number))]
@@ -802,13 +916,21 @@
     if (!validRegionIds.length) return null;
 
     const newId = Math.max(0, ...gameData.scenario.countries.map((country) => Number(country.id) || 0)) + 1;
+    const novorossiyaCapital = name === "Новороссия"
+      ? validRegionIds.find((regionId) => /Запорожская область.*центр-восток/i.test(gameData.regionById.get(Number(regionId))?.name || ""))
+        || validRegionIds.find((regionId) => /Запорожская область/i.test(gameData.regionById.get(Number(regionId))?.name || ""))
+      : null;
     const newCountry = {
       id: newId,
       name: name || `Новое государство ${newId}`,
       color: `#${((hashNumber(`${name || "released"}:${validRegionIds.join("-")}`) & 0xffffff) || 0x667799).toString(16).padStart(6, "0")}`,
       ideology: currentPlayerState()?.ideology || "neutral",
-      capitalRegionId: validRegionIds[0],
+      capitalRegionId: novorossiyaCapital || validRegionIds[0],
+      ...(name === "Новороссия" ? { flag: "flags/07-альтернативные-выдуманные-флаги/Новороссия.png" } : {}),
       regionIds: [],
+      isNewlyProclaimed: true,
+      proclamationPreset,
+      proclaimedOn: strategyState.date?.toISOString?.().slice(0, 10) || "",
     };
     gameData.scenario.countries.push(newCountry);
     strategyState.countryStates[String(newId)] = createCountryRuntime(newCountry, strategyState.date?.getFullYear?.() || 2026);
@@ -839,6 +961,26 @@
   }
 
   function applyPeaceDemand(demand) {
+    if (demand.type === "recognition") {
+      const entry = strategyState.recognition?.entities?.find((item) => item.key === demand.entityKey);
+      if (entry) {
+        const recognizerId = Number(demand.recognizerId || demand.targetId);
+        if (entry.kind === "government") entry.governmentBy[recognizerId] = demand.position;
+        else if (entry.kind === "territory") entry.territoryBy[recognizerId] = demand.position;
+        else if (!entry.recognizedBy.includes(recognizerId)) entry.recognizedBy.push(recognizerId);
+        strategyState.recognition.history.push({ date: strategyState.date.toISOString().slice(0, 10), countryId: recognizerId, countryName: countryById(recognizerId)?.name, action: "признала по мирному договору", entityName: entry.name, position: demand.position || "" });
+        addLog(`${countryById(recognizerId)?.name || "Сторона договора"} признала ${demand.position || entry.name} по условиям мира.`);
+        if (demand.novorossiyaRecognition) {
+          const status = strategyState.recognition.entities.find((item) => item.key === "novorossiya-status");
+          if (status) {
+            status.territoryBy[recognizerId] = "Статус не определён";
+            strategyState.recognition.history.push({ date: strategyState.date.toISOString().slice(0, 10), countryId: recognizerId, countryName: countryById(recognizerId)?.name, action: "оставила территориальный статус неопределённым", entityName: status.name, position: "Статус не определён" });
+          }
+          addLog("Украина признала Новороссию отдельным государством, оставив территориальный статус неопределённым.");
+        }
+      }
+      return;
+    }
     const actorRuntime = strategyState.countryStates[String(demand.actorId)];
     const targetRuntime = strategyState.countryStates[String(demand.targetId)];
     if (!actorRuntime || !targetRuntime) return;
@@ -1160,13 +1302,24 @@
           <div class="peace-terms">${terms}</div>
           <div class="peace-offer-row">
           <select id="peaceTarget" class="strategy-select">${targets.map((country) => `<option value="${country.id}">${country.name}</option>`).join("")}</select>
-          <select id="peaceDemandType" class="strategy-select"><option value="reparations">Репарации</option><option value="annex_occupied">Закрепить оккупации</option><option value="demilitarize">Демилитаризация</option><option value="status_quo">Статус-кво</option></select>
+          <select id="peaceDemandType" class="strategy-select"><option value="reparations">Репарации</option><option value="annex_occupied">Закрепить оккупации</option><option value="demilitarize">Демилитаризация</option><option value="recognition">Признание государства / власти / территории</option><option value="status_quo">Статус-кво</option></select>
           </div>
+          ${peaceRecognitionTargets(conference).length ? `<div class="peace-offer-row"><select id="peaceRecognitionEntity" class="strategy-select">${peaceRecognitionTargets(conference).map((entry) => `<option value="${entry.key}">${entry.name}</option>`).join("")}</select><select id="peaceRecognitionPosition" class="strategy-select"><option value="">Признать государство</option>${peaceRecognitionTargets(conference).flatMap((entry) => entry.governments.map((position) => `<option value="${position}">${position}</option>`)).filter((value, index, all) => all.indexOf(value) === index).join("")}</select></div>` : ""}
           <div class="peace-region-list"><strong>Оккупированные регионы</strong><small>Можно запросить территории, занятые вами или союзниками.</small>${playerRegions.length ? playerRegions.map(({ country, controller, regionId }) => `<label class="peace-region-option"><input type="checkbox" data-peace-region="${regionId}" checked><span>${gameData.regionById.get(Number(regionId))?.name || `Регион ${regionId}`}</span><small>${controller?.name || "Оккупировано союзником"} → ${country.name}</small></label>`).join("") : "<small>Нет регионов для передачи по договору.</small>"}</div>
           <div class="peace-offer-row"><button class="mini-button" type="button" data-peace-action="add">Записать условие</button><button class="mini-button" type="button" data-peace-action="submit">Передать противнику</button></div>
           <button class="primary-button" type="button" data-peace-action="sign" ${conference.scheduled && conference.negotiationDate > strategyState.date.toISOString().slice(0, 10) ? "disabled" : ""}>Подписать мир</button>
         </section>
       </div>`;
+    const peaceRecognitionEntity = peaceContent.querySelector("#peaceRecognitionEntity");
+    const peaceRecognitionPosition = peaceContent.querySelector("#peaceRecognitionPosition");
+    const updateRecognitionPositions = () => {
+      const entry = peaceRecognitionTargets(conference).find((item) => item.key === peaceRecognitionEntity?.value);
+      if (!peaceRecognitionPosition || !entry) return;
+      peaceRecognitionPosition.innerHTML = `<option value="">${entry.kind === "state" ? "Признать государство" : "Выберите конкретную позицию"}</option>${entry.governments.map((position) => `<option value="${position}">${position}</option>`).join("")}`;
+      peaceRecognitionPosition.disabled = entry.kind === "state";
+    };
+    peaceRecognitionEntity?.addEventListener("change", updateRecognitionPositions);
+    updateRecognitionPositions();
     const peaceActions = peaceContent.querySelector(".peace-offer-row");
     if (peaceActions) peaceActions.insertAdjacentHTML("beforeend", '<button class="mini-button" type="button" data-peace-action="map">Открыть карту распределения</button>');
     const laptop = peaceContent.querySelector(".peace-laptop");
@@ -1199,6 +1352,47 @@
 
   function subjectLabel(type) {
     return ({ puppet: "марионетка", vassal: "вассал", colony: "колония" })[type] || "зависимое государство";
+  }
+
+  function canAcceptTransnistriaVassalage() {
+    const player = currentPlayerCountry();
+    const status = strategyState?.recognition?.entities?.find((entity) => entity.key === "transnistria-status");
+    const pmrExists = gameData?.scenario?.countries?.some((country) => /Приднестров|Тираспол/i.test(country.name));
+    const region = gameData?.regionById?.get(1781);
+    const owner = region && directOwnerOfRegion(1781);
+    return Number(strategyState?.date?.getFullYear()) >= 1991 && /Россия|Российская Федерация/.test(player?.name || "") &&
+      status?.territoryBy?.[Number(player.id)] === "Часть России" && !pmrExists &&
+      region && /Приднестров/i.test(region.name || "") && owner && /Молдав|Молдов/.test(owner.name) && (owner.regionIds || []).includes(1781) &&
+      Number(currentPlayerState()?.politicalPower || 0) >= 10;
+  }
+
+  function acceptTransnistriaVassalage() {
+    if (!canAcceptTransnistriaVassalage()) {
+      addLog("Для вассалитета ПМР нужна позиция «Часть России», игра за Россию и доступный регион Приднестровья в составе Молдавии.");
+      return false;
+    }
+    const player = currentPlayerCountry();
+    const oldOwner = directOwnerOfRegion(1781);
+    const pmrName = "Приднестровская Молдавская Республика";
+    if (!createFocusCountry(pmrName, [1781])) return false;
+    const pmr = gameData.scenario.countries.find((country) => country.name === pmrName);
+    const runtime = pmr && strategyState.countryStates[String(pmr.id)];
+    if (!pmr || !runtime) return false;
+    pmr.color = "#3f74a8";
+    runtime.subjectOf = Number(player.id);
+    runtime.subjectType = "vassal";
+    runtime.subjectAutonomy = 3;
+    runtime.subjectLoyalty = 82;
+    runtime.subjectSince = strategyState.date.toISOString().slice(0, 10);
+    runtime.subjectArmyDemand = 0;
+    addAlliance(strategyState, player.id, pmr.id);
+    setRelation(player.id, pmr.id, 100);
+    currentPlayerState().politicalPower -= 10;
+    if (oldOwner) setRelation(player.id, oldOwner.id, -25);
+    addLog(`ПМР принята под вассалитет ${player.name}. На карте ей передан выделенный Тираспольский регион; решение по статусу осталось в досье ООН.`);
+    renderGameMap();
+    renderStrategyPanel();
+    return true;
   }
 
   function makeSubject(targetId, type = "puppet") {
@@ -2214,6 +2408,7 @@
   }
 
   function mapModeLabel(mode) {
+    if (mode === "recognition") return "признание";
     return MAP_MODES.find((item) => item.id === mode)?.label.toLowerCase() || "политическая";
   }
 
@@ -2366,6 +2561,11 @@
       relations: [
         { color: "#00ff00", text: "хорошие отношения" },
         { color: "#ff0000", text: "плохие отношения" },
+      ],
+      recognition: [
+        { color: "#37b16f", text: "признаёт выбранный статус" },
+        { color: "#cf463d", text: "признаёт другой статус / не признаёт" },
+        { color: "#676f78", text: "позиция не указана" },
       ],
     };
     return legends[mode] || legends.political;

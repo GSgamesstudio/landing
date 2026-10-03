@@ -7,7 +7,7 @@
     "name": "Европа",
     "width": 1500,
     "height": 920,
-    "file": null
+    "file": "Европа.json"
   },
   "countries": [
     {
@@ -1256,9 +1256,19 @@
         891,
         892,
         894,
+        11173,
+        11174,
+        11175,
+        11176,
+        11177,
         895,
         896,
         897,
+        11178,
+        11179,
+        11180,
+        11181,
+        11182,
         1352,
         1353,
         1354,
@@ -1269,9 +1279,15 @@
         1364,
         1609,
         1610,
+        11193,
         1779,
         1780,
         2227,
+        11188,
+        11189,
+        11190,
+        11191,
+        11192,
         2228,
         2318,
         2319,
@@ -1876,7 +1892,16 @@
         2952,
         2953,
         2954,
-        4033
+        4033,
+        11183,
+        11184,
+        11185,
+        11186,
+        11187,
+        11194,
+        11195,
+        11196,
+        11197
       ]
     },
     {
@@ -2227,7 +2252,7 @@
       "id": 72,
       "name": "Палестина",
       "ideology": "neutral",
-      "capitalRegionId": 20,
+      "capitalRegionId": 22,
       "color": "#86e496",
       "flag": "flags/01-современные-страны/Палестина.png",
       "flagId": "iso:PS",
@@ -2308,7 +2333,32 @@
       ]
     }
   ],
-  "occupations": [],
+  "occupations": [
+    {
+      "regionId": 1610,
+      "controllerCountryId": 58
+    },
+    {
+      "regionId": 11189,
+      "controllerCountryId": 58
+    },
+    {
+      "regionId": 2227,
+      "controllerCountryId": 58
+    },
+    {
+      "regionId": 897,
+      "controllerCountryId": 58
+    },
+    {
+      "regionId": 11183,
+      "controllerCountryId": 47
+    },
+    {
+      "regionId": 20,
+      "controllerCountryId": 65
+    }
+  ],
   "armies": [],
   "administrativeDivisions": []
 }
