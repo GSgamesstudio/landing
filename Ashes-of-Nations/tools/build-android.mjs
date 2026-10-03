@@ -26,17 +26,12 @@ function run(command, args, options = {}) {
   });
 }
 
-async function ensureLandscapeManifest() {
-  let text = await readFile(manifestPath, "utf8");
-  if (text.includes("android:screenOrientation=")) {
-    text = text.replace(/android:screenOrientation="[^"]*"/, 'android:screenOrientation="landscape"');
-  } else {
-    text = text.replace(
-      /(<activity\b[^>]*android:name="\.MainActivity")/,
-      '$1 android:screenOrientation="landscape"',
-    );
-  }
-  await writeFile(manifestPath, text);
+async function ensureFlexibleOrientation() {
+  const text = await readFile(manifestPath, "utf8");
+  const updated = text.includes("android:screenOrientation=")
+    ? text.replace(/android:screenOrientation="[^"]*"/, 'android:screenOrientation="unspecified"')
+    : text.replace(/(<activity\b[^>]*android:name="\.MainActivity")/, '$1 android:screenOrientation="unspecified"');
+  if (updated !== text) await writeFile(manifestPath, updated);
 }
 
 async function ensureAndroidSdk() {
@@ -74,6 +69,6 @@ if (!existsSync(androidDir)) {
 await run("npx", ["cap", "sync", "android"]);
 ensureJavaHome();
 await ensureAndroidSdk();
-await ensureLandscapeManifest();
+await ensureFlexibleOrientation();
 await run(".\\gradlew.bat", ["assembleDebug"], { cwd: androidDir });
 await copyApk();

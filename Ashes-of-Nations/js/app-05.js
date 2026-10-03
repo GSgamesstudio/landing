@@ -615,6 +615,7 @@
       button.classList.toggle("active", button.dataset.tab === activeTab);
     });
     strategyContent.classList.toggle("hidden", !activeTab);
+    gameScreen.classList.toggle("mobile-sheet-open", Boolean(activeTab) && !relationMapMode);
     if (!activeTab && strategyPanelFullscreen) setStrategyPanelFullscreen(false);
     updateStrategyFullscreenButton();
     if (!activeTab) {
@@ -1871,7 +1872,7 @@
   }
 
   function setGameZoom(value) {
-    gameZoom = Math.max(0.5, Math.min(4, value));
+    gameZoom = Math.max(window.matchMedia("(max-width: 900px)").matches ? 0.25 : 0.5, Math.min(4, value));
     if (gameData) {
       const cyclic = isCyclicMap(gameData.map);
       if (cyclic) ensureWorldWrap();
@@ -1899,6 +1900,7 @@
 
   function selectRegionFromMap(event) {
     if (!gameData || !strategyState) return;
+    if (performance.now() < suppressMapClickUntil) return;
     if (mapDragState?.moved) return;
     const hit = mapHitFromEvent(event);
     if (!hit) return;
@@ -1969,9 +1971,72 @@
     }) || null;
   }
 
+  const mapTouchPointers = new Map();
+  let mapPinchStart = null;
+  let suppressMapClickUntil = 0;
+
+  function mapPinchDistance() {
+    const [first, second] = [...mapTouchPointers.values()];
+    return Math.hypot(first.x - second.x, first.y - second.y);
+  }
+
+  function handleMapPointerDown(event) {
+    if (event.pointerType !== "touch") {
+      beginMapDrag(event);
+      return;
+    }
+    mapTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (mapTouchPointers.size === 1) {
+      beginMapDrag(event);
+      return;
+    }
+    if (mapTouchPointers.size === 2) {
+      mapDragState = null;
+      armyDragState = null;
+      mapPinchStart = { distance: mapPinchDistance(), zoom: gameZoom };
+      suppressMapClickUntil = performance.now() + 500;
+      if (gameMapViewport.setPointerCapture) gameMapViewport.setPointerCapture(event.pointerId);
+    }
+  }
+
+  function handleMapPointerMove(event) {
+    if (event.pointerType === "touch" && mapTouchPointers.has(event.pointerId)) {
+      mapTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (mapPinchStart && mapTouchPointers.size >= 2) {
+        const [first, second] = [...mapTouchPointers.values()];
+        const rect = gameMapViewport.getBoundingClientRect();
+        const centerX = (first.x + second.x) / 2 - rect.left;
+        const centerY = (first.y + second.y) / 2 - rect.top;
+        const oldZoom = gameZoom;
+        const oldScrollLeft = gameMapViewport.scrollLeft;
+        const oldScrollTop = gameMapViewport.scrollTop;
+        setGameZoom(mapPinchStart.zoom * mapPinchDistance() / Math.max(1, mapPinchStart.distance));
+        const ratio = gameZoom / oldZoom;
+        gameMapViewport.scrollLeft = (oldScrollLeft + centerX) * ratio - centerX;
+        gameMapViewport.scrollTop = (oldScrollTop + centerY) * ratio - centerY;
+        wrapMapScroll();
+        return;
+      }
+    }
+    updateMapDrag(event);
+  }
+
+  function handleMapPointerEnd(event, cancelled = false) {
+    const wasPinching = Boolean(mapPinchStart);
+    if (event.pointerType === "touch") mapTouchPointers.delete(event.pointerId);
+    if (wasPinching) {
+      suppressMapClickUntil = performance.now() + 500;
+      if (mapTouchPointers.size < 2) mapPinchStart = null;
+      gameMapViewport.classList.remove("dragging-map");
+      return;
+    }
+    if (mapDragState?.moved) suppressMapClickUntil = performance.now() + 300;
+    endMapDrag(event, cancelled);
+  }
+
   function beginMapDrag(event) {
     if (!gameData || event.button !== 0) return;
-    const army = armyAtMapPoint(mapHitFromEvent(event));
+    const army = event.pointerType === "touch" ? null : armyAtMapPoint(mapHitFromEvent(event));
     if (army) {
       armyDragState = { army, targetRegionId: null, moved: false, pointerId: event.pointerId };
       mapDragState = { moved: true };
@@ -2327,6 +2392,12 @@
     if (!activeTab) return;
     playSound("click");
     setStrategyPanelFullscreen(!strategyPanelFullscreen);
+  });
+
+  document.getElementById("mobileMapButton")?.addEventListener("click", () => {
+    activeTab = null;
+    setStrategyPanelFullscreen(false);
+    renderStrategyPanel();
   });
 
   gameScreen.addEventListener("click", (event) => {
@@ -2685,10 +2756,10 @@
     playSound("click");
     setGameZoom(gameZoom + 0.25);
   });
-  gameMapViewport.addEventListener("pointerdown", beginMapDrag);
-  window.addEventListener("pointermove", updateMapDrag);
-  window.addEventListener("pointerup", endMapDrag);
-  window.addEventListener("pointercancel", (event) => endMapDrag(event, true));
+  gameMapViewport.addEventListener("pointerdown", handleMapPointerDown);
+  window.addEventListener("pointermove", handleMapPointerMove);
+  window.addEventListener("pointerup", handleMapPointerEnd);
+  window.addEventListener("pointercancel", (event) => handleMapPointerEnd(event, true));
   gameMapViewport.addEventListener("scroll", wrapMapScroll);
   gameMapViewport.addEventListener("click", selectRegionFromMap);
   gameMapViewport.addEventListener("contextmenu", inspectRelationPairFromMap);
