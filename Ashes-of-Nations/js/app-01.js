@@ -9,7 +9,6 @@
   const peace3dCanvas = document.getElementById("peace3dCanvas");
   const peaceBackButton = document.getElementById("peaceBackButton");
   const playButton = document.getElementById("playButton");
-  const historyViewerButton = document.getElementById("historyViewerButton");
   const howToPlayButton = document.getElementById("howToPlayButton");
   const continueButton = document.getElementById("continueButton");
   const savesButton = document.getElementById("savesButton");
@@ -82,7 +81,7 @@
   const FOCUS_CSV_DIR = "focuses";
   const CATALOG_REFRESH_MS = 30000;
   // Change this number whenever bundled UI/assets change to invalidate browser caches.
-  const CACHE_VERSION = "20261003-173734";
+  const CACHE_VERSION = "20261003-183956";
   const NUCLEAR_CAPABLE_COUNTRIES = new Set(["Россия", "СССР", "США", "Китай", "Франция", "Великобритания", "Индия", "Пакистан", "КНДР", "Израиль"]);
 
   let peace3dRenderer = null;

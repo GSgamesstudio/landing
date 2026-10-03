@@ -2651,11 +2651,6 @@
     historicalViewerMode = false;
     showScreen(setupScreen);
   });
-  historyViewerButton.addEventListener("click", () => {
-    ensureAudio();
-    playSound("click");
-    void startHistoricalViewer();
-  });
   howToPlayButton.addEventListener("click", () => {
     ensureAudio();
     playSound("click");
