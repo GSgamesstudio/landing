@@ -669,20 +669,65 @@
     }
   }
 
+  const scenarioCountryNamesCache = new Map();
+
+  async function loadScenarioCountryNames(scenario) {
+    if (!scenarioCountryNamesCache.has(scenario.path)) {
+      const load = fetch(`${scenario.path}?v=${Date.now()}`, { cache: "no-store" })
+        .then(async (response) => {
+          if (!response.ok) throw new Error(`Не удалось загрузить ${scenario.path}`);
+          const data = await response.json();
+          return Array.isArray(data.countries)
+            ? data.countries.map((country) => ({ name: country?.name, focusCountryName: country?.focusCountryName }))
+            : [];
+        })
+        .catch((error) => {
+          scenarioCountryNamesCache.delete(scenario.path);
+          throw error;
+        });
+      scenarioCountryNamesCache.set(scenario.path, load);
+    }
+    return scenarioCountryNamesCache.get(scenario.path);
+  }
+
   async function loadCatalogs() {
     if (gameScreen.classList.contains("active")) return;
     try {
       const stamp = Date.now();
-      const [mapsResponse, scenariosResponse] = await Promise.all([
+      const [mapsResponse, scenariosResponse, focusesResponse] = await Promise.all([
         fetch(`maps/manifest.json?v=${stamp}`, { cache: "no-store" }),
         fetch(`scenarios/manifest.json?v=${stamp}`, { cache: "no-store" }),
+        fetch(`focuses/manifest.json?v=${stamp}`, { cache: "no-store" }),
       ]);
-      if (!mapsResponse.ok || !scenariosResponse.ok) return;
+      if (!mapsResponse.ok || !scenariosResponse.ok || !focusesResponse.ok) return;
 
       const mapsManifest = await mapsResponse.json();
       const scenariosManifest = await scenariosResponse.json();
+      const focusesManifest = await focusesResponse.json();
+      const focusFiles = Array.isArray(focusesManifest.files) ? focusesManifest.files : [];
+      const focusKeys = new Set(focusFiles.map((file) => String(file).replace(/\.csv$/i, "").toLocaleLowerCase("ru-RU")));
+      const focusYears = new Set(focusFiles
+        .map((file) => String(file).match(/\[(\d{4})\]\.csv$/i))
+        .filter(Boolean)
+        .map((match) => Number(match[1])));
+      if (Object.keys(MAJOR_FOCUS_TREES).length > 0) focusYears.add(PLAYABLE_SCENARIO_YEAR);
       const rawScenarios = Array.isArray(scenariosManifest.scenarios) ? scenariosManifest.scenarios : [];
-      const nextScenarios = rawScenarios.filter((scenario) => Number(scenario.year) >= MIN_SCENARIO_YEAR);
+      const hiddenScenarioFiles = new Set(["Евразия 1960.json", "Евразия 1914.json", "Европа 2007.json"]);
+      const focusYearScenarios = rawScenarios.filter((scenario) =>
+        Number(scenario.year) >= MIN_SCENARIO_YEAR &&
+        focusYears.has(Number(scenario.year)) &&
+        !hiddenScenarioFiles.has(scenario.file) &&
+        (scenario.mapFile !== "мир.json" || Number(scenario.year) === PLAYABLE_SCENARIO_YEAR));
+      const nextScenarios = (await Promise.all(focusYearScenarios.map(async (scenario) => {
+        const countries = await loadScenarioCountryNames(scenario);
+        const year = Number(scenario.year);
+        return countries.some((country) => {
+          const focusName = country?.focusCountryName || country?.name;
+          return focusKeys.has(focusCsvKey(focusName, year)) ||
+            (year === PLAYABLE_SCENARIO_YEAR && Boolean(MAJOR_FOCUS_TREES[focusName] ||
+              (isRussiaCountry(country) && MAJOR_FOCUS_TREES["Россия"])));
+        }) ? scenario : null;
+      }))).filter(Boolean);
       const playableMapFiles = new Set(nextScenarios.map((scenario) => scenario.mapFile).filter(Boolean));
       const nextMaps = (Array.isArray(mapsManifest.maps) ? mapsManifest.maps : [])
         .filter((map) => playableMapFiles.size === 0 || playableMapFiles.has(map.file));
