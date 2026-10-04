@@ -1,14 +1,14 @@
 {
   "name": "Ashes of Nations",
   "short_name": "Ashes",
-  "start_url": "./index.html?v=20261003-183956",
+  "start_url": "./index.html?v=20261004-140414",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#0d1115",
   "theme_color": "#0d1115",
   "icons": [
     {
-      "src": "assets/avatarka.png?v=20261003-183956",
+      "src": "assets/avatarka.png?v=20261004-140414",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

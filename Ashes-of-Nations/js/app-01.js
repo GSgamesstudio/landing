@@ -81,7 +81,7 @@
   const FOCUS_CSV_DIR = "focuses";
   const CATALOG_REFRESH_MS = 30000;
   // Change this number whenever bundled UI/assets change to invalidate browser caches.
-  const CACHE_VERSION = "20261003-183956";
+  const CACHE_VERSION = "20261004-140414";
   const NUCLEAR_CAPABLE_COUNTRIES = new Set(["Россия", "СССР", "США", "Китай", "Франция", "Великобритания", "Индия", "Пакистан", "КНДР", "Израиль"]);
 
   let peace3dRenderer = null;

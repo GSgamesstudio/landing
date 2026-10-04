@@ -2797,7 +2797,14 @@
   settingsPoliticalMap.addEventListener("change", () => {
     userSettings.politicalMap = settingsPoliticalMap.value;
     saveUserSettings();
+    syncPoliticalMapOptions();
     if (gameData && mapMode === "political") renderGameMap();
+  });
+  document.querySelectorAll("[data-map-display]").forEach((button) => {
+    button.addEventListener("click", () => {
+      settingsPoliticalMap.value = button.dataset.mapDisplay;
+      settingsPoliticalMap.dispatchEvent(new Event("change", { bubbles: true }));
+    });
   });
   settingsFullscreen.addEventListener("click", toggleFullscreen);
   settingsApplyPlayer.addEventListener("click", () => {

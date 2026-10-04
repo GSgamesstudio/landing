@@ -4,26 +4,28 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ashes of Nations</title>
-    <link rel="icon" type="image/png" href="assets/avatarka.png?v=20261003-183956">
-    <link rel="manifest" href="manifest.webmanifest?v=20261003-183956">
-    <link rel="stylesheet" href="styles.css?v=20261003-183956">
+    <link rel="icon" type="image/png" href="assets/avatarka.png?v=20261004-140414">
+    <link rel="manifest" href="manifest.webmanifest?v=20261004-140414">
+    <link rel="stylesheet" href="styles.css?v=20261004-140414">
   </head>
   <body>
     <main class="game-shell">
       <section id="mainScreen" class="screen main-screen active">
         <div class="backdrop"></div>
         <div class="menu">
-          <p class="eyebrow">Grand strategy</p>
-          <h1>Ashes<br>of Nations</h1>
-          <p class="subtitle">Перепишите историю наций</p>
+          <div class="menu-heading">
+            <p class="eyebrow">Grand strategy</p>
+            <h1>Ashes<br>of Nations</h1>
+            <p class="subtitle">Перепишите историю наций</p>
+          </div>
           <div class="menu-actions">
             <button id="playButton" class="primary-button" type="button">Играть</button>
             <button id="howToPlayButton" class="menu-button" type="button">Как играть · обучение</button>
             <button id="continueButton" class="menu-button" type="button" disabled>Продолжить</button>
             <button id="savesButton" class="menu-button" type="button">Сохранения</button>
-            <a class="menu-button" href="editor/index.html?v=20261003-183956">Редактор карт</a>
-            <a class="menu-button" href="scenario-editor/index.html?v=20261003-183956">Редактор сценариев</a>
-            <a class="menu-button" href="sources.html?v=20261003-183956">Источники и лицензии</a>
+            <a class="menu-button" href="editor/index.html?v=20261004-140414">Редактор карт</a>
+            <a class="menu-button" href="scenario-editor/index.html?v=20261004-140414">Редактор сценариев</a>
+            <a class="menu-button" href="sources.html?v=20261004-140414">Источники и лицензии</a>
             <button id="settingsButton" class="menu-button" type="button">Настройки</button>
           </div>
         </div>
@@ -166,13 +168,25 @@
               <option value="ssaa">SSAA</option>
             </select>
           </label>
-          <label class="settings-field">
-            <span>Обычная карта</span>
-            <select id="settingsPoliticalMap" class="strategy-select">
+          <div class="settings-field settings-map-display">
+            <span>Отображение карты</span>
+            <select id="settingsPoliticalMap" class="settings-native-select" aria-hidden="true" tabindex="-1">
               <option value="standard">Стандарт</option>
               <option value="flags">Флаги</option>
             </select>
-          </label>
+            <div class="map-display-options" role="group" aria-label="Режим отображения карты">
+              <button class="map-display-option" type="button" data-map-display="standard" aria-pressed="false">
+                <span class="map-display-preview preview-standard" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>Стандарт</strong>
+                <small>Цвета стран</small>
+              </button>
+              <button class="map-display-option" type="button" data-map-display="flags" aria-pressed="false">
+                <span class="map-display-preview preview-flags" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>Флаги</strong>
+                <small>Флаги на карте</small>
+              </button>
+            </div>
+          </div>
           <label class="settings-field">
             <span data-i18n="playerLabel">Игрок</span>
             <select id="settingsPlayer" class="strategy-select"></select>
@@ -224,17 +238,15 @@
         </div>
       </section>
     </main>
-    <script src="data/historical-events.js?v=20261003-183956"></script>
-    <script src="data/historical-events-1700-1865.js?v=20261003-183956"></script>
-    <script src="data/historical-events-1866-1923.js?v=20261003-183956"></script>
-    <script src="data/historical-events-1924-1945.js?v=20261003-183956"></script>
-    <script src="data/historical-events-campaigns.js?v=20261003-183956"></script>
-    <script src="data/historical-events-1946-2026.js?v=20261003-183956"></script>
-    <script src="data/historical-territory-effects.js?v=20261003-183956"></script>
-    <script src="data/historical-alternatives.js?v=20261003-183956"></script>
-    <script src="data/historical-territories.js?v=20261003-183956"></script>
-    <script src="app.js?v=20261003-183956"></script>
+    <script src="data/historical-events.js?v=20261004-140414"></script>
+    <script src="data/historical-events-1700-1865.js?v=20261004-140414"></script>
+    <script src="data/historical-events-1866-1923.js?v=20261004-140414"></script>
+    <script src="data/historical-events-1924-1945.js?v=20261004-140414"></script>
+    <script src="data/historical-events-campaigns.js?v=20261004-140414"></script>
+    <script src="data/historical-events-1946-2026.js?v=20261004-140414"></script>
+    <script src="data/historical-territory-effects.js?v=20261004-140414"></script>
+    <script src="data/historical-alternatives.js?v=20261004-140414"></script>
+    <script src="data/historical-territories.js?v=20261004-140414"></script>
+    <script src="app.js?v=20261004-140414"></script>
   </body>
 </html>
-
-

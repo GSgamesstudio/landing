@@ -198,7 +198,15 @@
 
   function openSettings() {
     updateSettingsPlayerOptions();
+    syncPoliticalMapOptions();
     settingsModal.hidden = false;
+  }
+
+  function syncPoliticalMapOptions() {
+    document.querySelectorAll("[data-map-display]").forEach((button) => {
+      const selected = button.dataset.mapDisplay === settingsPoliticalMap.value;
+      button.setAttribute("aria-pressed", String(selected));
+    });
   }
 
   function closeSettings() {

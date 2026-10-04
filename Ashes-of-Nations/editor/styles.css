@@ -241,6 +241,15 @@ input {
   font-size: 13px;
 }
 
+.back-to-game {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 42px;
+  text-decoration: none;
+}
+
 .checkbox-field {
   display: flex;
   align-items: center;
