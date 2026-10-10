@@ -156,6 +156,12 @@
       { id: "keyArtilleryView", label: "\u0410\u0440\u0442-\u0440\u0435\u0436\u0438\u043c" }
     ];
 
+    const languageSettings = [
+      { id: "auto", label: "Авто (язык платформы)" },
+      { id: "ru", label: "Русский" },
+      { id: "en", label: "Английский" }
+    ];
+
     function normalizeGameSettings() {
       settingsControls.forEach((control) => {
         gameSettings[control.id] = clampNumber(gameSettings[control.id], control.min, control.max);
@@ -166,6 +172,7 @@
       keySettings.forEach((setting) => {
         gameSettings[setting.id] = normalizeKeySetting(gameSettings[setting.id], defaultGameSettings[setting.id]);
       });
+      gameSettings.language = supportedGameLanguages.includes(gameSettings.language) ? gameSettings.language : "auto";
     }
 
     function formatSettingValue(control) {
@@ -275,6 +282,40 @@
       return item;
     }
 
+    function createLanguageSettingItem() {
+      const item = document.createElement("label");
+      const name = document.createElement("div");
+      const select = document.createElement("select");
+      const description = document.createElement("div");
+
+      item.className = "settingsItem";
+      name.className = "settingsName";
+      select.className = "settingsLanguageSelect";
+      description.className = "settingsDescription";
+      name.textContent = "Язык";
+      description.textContent = "В режиме «Авто» используется язык, который определила платформа YaGamesSDK или браузер.";
+      languageSettings.forEach((language) => {
+        const option = document.createElement("option");
+        option.value = language.id;
+        option.textContent = language.label;
+        select.append(option);
+      });
+      select.value = gameSettings.language;
+      select.addEventListener("change", () => {
+        gameSettings.language = select.value;
+        saveGameSettings();
+        applyGameLanguage();
+        renderTopBar();
+        renderSideButtons();
+        renderTankFilters();
+        renderTankBar(loadedTanks);
+        overlayContent.textContent = "";
+        renderSettingsScreen();
+      });
+      item.append(name, select, description);
+      return item;
+    }
+
     function createSettingsActionButton(label, className, onClick) {
       const button = document.createElement("button");
 
@@ -291,6 +332,7 @@
       const eraFlagNote = document.createElement("div");
 
       screen.className = "settingsScreen";
+      screen.append(createLanguageSettingItem());
       eraFlagNote.className = "settingsItem settingsDescription";
       eraFlagNote.textContent = "Флаг Веймарской республики с железным крестом используется для отображения эпохи.";
       settingsControls.forEach((control) => screen.append(createSettingsItem(control)));
@@ -992,11 +1034,11 @@
       topBar.textContent = "";
 
       topBar.append(
-        createTopSlot("Р§РµСЂС‚РµР¶Рё", playerResources.blueprints),
-        createTopSlot("РћРїС‹С‚", selectedTank?.experience || 0),
-        createTopSlot("", "Р’ Р±РѕР№", "battleButton"),
-        createTopSlot("РЎРµСЂРµР±СЂРѕ", playerResources.silver),
-        createTopSlot("Р—РѕР»РѕС‚Рѕ", playerResources.gold)
+        createTopSlot("Чертежи", playerResources.blueprints),
+        createTopSlot("Опыт", selectedTank?.experience || 0),
+        createTopSlot("", "В бой", "battleButton"),
+        createTopSlot("Серебро", playerResources.silver),
+        createTopSlot("Золото", playerResources.gold)
       );
     }
 

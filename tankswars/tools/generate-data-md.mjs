@@ -63,7 +63,8 @@ const columnDefinitions = [
   ["AE", "Размер", "sizeLevel", "Размер 1–5, влияющий на масштаб и коллизию"],
   ["AF", "УВН вниз", "gunDepression", "Угол склонения; сейчас не ограничивает наведение в бою"],
   ["AG", "УВН вверх", "gunElevation", "Угол возвышения; сейчас не ограничивает наведение в бою"],
-  ["AH", "Флаг детализации", "detailFlag", "Переопределяет фоновый флаг танка; пустое значение берёт флаг из нации"]
+  ["AH", "Флаг детализации", "detailFlag", "Переопределяет фоновый флаг танка; пустое значение берёт флаг из нации"],
+  ["AI", "Английское название", "englishName", "Название техники для английского интерфейса; русское название остаётся ключом связей и изображений"]
 ];
 
 const escapeCell = (value) => String(value ?? "")
@@ -91,7 +92,7 @@ const lines = [
   "",
   "Для быстрого просмотра данные разделены на несколько более узких таблиц. Символ `—` означает пустую ячейку.",
   "",
-  "## Справочник столбцов A–AG",
+  "## Справочник столбцов A–AI",
   "",
   "| Столбец | Понятное название | Поле в коде | Что означает |",
   "|---|---|---|---|",
@@ -114,12 +115,12 @@ const lines = [
   "",
   "## Быстрый список всей техники",
   "",
-  "| № CSV | Ур. | Название | Нация | Класс | HP | Урон 1/2/3 | Пробитие 1/2/3 | Броня/X | КД | Скорость S | AC |",
-  "|---:|---:|---|---|---|---:|---|---|---|---:|---:|---:|"
+  "| № CSV | Ур. | Название | English name | Нация | Класс | HP | Урон 1/2/3 | Пробитие 1/2/3 | Броня/X | КД | Скорость S | AC |",
+  "|---:|---:|---|---|---|---|---:|---|---|---|---:|---:|---:|"
 ];
 
 for (const { csvRow, cells } of rows) {
-  lines.push(`| ${csvRow} | ${escapeCell(cells[7])} | ${escapeCell(cells[0])} | ${escapeCell(cells[8])} | ${escapeCell(cells[14])} | ${escapeCell(cells[15])} | ${escapeCell(cells.slice(4, 7).join(" / "))} | ${escapeCell(cells.slice(19, 22).join(" / "))} | ${escapeCell(`${cells[22] || "—"} / ${cells[23] || "—"}`)} | ${escapeCell(cells[16])} | ${escapeCell(cells[18])} | ${escapeCell(cells[28])} |`);
+  lines.push(`| ${csvRow} | ${escapeCell(cells[7])} | ${escapeCell(cells[0])} | ${escapeCell(cells[34])} | ${escapeCell(cells[8])} | ${escapeCell(cells[14])} | ${escapeCell(cells[15])} | ${escapeCell(cells.slice(4, 7).join(" / "))} | ${escapeCell(cells.slice(19, 22).join(" / "))} | ${escapeCell(`${cells[22] || "—"} / ${cells[23] || "—"}`)} | ${escapeCell(cells[16])} | ${escapeCell(cells[18])} | ${escapeCell(cells[28])} |`);
 }
 
 for (let tier = 1; tier <= 11; tier += 1) {

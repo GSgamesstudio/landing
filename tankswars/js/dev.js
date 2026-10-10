@@ -56,7 +56,8 @@
     sizeLevel: 30,
     gunDepression: 31,
     gunElevation: 32,
-    detailFlag: 33
+    detailFlag: 33,
+    englishName: 34
   };
 
   const state = {
@@ -2122,6 +2123,7 @@
 
     grid.append(
       inputListField("Название", getRowValue(row, csvColumns.name), "tankNameList", (value) => updateCsvRow(rowIndex, (current) => setCsvCell(current, csvColumns.name, value))),
+      inputListField("English name", getRowValue(row, csvColumns.englishName), "", (value) => updateCsvRow(rowIndex, (current) => setCsvCell(current, csvColumns.englishName, value))),
       numericField("Уровень", getRowValue(row, csvColumns.level), (value) => updateCsvRow(rowIndex, (current) => setCsvCell(current, csvColumns.level, value))),
       selectField("Размер танка", [
         { value: "1", label: "1 - 70%" },

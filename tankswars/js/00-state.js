@@ -97,6 +97,7 @@
       showReloadIndicator: true,
       showBattleResultPanel: true,
       fullscreen: false,
+      language: "auto",
       keyForward: "w",
       keyBackward: "s",
       keyLeft: "a",

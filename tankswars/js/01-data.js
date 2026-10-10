@@ -250,7 +250,8 @@
           showTeamMarkers: parsedSettings.showTeamMarkers !== false,
           showReloadIndicator: parsedSettings.showReloadIndicator !== false,
           showBattleResultPanel: parsedSettings.showBattleResultPanel !== false,
-          fullscreen: parsedSettings.fullscreen === true
+          fullscreen: parsedSettings.fullscreen === true,
+          language: supportedGameLanguages.includes(parsedSettings.language) ? parsedSettings.language : "auto"
         };
       } catch (error) {
         console.warn("Could not load game settings.", error);
@@ -258,6 +259,7 @@
       }
 
       normalizeGameSettings();
+      applyGameLanguage();
       Object.keys(defaultGameSettings)
         .filter((key) => key.startsWith("key"))
         .forEach((key) => {
@@ -414,8 +416,7 @@
 
     function createDefaultCrew() {
       return Object.fromEntries(crewRoles.map((role) => [role.id, {
-        experience: 0,
-        elite: false
+        experience: 0
       }]));
     }
 
@@ -427,8 +428,7 @@
         const member = source[role.id] || {};
 
         crew[role.id] = {
-          experience: Math.min(crewExperienceToTrain, normalizeNumber(member.experience || 0)),
-          elite: member.elite === true
+          experience: Math.min(crewExperienceToTrain, normalizeNumber(member.experience || 0))
         };
       });
 
@@ -465,7 +465,7 @@
       const training = Math.min(1, normalizeNumber(member?.experience || 0) / crewExperienceToTrain);
       const baseMultiplier = 0.9 + training * 0.1;
 
-      return member?.elite ? baseMultiplier * 1.05 : baseMultiplier;
+      return baseMultiplier;
     }
 
     function normalizeTankState(value, fallback = 0) {
@@ -630,6 +630,7 @@
           return {
             id: index + 1,
             name,
+            englishName: (cells[34] || "").trim(),
             level,
             nation: cells[8] || "",
             detailFlag: (cells[33] || "").trim(),
@@ -680,6 +681,7 @@
           tank.researchParents = links.researchParents;
         });
 
+      registerTankEnglishNames(tanks);
       return tanks;
     }
 

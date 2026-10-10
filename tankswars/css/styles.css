@@ -2199,6 +2199,15 @@
       accent-color: #ff1f1f;
     }
 
+    .settingsLanguageSelect {
+      min-width: 190px;
+      border: 2px solid #111;
+      background: #252525;
+      color: #f1f1f1;
+      padding: 8px;
+      font: inherit;
+    }
+
     .settingsCheckbox {
       width: 26px;
       height: 26px;

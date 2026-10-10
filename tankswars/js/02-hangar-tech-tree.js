@@ -251,13 +251,12 @@
       }
 
       if (method === "gold") {
-        if (playerResources.gold < crewGoldTrainPrice) {
+        if (normalizeNumber(member.experience) >= crewExperienceToTrain || playerResources.gold < crewGoldTrainPrice) {
           return;
         }
 
         playerResources.gold -= crewGoldTrainPrice;
         member.experience = crewExperienceToTrain;
-        member.elite = true;
         savePlayerResources();
       } else {
         member.experience = Math.min(crewExperienceToTrain, normalizeNumber(member.experience));
@@ -287,7 +286,7 @@
         const progress = document.createElement("div");
         const trainButton = document.createElement("button");
         const goldButton = document.createElement("button");
-        const percent = Math.round((0.9 + Math.min(1, normalizeNumber(member.experience) / crewExperienceToTrain) * 0.1) * (member.elite ? 1.05 : 1) * 100);
+        const percent = Math.round((0.9 + Math.min(1, normalizeNumber(member.experience) / crewExperienceToTrain) * 0.1) * 100);
 
         row.className = "crewMember";
         info.className = "crewInfo";
@@ -302,7 +301,7 @@
         trainButton.disabled = true;
         trainButton.addEventListener("click", () => trainCrewMember(targetTank, role.id, "experience"));
         goldButton.textContent = `Улучшить: ${crewGoldTrainPrice} золота`;
-        goldButton.disabled = member.elite || playerResources.gold < crewGoldTrainPrice;
+        goldButton.disabled = member.experience >= crewExperienceToTrain || playerResources.gold < crewGoldTrainPrice;
         goldButton.addEventListener("click", () => trainCrewMember(targetTank, role.id, "gold"));
         row.append(info, progress, trainButton, goldButton);
         screen.append(row);

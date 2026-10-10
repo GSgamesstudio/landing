@@ -1676,6 +1676,7 @@
               console.log("Yandex SDK initialized");
               window.ysdk = ysdk;
               window.lang = ysdk.environment.i18n.lang;
+              applyGameLanguage();
               initTabActivityCheck();
               resolve(ysdk);
             })
