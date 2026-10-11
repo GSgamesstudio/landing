@@ -633,6 +633,28 @@
         .sort((first, second) => String(first).localeCompare(String(second), "ru", { numeric: true }));
     }
 
+    function saveTankBarFilters() {
+      setCookie("tankBarFilters", JSON.stringify(tankBarFilters));
+    }
+
+    function loadTankBarFilters() {
+      const stored = parseStoredJson("tankBarFilters", {});
+      if (!stored || typeof stored !== "object" || Array.isArray(stored)) return;
+
+      const availableTanks = loadedTanks.filter(tankIsAvailableInCurrentMode);
+      const validValues = {
+        nation: getTankFilterOptions(availableTanks, "nation"),
+        level: getTankFilterOptions(availableTanks, "level", (value) => String(value)),
+        type: ["regular", "premium", "collectible", "future", ...(developerModeEnabled ? ["developer"] : [])],
+        className: getTankFilterOptions(availableTanks, "className")
+      };
+
+      Object.keys(tankBarFilters).forEach((name) => {
+        tankBarFilters[name] = stored[name] === "all" || validValues[name].includes(stored[name])
+          ? stored[name] : "all";
+      });
+    }
+
     function tankMatchesBarFilters(tank) {
       if (!tankIsAvailableInCurrentMode(tank)) {
         return false;
@@ -692,6 +714,7 @@
       const classes = getTankFilterOptions(availableTanks, "className");
       const updateFilter = (name, value) => {
         tankBarFilters[name] = value;
+        saveTankBarFilters();
         renderTankFilters();
         renderTankBar(loadedTanks);
       };
@@ -742,6 +765,7 @@
         tankBarFilters.level = "all";
         tankBarFilters.type = "all";
         tankBarFilters.className = "all";
+        saveTankBarFilters();
         renderTankFilters();
         renderTankBar(loadedTanks);
       });

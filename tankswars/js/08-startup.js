@@ -602,6 +602,7 @@
       loadPlayerStats();
 
       loadedTanks = await loadTankRows();
+      loadTankBarFilters();
       const availableTanks = loadedTanks.filter((tank) => tank.state === 2 && tankIsAvailableInCurrentMode(tank));
       selectedTank = availableTanks[0] || fallbackTanks[0];
       renderHangarTankStats(selectedTank);

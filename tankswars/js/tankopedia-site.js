@@ -15,6 +15,38 @@ const state = {
   filtered: [],
   selectedId: 0
 };
+const tankopediaFiltersStorageKey = "tankopediaFilters";
+
+function saveTankopediaFilters() {
+  try {
+    localStorage.setItem(tankopediaFiltersStorageKey, JSON.stringify({
+      search: elements.search.value,
+      nation: elements.nation.value,
+      level: elements.level.value,
+      className: elements.className.value,
+      status: elements.status.value
+    }));
+  } catch (error) {
+    console.warn("Could not save tankopedia filters.", error);
+  }
+}
+
+function restoreTankopediaFilters() {
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem(tankopediaFiltersStorageKey) || "null");
+  } catch (error) {
+    console.warn("Could not load tankopedia filters.", error);
+    return;
+  }
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) return;
+
+  elements.search.value = typeof stored.search === "string" ? stored.search.slice(0, 120) : "";
+  for (const name of ["nation", "level", "className", "status"]) {
+    const select = elements[name];
+    select.value = [...select.options].some((option) => option.value === stored[name]) ? stored[name] : "all";
+  }
+}
 
 function parseCsvLine(line) {
   const cells = [];
@@ -553,10 +585,13 @@ function render() {
 }
 
 function attachEvents() {
-  [elements.search, elements.nation, elements.level, elements.className, elements.status].forEach((element) => {
-    element.addEventListener("input", render);
-    element.addEventListener("change", render);
-  });
+  const update = () => {
+    saveTankopediaFilters();
+    render();
+  };
+  elements.search.addEventListener("input", update);
+  [elements.nation, elements.level, elements.className, elements.status]
+    .forEach((select) => select.addEventListener("change", update));
 }
 
 async function loadTanks() {
@@ -572,6 +607,7 @@ async function loadTanks() {
   state.selectedId = state.tanks[0]?.id || 0;
   elements.totalCount.textContent = String(state.tanks.length);
   renderFilters();
+  restoreTankopediaFilters();
   render();
 }
 
