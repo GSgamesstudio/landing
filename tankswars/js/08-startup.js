@@ -110,6 +110,8 @@
     }
 
     let mobileControlsPanel = null;
+    let mobileRocketBoosterButton = null;
+    let mobileSiegeModeButton = null;
     const mobileControlPointers = new Map();
     const mobileControlKeyPressCounts = new Map();
 
@@ -247,6 +249,12 @@
         }),
         createMobileControlButton("Ком", "", { down() { ensureTacticalCommandPanel().classList.toggle("open"); } })
       );
+      mobileRocketBoosterButton = createMobileControlButton("Ракеты", "", { down: usePlayerRocketBooster });
+      mobileRocketBoosterButton.hidden = true;
+      actions.append(mobileRocketBoosterButton);
+      mobileSiegeModeButton = createMobileControlButton("Осада", "", { down: togglePlayerSiegeMode });
+      mobileSiegeModeButton.hidden = true;
+      actions.append(mobileSiegeModeButton);
       [1, 2, 3].forEach((shellNumber) => {
         shells.append(createMobileControlButton(String(shellNumber), "", {
           down() {
@@ -266,6 +274,8 @@
       const panel = ensureMobileControlsPanel();
       const visible = battleState.active && shouldUseMobileControls();
 
+      mobileRocketBoosterButton.hidden = !battleState.player?.rocketBooster;
+      mobileSiegeModeButton.hidden = !battleState.player?.siegeMode;
       panel.classList.toggle("isVisible", visible);
       panel.setAttribute("aria-hidden", visible ? "false" : "true");
       if (!visible) {
@@ -461,6 +471,18 @@
       if (key === "6") {
         event.preventDefault();
         togglePlayerClipFireMode();
+        return;
+      }
+
+      if (key === "7") {
+        event.preventDefault();
+        if (!event.repeat) usePlayerRocketBooster();
+        return;
+      }
+
+      if (key === "8") {
+        event.preventDefault();
+        if (!event.repeat) togglePlayerSiegeMode();
         return;
       }
 

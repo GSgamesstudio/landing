@@ -773,12 +773,34 @@
       const bodyWidth = 78 * sizeScale;
       const bodyHeight = 48 * sizeScale;
       const bodySize = getFittedImageSize(tank.bodyImage, bodyWidth, bodyHeight);
+      const waterRockAngle = destroyed ? 0 : (tank.waterRockAmount || 0)
+        * Math.sin(performance.now() / 700 + (tank.waterRockPhase || 0)) * 0.03;
 
       drawProjectedShadow(ctx, tank.x, tank.y, 88 * sizeScale, 48 * sizeScale, tank.angle, destroyed ? 0.22 : 0.34);
       ctx.save();
       ctx.translate(tank.x, tank.y);
-      ctx.rotate(tank.angle);
+      ctx.rotate(tank.angle + waterRockAngle);
       ctx.globalAlpha = destroyed ? 0.72 : 1;
+      if (!destroyed && tank.rocketBooster?.activeTime > 0) {
+        const flameLength = 14 + Math.sin(performance.now() / 80) * 4;
+
+        [-0.22, 0.22].forEach((offset) => {
+          const y = bodyHeight * offset;
+
+          ctx.fillStyle = "#ff8b24";
+          ctx.beginPath();
+          ctx.moveTo(-bodyWidth / 2 + 3, y - 5);
+          ctx.lineTo(-bodyWidth / 2 - flameLength, y);
+          ctx.lineTo(-bodyWidth / 2 + 3, y + 5);
+          ctx.fill();
+          ctx.fillStyle = "#ffe07a";
+          ctx.beginPath();
+          ctx.moveTo(-bodyWidth / 2 + 2, y - 2);
+          ctx.lineTo(-bodyWidth / 2 - flameLength * 0.65, y);
+          ctx.lineTo(-bodyWidth / 2 + 2, y + 2);
+          ctx.fill();
+        });
+      }
       drawTankPart(ctx, tank.bodyImage, bodyWidth, bodyHeight, tankColor);
       if (destroyed) {
         ctx.globalAlpha = 0.62;
@@ -797,7 +819,7 @@
 
         ctx.save();
         ctx.translate(tank.x, tank.y);
-        ctx.rotate(tank.turretAngle);
+        ctx.rotate(tank.turretAngle + waterRockAngle);
         ctx.globalAlpha = destroyed ? 0.72 : 1;
         drawTankPart(ctx, tank.turretImage, turretWidth, turretHeight, tankColor);
         if (destroyed) {
@@ -812,6 +834,128 @@
         drawBattleFire(ctx, tank.x + 8, tank.y - 8, 24, performance.now() / 1000);
         drawBattleSmoke(ctx, tank.x - 2, tank.y - 18, 30, performance.now() / 1000);
       }
+    }
+
+    function getNightHeadlightOccluders() {
+      const occluders = [];
+
+      battleState.rocks.forEach((rock, index) => {
+        occluders.push({ rect: getRockCollisionRect(rock, index) });
+      });
+      (battleState.mapDetails?.buildings || []).forEach((building) => {
+        occluders.push({ rect: getBuildingCollisionRect(building) });
+      });
+      getActiveDestructibles().forEach((item) => {
+        occluders.push({ rect: getDestructibleCollisionRect(item) });
+      });
+      getMapWreckCollisionRects().forEach((rect) => occluders.push({ rect }));
+      getAllBattleTanks().forEach((otherTank) => {
+        occluders.push({ rect: getTankCollisionRect(otherTank), tank: otherTank });
+      });
+
+      return occluders;
+    }
+
+    function getHeadlightRayHitDistance(origin, angle, rect, maxDistance) {
+      const rectAngle = rect.angle || 0;
+      const cos = Math.cos(rectAngle);
+      const sin = Math.sin(rectAngle);
+      const offsetX = origin.x - rect.x;
+      const offsetY = origin.y - rect.y;
+      const localX = offsetX * cos + offsetY * sin;
+      const localY = -offsetX * sin + offsetY * cos;
+      const localAngle = angle - rectAngle;
+      const directionX = Math.cos(localAngle);
+      const directionY = Math.sin(localAngle);
+      const halfWidth = rect.width / 2;
+      const halfHeight = rect.height / 2;
+      let near = 0;
+      let far = maxDistance;
+
+      for (const [position, direction, halfSize] of [
+        [localX, directionX, halfWidth],
+        [localY, directionY, halfHeight]
+      ]) {
+        if (Math.abs(direction) < 0.000001) {
+          if (position < -halfSize || position > halfSize) return null;
+          continue;
+        }
+
+        let first = (-halfSize - position) / direction;
+        let second = (halfSize - position) / direction;
+        if (first > second) [first, second] = [second, first];
+        near = Math.max(near, first);
+        far = Math.min(far, second);
+        if (near > far) return null;
+      }
+
+      return near <= maxDistance && far >= 0 ? Math.max(0, near) : null;
+    }
+
+    function drawNightTankHeadlights(ctx, tank, occluders) {
+      if (!tankIsAlive(tank)) {
+        return;
+      }
+
+      const sizeScale = tank.sizeScale || getTankSizeScale(tank.tank);
+      const beamStart = 24 * sizeScale;
+      const beamLength = 280 * sizeScale;
+      const beamHalfWidth = 92 * sizeScale;
+
+      ctx.save();
+      ctx.translate(tank.x, tank.y);
+      ctx.rotate(tank.angle);
+      ctx.globalCompositeOperation = "screen";
+      [-1, 1].forEach((side) => {
+        const lampY = side * 14 * sizeScale;
+        const lampOrigin = {
+          x: tank.x + Math.cos(tank.angle) * beamStart - Math.sin(tank.angle) * lampY,
+          y: tank.y + Math.sin(tank.angle) * beamStart + Math.cos(tank.angle) * lampY
+        };
+        const spreadAngle = 0.24;
+        const sideAngle = side * 0.055;
+        const rayCount = 16;
+        const beam = ctx.createLinearGradient(beamStart, lampY, beamLength, lampY + side * beamHalfWidth * 0.72);
+        const endpoints = [];
+
+        for (let rayIndex = 0; rayIndex <= rayCount; rayIndex += 1) {
+          const rayOffset = -spreadAngle + spreadAngle * 2 * rayIndex / rayCount;
+          const relativeAngle = sideAngle + rayOffset;
+          const rayAngle = tank.angle + relativeAngle;
+          let distance = beamLength;
+
+          occluders.forEach((occluder) => {
+            if (occluder.tank === tank) return;
+            const hitDistance = getHeadlightRayHitDistance(lampOrigin, rayAngle, occluder.rect, distance);
+            if (hitDistance !== null) distance = hitDistance;
+          });
+
+          endpoints.push({
+            x: beamStart + Math.cos(relativeAngle) * distance,
+            y: lampY + Math.sin(relativeAngle) * distance
+          });
+        }
+
+        beam.addColorStop(0, "rgba(255, 241, 184, 0.32)");
+        beam.addColorStop(0.28, "rgba(255, 235, 171, 0.15)");
+        beam.addColorStop(1, "rgba(255, 226, 150, 0)");
+        ctx.fillStyle = beam;
+        ctx.beginPath();
+        ctx.moveTo(beamStart, lampY - 3 * sizeScale);
+        endpoints.forEach((point) => ctx.lineTo(point.x, point.y));
+        ctx.lineTo(beamStart, lampY + 3 * sizeScale);
+        ctx.closePath();
+        ctx.fill();
+      });
+
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = "rgba(255, 242, 194, 0.86)";
+      [-14, 14].forEach((offset) => {
+        ctx.beginPath();
+        ctx.arc(beamStart - 2 * sizeScale, offset * sizeScale, 2.2 * sizeScale, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
     }
 
     function drawTankHealthBar(ctx, tank) {
@@ -1401,6 +1545,13 @@
       ctx.scale(battleState.camera.scale, battleState.camera.scale);
       ctx.translate(-battleState.camera.x, -battleState.camera.y);
       drawBattleMap(ctx);
+      if (battleState.mapPreset?.id === "moon") {
+        const headlightOccluders = getNightHeadlightOccluders();
+        battleState.enemies
+          .filter((tank) => tank.spotted)
+          .forEach((tank) => drawNightTankHeadlights(ctx, tank, headlightOccluders));
+        battleState.allies.forEach((tank) => drawNightTankHeadlights(ctx, tank, headlightOccluders));
+      }
       battleState.projectiles.forEach((projectile) => drawProjectile(ctx, projectile));
       battleState.enemies
         .filter((tank) => tank.spotted || !tankIsAlive(tank))

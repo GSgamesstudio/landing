@@ -193,7 +193,10 @@
     }
 
     const tankUniqueFeatureTitles = {
-      "10": "Плавающий"
+      "10": "Плавающий",
+      "11": "Ракетные ускорители",
+      "12": "Повышенная проходимость",
+      "13": "Осадный режим"
     };
 
     function parseTankUniqueFeatures(value) {

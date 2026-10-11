@@ -382,6 +382,72 @@
       };
     }
 
+    function getRocketBoosterSpeedMultiplier(tank) {
+      return tank?.rocketBooster?.activeTime > 0 ? rocketBoosterSpeedMultiplier : 1;
+    }
+
+    function activateTankRocketBooster(tank) {
+      const booster = tank?.rocketBooster;
+
+      if (!tankIsAlive(tank) || !booster || booster.activeTime > 0 || booster.cooldown > 0 || tankMobilityIsBroken(tank)) {
+        return false;
+      }
+
+      booster.activeTime = rocketBoosterDuration;
+      return true;
+    }
+
+    function usePlayerRocketBooster() {
+      if (battleState.active && activateTankRocketBooster(battleState.player)) {
+        renderBattleAmmoPanel();
+      }
+    }
+
+    function setTankSiegeMode(tank, active) {
+      if (!tankIsAlive(tank) || !tank?.siegeMode || tank.siegeMode.active === active) {
+        return false;
+      }
+
+      tank.siegeMode.active = active;
+      tank.siegeMode.settledSeconds = 0;
+      return true;
+    }
+
+    function togglePlayerSiegeMode() {
+      const player = battleState.player;
+      if (battleState.active && setTankSiegeMode(player, !player?.siegeMode?.active)) {
+        renderBattleAmmoPanel();
+      }
+    }
+
+    function getTankSiegeSpeedMultiplier(tank) {
+      return tank?.siegeMode?.active ? siegeSpeedMultiplier : 1;
+    }
+
+    function getTankSiegeTurnMultiplier(tank) {
+      return tank?.siegeMode?.active ? siegeTurnMultiplier : 1;
+    }
+
+    function getTankGunSpreadRadians(tank) {
+      const spread = Math.max(0, normalizePositiveFloat(tank?.gunSpreadRadians || 0));
+      const siege = tank?.siegeMode;
+      return siege?.active && siege.settledSeconds >= siegeDeploySeconds && Math.abs(tank.currentSpeed || 0) < 2
+        ? spread * siegeSpreadMultiplier : spread;
+    }
+
+    function updateSiegeModeStabilization(delta) {
+      getAliveBattleTanks().forEach((tank) => {
+        const siege = tank.siegeMode;
+        if (!siege) return;
+        const wasReady = siege.settledSeconds >= siegeDeploySeconds;
+        siege.settledSeconds = siege.active && Math.abs(tank.currentSpeed || 0) < 2
+          ? Math.min(siegeDeploySeconds, siege.settledSeconds + delta) : 0;
+        if (tank === battleState.player && wasReady !== (siege.settledSeconds >= siegeDeploySeconds)) {
+          renderBattleAmmoPanel();
+        }
+      });
+    }
+
     function tankRepairKitIsReady(tank) {
       return normalizePositiveFloat(tank?.consumables?.repairKit?.cooldown || 0) <= 0;
     }
@@ -714,6 +780,50 @@
         });
       }
 
+      if (player.rocketBooster) {
+        const booster = player.rocketBooster;
+        const slot = document.createElement("button");
+        const key = document.createElement("span");
+        const type = document.createElement("span");
+        const state = document.createElement("span");
+
+        slot.type = "button";
+        slot.className = `battleAmmoSlot consumable ${booster.activeTime > 0 ? "selected" : ""}`.trim();
+        slot.disabled = booster.activeTime > 0 || booster.cooldown > 0 || tankMobilityIsBroken(player);
+        key.className = "battleAmmoKey";
+        type.className = "battleAmmoType";
+        state.className = "battleAmmoDamage";
+        key.textContent = "7";
+        type.textContent = "Ускорители";
+        state.textContent = booster.activeTime > 0
+          ? `${Math.ceil(booster.activeTime)}с`
+          : booster.cooldown > 0 ? `${Math.ceil(booster.cooldown)}с` : "Готово";
+        slot.addEventListener("click", usePlayerRocketBooster);
+        slot.append(key, type, state);
+        battleAmmoPanel.append(slot);
+      }
+
+      if (player.siegeMode) {
+        const siege = player.siegeMode;
+        const slot = document.createElement("button");
+        const key = document.createElement("span");
+        const type = document.createElement("span");
+        const state = document.createElement("span");
+
+        slot.type = "button";
+        slot.className = `battleAmmoSlot consumable ${siege.active ? "selected" : ""}`.trim();
+        key.className = "battleAmmoKey";
+        type.className = "battleAmmoType";
+        state.className = "battleAmmoDamage";
+        key.textContent = "8";
+        type.textContent = "Осада";
+        state.textContent = !siege.active ? "Походный"
+          : siege.settledSeconds >= siegeDeploySeconds ? "Развёрнут" : "Развёртывание";
+        slot.addEventListener("click", togglePlayerSiegeMode);
+        slot.append(key, type, state);
+        battleAmmoPanel.append(slot);
+      }
+
       battleAmmoPanel.style.display = "flex";
     }
 
@@ -947,6 +1057,8 @@
         speed: getTankMoveSpeed(tank, isBot),
         turnSpeed: getTankTurnSpeed(tank, isBot),
         currentSpeed: 0,
+        waterRockAmount: 0,
+        waterRockPhase: (x * 0.013 + y * 0.017) % (Math.PI * 2),
         wheelSteer: 0,
         className,
         hasTurret,
@@ -974,6 +1086,8 @@
         clipReloadTimer: 0,
         modules: createTankModules(tank),
         consumables: createTankConsumables(),
+        rocketBooster: tankHasUniqueFeature(tank, "11") ? { activeTime: 0, cooldown: 0 } : null,
+        siegeMode: tankHasUniqueFeature(tank, "13") ? { active: false, settledSeconds: 0 } : null,
         fire: {
           active: false,
           timer: 0,
@@ -1324,7 +1438,20 @@
         return 1;
       }
 
+      if (tankHasUniqueFeature(tank, "12")) {
+        return allTerrainWaterSpeedMultiplier;
+      }
+
       return 0.55;
+    }
+
+    function updateWaterRocking(delta) {
+      getAllBattleTanks().forEach((tank) => {
+        const inWater = tankIsAlive(tank) && !tankHasUniqueFeature(tank, "10") && tankIsInRiver(tank);
+        const target = inWater ? 1 : 0;
+        const current = tank.waterRockAmount || 0;
+        tank.waterRockAmount = current + Math.sign(target - current) * Math.min(Math.abs(target - current), delta * 2);
+      });
     }
 
     function tankCollides(tank) {
@@ -1393,13 +1520,57 @@
       return true;
     }
 
+    function updateTrackedSpeed(tank, throttle, delta, speedMultiplier = 1) {
+      const siegeMultiplier = getTankSiegeSpeedMultiplier(tank);
+      const forwardSpeed = tank.speed * speedMultiplier * getRocketBoosterSpeedMultiplier(tank) * siegeMultiplier;
+      const targetSpeed = throttle > 0 ? forwardSpeed : throttle < 0 ? -tank.speed * 0.65 * siegeMultiplier : 0;
+      const currentSpeed = tank.currentSpeed || 0;
+      const accelerationFactor = tank.className === "ТТ" || tank.className === "САУ" ? 0.8
+        : tank.className === "ЛТ" ? 1.2 : 1;
+      const acceleration = throttle === 0 ? tank.speed * 1.7
+        : currentSpeed !== 0 && Math.sign(currentSpeed) !== Math.sign(throttle) ? tank.speed * 2.4
+          : throttle < 0 ? tank.speed * 0.9 : forwardSpeed * accelerationFactor;
+      const difference = targetSpeed - currentSpeed;
+      const step = Math.min(Math.abs(difference), acceleration * delta);
+
+      tank.currentSpeed = currentSpeed + Math.sign(difference) * step;
+      if (Math.abs(tank.currentSpeed) < 0.5) {
+        tank.currentSpeed = 0;
+      }
+    }
+
+    function moveTrackedTank(tank, throttle, delta, speedMultiplier = 1) {
+      if (tankMobilityIsBroken(tank)) {
+        tank.currentSpeed = 0;
+        return false;
+      }
+
+      updateTrackedSpeed(tank, throttle, delta, speedMultiplier);
+      if (tank.currentSpeed === 0) {
+        return true;
+      }
+
+      if (!moveTank(tank, tank.currentSpeed * delta)) {
+        tank.currentSpeed = 0;
+        return false;
+      }
+
+      return true;
+    }
+
+    function turnTrackedTank(tank, steeringInput, delta) {
+      const movementDirection = tank.currentSpeed < 0 ? -1 : 1;
+      tank.angle = normalizeAngle(tank.angle + tank.turnSpeed * getTankSiegeTurnMultiplier(tank) * steeringInput * movementDirection * delta);
+    }
+
     function updateWheeledSpeed(tank, throttle, delta) {
+      const forwardSpeed = tank.speed * getRocketBoosterSpeedMultiplier(tank);
       const targetSpeed = throttle > 0
-        ? tank.speed
+        ? forwardSpeed
         : throttle < 0
           ? -tank.speed * 0.38
           : 0;
-      const acceleration = throttle === 0 ? tank.speed * 1.95 : tank.speed * 1.42;
+      const acceleration = throttle === 0 ? tank.speed * 1.95 : forwardSpeed * 1.42;
       const difference = targetSpeed - tank.currentSpeed;
       const step = Math.min(Math.abs(difference), acceleration * delta);
 
@@ -1433,7 +1604,7 @@
       updateWheeledSpeed(tank, throttle, delta);
       updateWheeledSteering(tank, steeringInput, delta);
 
-      const speedRatio = Math.min(1, Math.abs(tank.currentSpeed) / Math.max(1, tank.speed));
+      const speedRatio = Math.min(1, Math.abs(tank.currentSpeed) / Math.max(1, tank.speed * getRocketBoosterSpeedMultiplier(tank)));
       const direction = tank.currentSpeed < 0 ? -1 : 1;
       const lowSpeedGrip = Math.min(1, speedRatio * 2.8);
       const highSpeedSteerLoss = 1 - speedRatio * 0.42;
@@ -1548,8 +1719,9 @@
       }
 
       const movedDistance = Math.hypot(tank.x - tank.stuckLastX, tank.y - tank.stuckLastY);
+      const minimumProgress = Math.max(0.1, Math.min(0.75, tank.speed * delta * 0.12));
 
-      tank.stuckMoveTimer = movedDistance < 2
+      tank.stuckMoveTimer = movedDistance < minimumProgress
         ? normalizePositiveFloat(tank.stuckMoveTimer || 0) + delta
         : 0;
       tank.stuckLastX = tank.x;
@@ -1608,6 +1780,33 @@
       });
     }
 
+    function updateRocketBoosterTimers(delta) {
+      getAliveBattleTanks().forEach((tank) => {
+        const booster = tank.rocketBooster;
+
+        if (!booster) {
+          return;
+        }
+
+        const previousTime = Math.ceil(booster.activeTime || booster.cooldown);
+
+        if (booster.activeTime > 0) {
+          const remainingDelta = Math.max(0, delta - booster.activeTime);
+
+          booster.activeTime = Math.max(0, booster.activeTime - delta);
+          if (booster.activeTime === 0) {
+            booster.cooldown = Math.max(0, rocketBoosterCooldown - remainingDelta);
+          }
+        } else {
+          booster.cooldown = Math.max(0, booster.cooldown - delta);
+        }
+
+        if (tank === battleState.player && previousTime !== Math.ceil(booster.activeTime || booster.cooldown)) {
+          renderBattleAmmoPanel();
+        }
+      });
+    }
+
     function updatePlayerTank(delta) {
       const player = battleState.player;
 
@@ -1619,16 +1818,15 @@
       const turnsRight = keyIsPressed("keyRight", ["в"]);
       const movesForward = keyIsPressed("keyForward", ["ц"]);
       const movesBackward = keyIsPressed("keyBackward", ["ы"]);
+      const throttle = Number(movesForward) - Number(movesBackward);
       const mobileControlsActive = typeof shouldUseMobileControls === "function" && shouldUseMobileControls();
       const previousHullAngle = player.angle;
       const mobilityBroken = tankMobilityIsBroken(player);
-      let attemptedMove = movesForward || movesBackward;
+      let attemptedMove = throttle !== 0;
 
       if (tankIsWheeled(player)) {
         const steeringInput = Number(turnsRight) - Number(turnsLeft);
-        const throttle = Number(movesForward) - Number(movesBackward);
 
-        attemptedMove = throttle !== 0;
         if (!mobilityBroken && (throttle !== 0 || Math.abs(player.currentSpeed) > 1)) {
           if (battleState.tutorial.enabled) {
             battleState.tutorial.moved = true;
@@ -1641,9 +1839,9 @@
           player.wheelSteer = 0;
         }
       } else if (!mobilityBroken && turnsLeft) {
-        player.angle = normalizeAngle(player.angle - player.turnSpeed * delta);
+        turnTrackedTank(player, -1, delta);
       } else if (!mobilityBroken && turnsRight) {
-        player.angle = normalizeAngle(player.angle + player.turnSpeed * delta);
+        turnTrackedTank(player, 1, delta);
       } else if (!mobilityBroken && tankIsArtillery(player) && !mobileControlsActive) {
         const targetHullAngle = Math.atan2(battleState.mouse.y - player.y, battleState.mouse.x - player.x);
 
@@ -1657,18 +1855,11 @@
         }
       }
 
-      if (!tankIsWheeled(player) && !mobilityBroken && movesForward) {
-        if (battleState.tutorial.enabled) {
+      if (!tankIsWheeled(player)) {
+        if (!mobilityBroken && throttle !== 0 && battleState.tutorial.enabled) {
           battleState.tutorial.moved = true;
         }
-        moveTank(player, player.speed * delta);
-      }
-
-      if (!tankIsWheeled(player) && !mobilityBroken && movesBackward) {
-        if (battleState.tutorial.enabled) {
-          battleState.tutorial.moved = true;
-        }
-        moveTank(player, -player.speed * 0.65 * delta);
+        moveTrackedTank(player, throttle, delta);
       }
 
       updateTankStuckRecovery(player, attemptedMove, delta);
@@ -2255,8 +2446,9 @@
 
     function updateBotStuckState(bot, delta) {
       const movedDistance = Math.hypot(bot.x - bot.botLastX, bot.y - bot.botLastY);
+      const minimumProgress = Math.max(0.1, Math.min(0.75, bot.speed * delta * 0.12));
 
-      bot.botStuckTimer = movedDistance < 3 ? bot.botStuckTimer + delta : Math.max(0, bot.botStuckTimer - delta * 1.8);
+      bot.botStuckTimer = movedDistance < minimumProgress ? bot.botStuckTimer + delta : Math.max(0, bot.botStuckTimer - delta * 1.8);
       bot.botLastX = bot.x;
       bot.botLastY = bot.y;
 
@@ -2286,7 +2478,11 @@
         bot.botTarget = getMostDangerousTarget(bot);
       }
 
-      const driveTarget = getBotDriveTarget(bot);
+      const siegeTargetDistance = tankIsAlive(bot.botTarget) ? getDistanceBetween(bot, bot.botTarget) : Infinity;
+      const siegeHoldPosition = Boolean(bot.siegeMode && selectedBattleMode.id !== "war"
+        && siegeTargetDistance >= 220 && siegeTargetDistance <= 650 && canTankSeeTank(bot, bot.botTarget));
+      setTankSiegeMode(bot, siegeHoldPosition);
+      const driveTarget = siegeHoldPosition ? bot : getBotDriveTarget(bot);
       const className = getTankClassKey(bot);
       const wheeled = tankIsWheeled(bot);
       const personality = getBotPersonality(bot);
@@ -2307,7 +2503,7 @@
           speedMultiplier = 0.72 * personality.speedMultiplier;
         }
 
-        if (!wheeled && !mobilityBroken) {
+        if (!wheeled && !mobilityBroken && !siegeHoldPosition) {
           bot.angle = rotateAngleToward(bot.angle, desiredAngle, bot.turnSpeed * delta);
         }
 
@@ -2319,7 +2515,7 @@
           if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
             bot.turretAngle = rotateAngleToward(bot.turretAngle, turretAngle, bot.turretTurnSpeed * delta);
           } else if (!mobilityBroken && (className === "\u041f\u0422" || className === "\u041f\u0422-\u0421\u0410\u0423" || tankIsArtillery(bot))) {
-            bot.angle = rotateAngleToward(bot.angle, turretAngle, bot.turnSpeed * delta);
+            bot.angle = rotateAngleToward(bot.angle, turretAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
             bot.turretAngle = bot.angle;
           } else if (!tankModuleIsBroken(bot, "turret")) {
             bot.turretAngle = bot.angle;
@@ -2336,6 +2532,9 @@
           let moved = true;
 
           attemptedDrive = true;
+          if (!mobilityBroken && canDrive && bot.botAvoidTimer <= 0 && Math.hypot(driveTarget.x - bot.x, driveTarget.y - bot.y) > 240) {
+            activateTankRocketBooster(bot);
+          }
           if (wheeled) {
             const steerError = normalizeAngle(desiredAngle - bot.angle);
             const steeringInput = clampNumber(steerError * 1.65, -1, 1);
@@ -2345,8 +2544,8 @@
             bot.speed *= speedMultiplier;
             moved = moveWheeledTank(bot, steeringInput, throttle, delta);
             bot.speed = originalSpeed;
-          } else if (canDrive) {
-            moved = moveTank(bot, bot.speed * speedMultiplier * delta);
+          } else {
+            moved = moveTrackedTank(bot, canDrive ? 1 : 0, delta, speedMultiplier);
           }
 
           if (!moved) {
@@ -2358,10 +2557,14 @@
             bot.botPathPoint = chooseBestDetourPoint(bot, driveTarget);
             bot.botPathTimer = 0.45;
           }
+        } else if (!wheeled) {
+          moveTrackedTank(bot, 0, delta);
         }
       } else {
         if (wheeled) {
           moveWheeledTank(bot, 0, 0, delta);
+        } else {
+          moveTrackedTank(bot, 0, delta);
         }
         bot.turretAngle = bot.angle;
       }
@@ -2818,7 +3021,7 @@
       const forwardY = dy / distance;
       const sideX = -forwardY;
       const sideY = forwardX;
-      const spread = Math.max(0, normalizePositiveFloat(tank.gunSpreadRadians || 0));
+      const spread = getTankGunSpreadRadians(tank);
       const lateralOffset = (Math.random() * 2 - 1) * distance * spread;
       const longitudinalOffset = (Math.random() * 2 - 1) * distance * spread * 3;
 
@@ -2859,7 +3062,7 @@
       const shellCount = usesBurstClip ? 1 : Math.max(1, normalizeNumber(tank.shellsPerShot || 1) || 1);
       const spreadStep = usesFire ? 0.075 : shellCount > 1 ? 0.035 : 0;
       const spreadStart = -spreadStep * (shellCount - 1) / 2;
-      const gunSpread = Math.max(0, normalizePositiveFloat(tank.gunSpreadRadians || 0));
+      const gunSpread = getTankGunSpreadRadians(tank);
       const spentShells = getTankShotShellCost(tank, shell);
 
       if (!spendBattleShellAmmo(tank, shell, spentShells)) {
@@ -3679,10 +3882,12 @@
     function updateBattle(delta) {
       updateBotTeamCommands(delta);
       updateReloadTimers(delta);
+      updateRocketBoosterTimers(delta);
       updateTankFires(delta);
       updateSurvivalBuffs(delta);
       updateWarRespawns(delta);
       updatePlayerTank(delta);
+      updateSiegeModeStabilization(delta);
       if (battleState.fireHeld && playerUsesHeldFire()) {
         firePlayerShell();
       }
@@ -3691,6 +3896,7 @@
         .filter((tank) => tank.isBot)
         .forEach((tank) => updateBotTank(tank, delta));
       battleState.enemies.forEach((tank) => updateBotTank(tank, delta));
+      updateWaterRocking(delta);
       updateProjectiles(delta);
       updateSpotting();
       if (selectedBattleMode.id === "war") {

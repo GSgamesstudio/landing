@@ -45,6 +45,14 @@
     const adGoldReward = 100;
     const repairKitSilverPrice = 200;
     const extinguisherSilverPrice = 500;
+    const rocketBoosterDuration = 10;
+    const rocketBoosterCooldown = 30;
+    const rocketBoosterSpeedMultiplier = 1.5;
+    const allTerrainWaterSpeedMultiplier = 0.8;
+    const siegeSpeedMultiplier = 0.35;
+    const siegeTurnMultiplier = 0.6;
+    const siegeSpreadMultiplier = 0.5;
+    const siegeDeploySeconds = 0.8;
     const victoryDayEvent = {
       title: "ПОРОГ: летний прорыв",
       description: "Сыграй 50 боев с 12 июля по 1 августа и бесплатно получи танк ПОРОГ.",
