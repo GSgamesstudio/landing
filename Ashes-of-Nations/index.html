@@ -6,7 +6,7 @@
     <title>Ashes of Nations</title>
     <link rel="icon" type="image/png" href="assets/avatarka.png?v=20261007-181327">
     <link rel="manifest" href="manifest.webmanifest?v=20261007-181327">
-    <link rel="stylesheet" href="styles.css?v=20261007-181327">
+    <link rel="stylesheet" href="styles.css?v=20261015-fullscreen-prompt">
   </head>
   <body>
     <main class="game-shell">
@@ -244,6 +244,17 @@
             <button id="tutorialAction" class="mini-button" type="button"></button>
             <button id="tutorialNext" class="primary-button" type="button">Далее →</button>
           </div>
+        </div>
+      </section>
+
+      <section id="mobileFullscreenPrompt" class="mobile-fullscreen-prompt" hidden aria-label="Полноэкранный режим">
+        <div class="mobile-fullscreen-card" role="dialog" aria-modal="true" aria-labelledby="mobileFullscreenTitle">
+          <button id="mobileFullscreenClose" class="mobile-fullscreen-close" type="button" aria-label="Закрыть">×</button>
+          <p class="eyebrow">Мобильный режим</p>
+          <h2 id="mobileFullscreenTitle">Играть на весь экран?</h2>
+          <p id="mobileFullscreenText">Так карта будет удобнее на телефоне. Браузер попросит подтвердить переход.</p>
+          <button id="mobileFullscreenAccept" class="primary-button" type="button">На весь экран</button>
+          <button id="mobileFullscreenLater" class="mini-button" type="button">Продолжить в окне</button>
         </div>
       </section>
     </main>

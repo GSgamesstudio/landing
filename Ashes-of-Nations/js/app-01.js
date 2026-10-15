@@ -62,6 +62,10 @@
   const nextTurnButton = document.getElementById("nextTurnButton");
   const turnStatus = document.getElementById("turnStatus");
   const tutorialModal = document.getElementById("tutorialModal");
+  const mobileFullscreenPrompt = document.getElementById("mobileFullscreenPrompt");
+  const mobileFullscreenAccept = document.getElementById("mobileFullscreenAccept");
+  const mobileFullscreenClose = document.getElementById("mobileFullscreenClose");
+  const mobileFullscreenLater = document.getElementById("mobileFullscreenLater");
   const tutorialClose = document.getElementById("tutorialClose");
   const tutorialKicker = document.getElementById("tutorialKicker");
   const tutorialTitle = document.getElementById("tutorialTitle");

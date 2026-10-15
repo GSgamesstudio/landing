@@ -227,11 +227,51 @@
     saveGame("switch-player");
   }
 
+  function isMobileBrowser() {
+    return /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
+      || (navigator.maxTouchPoints > 0 && matchMedia("(pointer: coarse) and (max-width: 1100px)").matches);
+  }
+
+  function fullscreenPromptWasClosed() {
+    try {
+      return sessionStorage.getItem("ashes-mobile-fullscreen-prompt-closed") === "1";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function rememberFullscreenPromptClosed() {
+    try {
+      sessionStorage.setItem("ashes-mobile-fullscreen-prompt-closed", "1");
+    } catch (error) {
+      // Private browsing may deny storage; the prompt can still be closed for this page.
+    }
+  }
+
+  function closeMobileFullscreenPrompt(remember = true) {
+    if (!mobileFullscreenPrompt) return;
+    mobileFullscreenPrompt.hidden = true;
+    if (remember) rememberFullscreenPromptClosed();
+  }
+
+  function showMobileFullscreenPrompt() {
+    if (!isMobileBrowser() || document.fullscreenElement || fullscreenPromptWasClosed()) return;
+    if (!mobileFullscreenPrompt) return;
+    mobileFullscreenPrompt.hidden = false;
+  }
+
+  async function requestFullscreenMode() {
+    if (document.fullscreenElement) return true;
+    if (typeof document.documentElement.requestFullscreen !== "function") return false;
+    await document.documentElement.requestFullscreen();
+    await lockLandscapeOrientation();
+    return Boolean(document.fullscreenElement);
+  }
+
   async function toggleFullscreen() {
     try {
       if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        await lockLandscapeOrientation();
+        await requestFullscreenMode();
       } else {
         await document.exitFullscreen();
       }
