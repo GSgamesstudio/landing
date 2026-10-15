@@ -361,7 +361,7 @@
   function createRegion() {
     const name = regionNameInput.value.trim() || `Регион ${regions.length + 1}`;
     const color = nextColor(selectedType);
-    const id = regions.length + 1;
+    const id = regions.reduce((maxId, region) => Math.max(maxId, region.id), 0) + 1;
     regions.push({
       id,
       name,

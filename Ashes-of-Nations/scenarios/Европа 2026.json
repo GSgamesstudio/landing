@@ -7,7 +7,7 @@
     "name": "Европа",
     "width": 1500,
     "height": 920,
-    "file": null
+    "file": "Европа.json"
   },
   "countries": [
     {
@@ -1023,8 +1023,7 @@
       "subjectAutonomy": 0,
       "regionIds": [
         850,
-        880,
-        1781
+        880
       ]
     },
     {
@@ -1505,7 +1504,25 @@
         11139,
         11140,
         11141,
-        11142
+        11142,
+        11173,
+        11174,
+        11175,
+        11176,
+        11177,
+        11178,
+        11179,
+        11180,
+        11181,
+        11182,
+        11188,
+        11189,
+        11190,
+        11191,
+        11192,
+        11193,
+        11264,
+        11268
       ]
     },
     {
@@ -1535,9 +1552,10 @@
       "subjectType": "puppet",
       "subjectAutonomy": 0,
       "regionIds": [
-        810,
         311,
-        813
+        810,
+        813,
+        11265
       ]
     },
     {
@@ -1552,7 +1570,8 @@
       "subjectType": "puppet",
       "subjectAutonomy": 0,
       "regionIds": [
-        1644
+        1644,
+        11266
       ]
     },
     {
@@ -1876,7 +1895,18 @@
         2952,
         2953,
         2954,
-        4033
+        4033,
+        11183,
+        11184,
+        11185,
+        11186,
+        11187,
+        11194,
+        11195,
+        11196,
+        11197,
+        11263,
+        11267
       ]
     },
     {
@@ -2227,7 +2257,7 @@
       "id": 72,
       "name": "Палестина",
       "ideology": "neutral",
-      "capitalRegionId": 20,
+      "capitalRegionId": 22,
       "color": "#86e496",
       "flag": "flags/01-современные-страны/Палестина.png",
       "flagId": "iso:PS",
@@ -2306,9 +2336,29 @@
       "regionIds": [
         212
       ]
+    },
+    {
+      "id": 77,
+      "name": "Приднестровье",
+      "ideology": "communism",
+      "capitalRegionId": 1781,
+      "color": "#cc0000",
+      "flag": "../flags/01-современные-страны/Приднестровская Молдавская Республика.png",
+      "flagId": "file:01-современные-страны/Приднестровская Молдавская Республика.png",
+      "subjectOf": null,
+      "subjectType": "puppet",
+      "subjectAutonomy": 1,
+      "regionIds": [
+        1781
+      ]
     }
   ],
-  "occupations": [],
+  "occupations": [
+    {
+      "regionId": 20,
+      "controllerCountryId": 65
+    }
+  ],
   "armies": [],
   "administrativeDivisions": []
 }

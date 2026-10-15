@@ -28,6 +28,15 @@
       "countries": 134
     },
     {
+      "name": "Европа 2026",
+      "year": 2026,
+      "file": "Европа 2026.json",
+      "path": "scenarios/Европа 2026.json",
+      "mapFile": "Европа.json",
+      "mapName": "Европа",
+      "countries": 76
+    },
+    {
       "name": "Мир 2026",
       "year": 2026,
       "file": "Мир 2026.json",
@@ -44,6 +53,15 @@
       "mapFile": "мир.json",
       "mapName": "Мир",
       "countries": 194
+    },
+    {
+      "name": "Европа 2007",
+      "year": 2007,
+      "file": "Европа 2007.json",
+      "path": "scenarios/Европа 2007.json",
+      "mapFile": "Европа.json",
+      "mapName": "Европа",
+      "countries": 75
     },
     {
       "name": "Мир 1994",
@@ -136,6 +154,15 @@
       "countries": 75
     },
     {
+      "name": "Европа 1933",
+      "year": 1933,
+      "file": "Европа 1933.json",
+      "path": "scenarios/Европа 1933.json",
+      "mapFile": "Европа.json",
+      "mapName": "Европа",
+      "countries": 63
+    },
+    {
       "name": "Мир 1933",
       "year": 1933,
       "file": "Мир 1933.json",
@@ -179,6 +206,15 @@
       "mapFile": "Евразия.json",
       "mapName": "Евразия",
       "countries": 75
+    },
+    {
+      "name": "Европа 1914",
+      "year": 1914,
+      "file": "Европа 1914.json",
+      "path": "scenarios/Европа 1914.json",
+      "mapFile": "Европа.json",
+      "mapName": "Европа",
+      "countries": 33
     },
     {
       "name": "Мир 1914",

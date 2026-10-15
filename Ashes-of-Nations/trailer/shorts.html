@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><title>Ashes of Nations Shorts</title>
+<style>html,body{margin:0;background:#080d12;overflow:hidden}canvas{display:block}</style>
+<canvas id="frame" width="1080" height="1920"></canvas>
+<script>
+const { readFileSync, writeFileSync } = require('node:fs');
+const path = require('node:path');
+const canvas = document.getElementById('frame');
+const ctx = canvas.getContext('2d', { alpha: false });
+const W=1080,H=1920,gold='#d8b96f',cream='#f3eee3';
+const scenes=[
+  {file:'06-map-1914.png',seconds:6,lines:['ИСТОРИЯ','ЖДЁТ ТЕБЯ'],tag:'1914 · НАЧНИ СВОЮ ИСТОРИЮ',crop:{x:490,y:92,w:710,h:675}},
+  {file:'03-scenario-1914.png',seconds:4,lines:['ВЫБЕРИ','ЭПОХУ'],tag:'ИСТОРИЧЕСКИЕ СЦЕНАРИИ',crop:{x:385,y:70,w:1060,h:1010}},
+  {file:'05-focuses.png',seconds:6,lines:['ОПРЕДЕЛИ','КУРС НАЦИИ'],tag:'НАЦИОНАЛЬНЫЕ ФОКУСЫ',crop:{x:337,y:90,w:970,h:924}},
+  {file:'05-production.png',seconds:5,lines:['СТРОЙ','ЭКОНОМИКУ'],tag:'РЕСУРСЫ И ПРОИЗВОДСТВО',crop:{x:337,y:90,w:970,h:924}},
+  {file:'05-foreign.png',seconds:5,lines:['ЗАКЛЮЧАЙ','СОЮЗЫ'],tag:'ДИПЛОМАТИЯ',crop:{x:337,y:90,w:970,h:924}},
+  {file:'05-army.png',seconds:5,lines:['ВЕДИ','АРМИИ'],tag:'АРМИИ И ФРОНТЫ',crop:{x:337,y:90,w:970,h:924}},
+  {file:'07-map-2026.png',seconds:6,lines:['МЕНЯЙ','КАРТУ МИРА'],tag:'ИСТОРИЯ И СОВРЕМЕННОСТЬ',crop:{x:650,y:92,w:970,h:924}},
+  {file:null,seconds:6,lines:['ASHES OF','NATIONS'],tag:'ПЕРЕПИШИТЕ ИСТОРИЮ НАЦИЙ'},
+];
+const total=scenes.reduce((sum,scene)=>sum+scene.seconds,0);
+const images=new Map();
+function loadImage(name){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{images.set(name,image);resolve();};image.onerror=reject;image.src='stills/'+name;});}
+function ease(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);}
+function cover(image,x,y,w,h,zoom=1,pan=0){
+  const ratio=Math.max(w/image.width,h/image.height)*zoom;
+  const dw=image.width*ratio,dh=image.height*ratio;
+  ctx.drawImage(image,x+(w-dw)/2+pan,y+(h-dh)/2,dw,dh);
+}
+function card(image,p,scene){
+  const x=58,y=535,w=964,h=918;
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.75)';ctx.shadowBlur=50;ctx.fillStyle='#111a20';
+  ctx.beginPath();ctx.roundRect(x,y,w,h,22);ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.roundRect(x,y,w,h,22);ctx.clip();
+  const crop=scene.crop,zoom=1.01+p*.025;
+  const sw=crop.w/zoom,sh=crop.h/zoom;
+  const sx=crop.x+(crop.w-sw)/2+(p-.5)*8,sy=crop.y+(crop.h-sh)/2;
+  ctx.drawImage(image,sx,sy,sw,sh,x,y,w,h);
+  const shade=ctx.createLinearGradient(0,y,0,y+h);
+  shade.addColorStop(0,'rgba(4,9,13,.13)');shade.addColorStop(1,'rgba(4,9,13,.3)');
+  ctx.fillStyle=shade;ctx.fillRect(x,y,w,h);ctx.restore();
+  ctx.strokeStyle='rgba(216,185,111,.8)';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(x,y,w,h,22);ctx.stroke();
+}
+function draw(t){
+  let start=0,scene=scenes[scenes.length-1];
+  for(const current of scenes){if(t<start+current.seconds){scene=current;break;}start+=current.seconds;}
+  const local=t-start,p=local/scene.seconds;
+  ctx.fillStyle='#081017';ctx.fillRect(0,0,W,H);
+  const background=images.get(scene.file||'06-map-1914.png');
+  ctx.save();ctx.filter='blur(30px) brightness(.34)';cover(background,-90,-90,W+180,H+180,1.05);ctx.restore();
+  ctx.fillStyle='rgba(4,9,14,.53)';ctx.fillRect(0,0,W,H);
+  const fade=Math.min(ease(local/.55),ease((scene.seconds-local)/.65));
+  ctx.globalAlpha=fade;
+  ctx.fillStyle=gold;ctx.fillRect(60,85,92,5);
+  ctx.font='bold 36px Arial';ctx.letterSpacing='5px';ctx.fillText('GRAND STRATEGY',60,157);ctx.letterSpacing='0px';
+  ctx.fillStyle=cream;ctx.font='bold 102px Georgia';ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=20;
+  if(scene.file){
+    ctx.fillText(scene.lines[0],58,340);ctx.fillText(scene.lines[1],58,452);
+    ctx.shadowBlur=0;card(background,p,scene);
+    ctx.fillStyle=gold;ctx.fillRect(60,1532,120,5);
+    ctx.font='bold 42px Arial';ctx.fillText(scene.tag,60,1620);
+    ctx.fillStyle=cream;ctx.font='31px Georgia';ctx.fillText('ASHES OF NATIONS',60,1690);
+  }else{
+    ctx.textAlign='center';ctx.font='bold 140px Georgia';
+    ctx.fillText('ASHES OF',W/2,805);ctx.fillText('NATIONS',W/2,975);
+    ctx.shadowBlur=0;ctx.fillStyle=gold;ctx.fillRect(220,1045,640,5);
+    ctx.font='bold 39px Arial';ctx.fillText(scene.tag,W/2,1130);
+    ctx.textAlign='left';
+  }
+  ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(255,255,255,.24)';ctx.fillRect(60,1818,960,5);
+  ctx.fillStyle=gold;ctx.fillRect(60,1818,960*(t/total),5);
+}
+async function renderTrailer(args={}){
+  await Promise.all([...new Set(scenes.map(s=>s.file).filter(Boolean))].map(loadImage));
+  const support=['video/mp4;codecs=avc1.42E01E','video/webm;codecs=vp9','video/webm;codecs=vp8'].find(MediaRecorder.isTypeSupported);
+  if(!support)throw new Error('No supported MediaRecorder video codec');
+  let stream=canvas.captureStream(30),music;
+  if(args.music){
+    const bytes=readFileSync(args.music),ext=path.extname(args.music).toLowerCase();
+    const mime=ext==='.mp3'?'audio/mpeg':ext==='.wav'?'audio/wav':ext==='.ogg'?'audio/ogg':'audio/mp4';
+    music=new Audio(URL.createObjectURL(new Blob([bytes],{type:mime})));
+    if(music.readyState<1)await new Promise((resolve,reject)=>{music.onloadedmetadata=resolve;music.onerror=reject;});
+    await new Promise(resolve=>{music.onseeked=resolve;music.currentTime=1;});
+    const audioCtx=new AudioContext(),source=audioCtx.createMediaElementSource(music),dest=audioCtx.createMediaStreamDestination();
+    source.connect(dest);stream=new MediaStream([...stream.getVideoTracks(),...dest.stream.getAudioTracks()]);
+    await audioCtx.resume();
+  }
+  const recorder=new MediaRecorder(stream,{mimeType:support,videoBitsPerSecond:7000000}),chunks=[];
+  recorder.ondataavailable=event=>{if(event.data.size)chunks.push(event.data);};
+  const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=reject;});
+  draw(0);if(music)await music.play();recorder.start(1000);
+  const started=performance.now();
+  await new Promise(resolve=>{function frame(){const t=(performance.now()-started)/1000;draw(Math.min(t,total-.001));if(t<total)requestAnimationFrame(frame);else resolve();}requestAnimationFrame(frame);});
+  recorder.stop();await stopped;stream.getTracks().forEach(track=>track.stop());if(music)music.pause();
+  const bytes=Buffer.from(await new Blob(chunks).arrayBuffer());
+  const output=args.output||path.join(__dirname,'Ashes-of-Nations-Shorts'+(support.startsWith('video/mp4')?'.mp4':'.webm'));
+  writeFileSync(output,bytes);return{output,bytes:bytes.length,seconds:total,codec:support};
+}
+window.renderTrailer=renderTrailer;
+</script></html>

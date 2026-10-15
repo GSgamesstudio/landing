@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><title>Ashes of Nations trailer</title>
+<style>html,body{margin:0;background:#080d12;overflow:hidden}canvas{display:block}</style>
+<canvas id="frame" width="1920" height="1080"></canvas>
+<script>
+const { readFileSync, writeFileSync } = require('node:fs');
+const path = require('node:path');
+const canvas = document.getElementById('frame');
+const ctx = canvas.getContext('2d', { alpha: false });
+const W = 1920, H = 1080;
+const gold = '#d8b96f', cream = '#f3eee3';
+const scenes = [
+  { file:'06-map-1914.png', seconds:6, title:'ИСТОРИЯ ЖДЁТ ТВОЕГО РЕШЕНИЯ', tag:'1914 · НАЧНИ СВОЮ ИСТОРИЮ', zoom:1.04 },
+  { file:'03-scenario-1914.png', seconds:4, title:'ВЫБЕРИ ЭПОХУ', tag:'ИСТОРИЧЕСКИЕ СЦЕНАРИИ', zoom:1.06 },
+  { file:'05-focuses.png', seconds:6, title:'ОПРЕДЕЛИ КУРС НАЦИИ', tag:'НАЦИОНАЛЬНЫЕ ФОКУСЫ', zoom:1.07 },
+  { file:'05-production.png', seconds:5, title:'ПОСТРОЙ ЭКОНОМИКУ', tag:'РЕСУРСЫ И ПРОИЗВОДСТВО', zoom:1.06 },
+  { file:'05-foreign.png', seconds:5, title:'ЗАКЛЮЧАЙ СОЮЗЫ', tag:'ДИПЛОМАТИЯ', zoom:1.06 },
+  { file:'05-army.png', seconds:5, title:'КОМАНДУЙ АРМИЕЙ', tag:'АРМИИ И ФРОНТЫ', zoom:1.06 },
+  { file:'07-map-2026.png', seconds:6, title:'ИЗМЕНИ КАРТУ МИРА', tag:'ОТ 1914 ДО СОВРЕМЕННОСТИ', zoom:1.04 },
+  { file:null, seconds:6, title:'ASHES OF\nNATIONS', tag:'ПЕРЕПИШИТЕ ИСТОРИЮ НАЦИЙ' },
+];
+const total = scenes.reduce((sum, s) => sum + s.seconds, 0);
+const images = new Map();
+function loadImage(name) {
+  return new Promise((resolve,reject) => {
+    const image = new Image();
+    image.onload = () => { images.set(name,image); resolve(); };
+    image.onerror = reject;
+    image.src = 'stills/' + name;
+  });
+}
+function ease(x) { x=Math.max(0,Math.min(1,x)); return x*x*(3-2*x); }
+function drawPhoto(scene, localTime) {
+  const image=images.get(scene.file);
+  if (!image) return;
+  const p=localTime/scene.seconds;
+  const zoom=scene.zoom + p*0.035;
+  const dw=W*zoom, dh=H*zoom;
+  const x=(W-dw)/2 + (p-.5)*24;
+  const y=(H-dh)/2 + (p-.5)*12;
+  ctx.drawImage(image,x,y,dw,dh);
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(3,8,13,.78)');
+  grad.addColorStop(.33,'rgba(3,8,13,.10)');
+  grad.addColorStop(.68,'rgba(3,8,13,.06)');
+  grad.addColorStop(1,'rgba(3,8,13,.88)');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+}
+function drawText(scene, localTime) {
+  const inAlpha=ease(localTime/.65), outAlpha=ease((scene.seconds-localTime)/.7);
+  ctx.globalAlpha=Math.min(inAlpha,outAlpha);
+  ctx.fillStyle=gold;
+  ctx.fillRect(104,93,90,4);
+  ctx.font='bold 24px Arial';
+  ctx.letterSpacing='5px';
+  ctx.fillText('GRAND STRATEGY',104,142);
+  ctx.letterSpacing='0px';
+  if (scene.file) {
+    ctx.font='bold 72px Georgia';
+    ctx.fillStyle=cream;
+    ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=24;
+    ctx.fillText(scene.title,104,900);
+    ctx.shadowBlur=0;
+    ctx.fillStyle=gold; ctx.fillRect(104,928,110,3);
+    ctx.font='bold 27px Arial'; ctx.fillText(scene.tag,104,980);
+  } else {
+    ctx.textAlign='center';
+    ctx.font='bold 154px Georgia'; ctx.fillStyle=cream;
+    ctx.fillText('ASHES OF',W/2,505);
+    ctx.fillText('NATIONS',W/2,665);
+    ctx.fillStyle=gold; ctx.fillRect(W/2-290,704,580,3);
+    ctx.font='bold 31px Arial'; ctx.fillText(scene.tag,W/2,770);
+    ctx.textAlign='left';
+  }
+  ctx.globalAlpha=1;
+}
+function draw(t) {
+  let start=0, scene=scenes[scenes.length-1];
+  for (const candidate of scenes) { if (t<start+candidate.seconds) {scene=candidate;break;} start+=candidate.seconds; }
+  const local=t-start;
+  ctx.fillStyle='#080d12'; ctx.fillRect(0,0,W,H);
+  if (scene.file) drawPhoto(scene,local);
+  else {
+    const image=images.get('06-map-1914.png');
+    ctx.globalAlpha=.13; ctx.drawImage(image,0,0,W,H); ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(5,10,14,.75)'; ctx.fillRect(0,0,W,H);
+  }
+  drawText(scene,local);
+  if (local<.55 && start>0) {ctx.fillStyle=`rgba(0,0,0,${.55*(1-ease(local/.55))})`;ctx.fillRect(0,0,W,H);}
+}
+async function renderTrailer(args={}) {
+  await Promise.all([...new Set(scenes.map(s=>s.file).filter(Boolean))].map(loadImage));
+  const support=['video/mp4;codecs=avc1.42E01E','video/webm;codecs=vp9','video/webm;codecs=vp8'].find(MediaRecorder.isTypeSupported);
+  if (!support) throw new Error('No supported MediaRecorder video codec');
+  let stream=canvas.captureStream(30);
+  let music;
+  if (args.music) {
+    const audioBytes=readFileSync(args.music);
+    const ext=path.extname(args.music).toLowerCase();
+    const mime=ext==='.mp3'?'audio/mpeg':ext==='.wav'?'audio/wav':ext==='.ogg'?'audio/ogg':'audio/mp4';
+    music=new Audio(URL.createObjectURL(new Blob([audioBytes],{type:mime})));
+    if (music.readyState < 1) await new Promise((resolve,reject)=>{music.onloadedmetadata=resolve;music.onerror=reject;});
+    await new Promise(resolve=>{music.onseeked=resolve;music.currentTime=1;});
+    const audioCtx=new AudioContext();
+    const source=audioCtx.createMediaElementSource(music);
+    const dest=audioCtx.createMediaStreamDestination();
+    source.connect(dest);
+    stream=new MediaStream([...stream.getVideoTracks(),...dest.stream.getAudioTracks()]);
+    music.volume=1;
+    await audioCtx.resume();
+  }
+  const options={mimeType:support,videoBitsPerSecond:8500000};
+  const recorder=new MediaRecorder(stream,options);
+  const chunks=[];
+  recorder.ondataavailable=(event)=>{if(event.data.size)chunks.push(event.data);};
+  const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=reject;});
+  draw(0);
+  if (music) await music.play();
+  recorder.start(1000);
+  const started=performance.now();
+  await new Promise(resolve=>{
+    function frame(){ const t=(performance.now()-started)/1000; draw(Math.min(t,total-.001)); if(t<total)requestAnimationFrame(frame);else resolve(); }
+    requestAnimationFrame(frame);
+  });
+  recorder.stop(); await stopped;
+  stream.getTracks().forEach(track=>track.stop());
+  if (music) music.pause();
+  const bytes=Buffer.from(await new Blob(chunks).arrayBuffer());
+  const extension=support.startsWith('video/mp4')?'.mp4':'.webm';
+  const output=args.output || path.join(__dirname,'Ashes-of-Nations-trailer'+extension);
+  writeFileSync(output,bytes);
+  return {output,bytes:bytes.length,seconds:total,codec:support};
+}
+window.renderTrailer=renderTrailer;
+</script>
+</html>

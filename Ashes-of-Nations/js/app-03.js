@@ -1445,6 +1445,7 @@
         army.eta -= 1;
         army.readiness = clamp(army.readiness - 0.4, 5, 100);
         if (army.eta > 0) return;
+        const previousRegionId = Number(army.regionId);
         army.regionId = Number(army.movingTo);
         if (Array.isArray(army.route) && Number(army.route[0]) === Number(army.regionId)) army.route.shift();
         army.movingTo = army.route?.length ? Number(army.route[0]) : null;
@@ -1454,10 +1455,23 @@
         army.readiness = clamp(army.readiness + 6, 0, 100);
         changed = true;
         const owner = ownerOfRegion(army.regionId);
-        const alreadyOccupied = (gameData.scenario.occupations || []).some((occupation) => Number(occupation.regionId) === Number(army.regionId));
+        const occupation = (gameData.scenario.occupations || []).find((item) => Number(item.regionId) === Number(army.regionId));
+        if (occupation && owner && (Number(owner.id) === Number(runtime.countryId) || areMilitaryAllies(runtime.countryId, owner.id)) &&
+          isAtWar(runtime.countryId, occupation.controllerCountryId)) {
+          if (canMilitaryOvercome(runtime.countryId, occupation.controllerCountryId, army)) {
+            resolveRegionBattle(army.regionId, runtime.countryId, occupation.controllerCountryId, army);
+            gameData.scenario.occupations = gameData.scenario.occupations.filter((item) => Number(item.regionId) !== Number(army.regionId));
+            checkForGovernmentInExileLiberation(runtime.countryId, army.regionId);
+            markMapDirty();
+          } else {
+            repelRegionAttack(army.regionId, runtime.countryId, occupation.controllerCountryId, army, previousRegionId);
+            return;
+          }
+        }
+        const alreadyOccupied = Boolean(occupation);
         if (owner && Number(owner.id) !== Number(runtime.countryId) && isAtWar(runtime.countryId, owner.id) && !alreadyOccupied && canAutoTargetRegion(army.regionId, runtime.countryId) && canMilitaryOvercome(runtime.countryId, owner.id, army)) {
           gameData.scenario.occupations.push({ regionId: Number(army.regionId), controllerCountryId: Number(runtime.countryId) });
-          dislodgeDefendingArmies(army.regionId, runtime.countryId);
+          resolveRegionBattle(army.regionId, runtime.countryId, owner.id, army);
           checkForLiberationOpportunity(runtime.countryId, army.regionId);
           markMapDirty();
           if (Number(runtime.countryId) === Number(strategyState.playerCountryId)) addLog(`${army.name} заняла регион.`);
@@ -1470,12 +1484,29 @@
     return changed;
   }
 
-  function targetArmyCount(country, runtime, minister = null) {
+  function primaryWarForCountry(country) {
+    return strategyState.wars
+      .filter((war) => war.active && (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)))
+      .sort((left, right) => {
+        const lostTo = (war) => {
+          const enemyId = Number(war.attackerId) === Number(country.id) ? Number(war.defenderId) : Number(war.attackerId);
+          return (gameData.scenario.occupations || []).filter((occupation) =>
+            Number(ownerOfRegion(occupation.regionId)?.id) === Number(country.id) &&
+            Number(occupation.controllerCountryId) === enemyId).length;
+        };
+        return lostTo(right) - lostTo(left);
+      })[0] || null;
+  }
+
+  function targetArmyCount(country, runtime, minister = null, activeWar = primaryWarForCountry(country)) {
     const base = Math.max(3, Math.floor((country.regionIds || []).length / 55));
-    if (minister?.mode === "aggressive") return base + 8;
-    if (minister?.mode === "mobilization") return base + 10;
-    if (minister?.mode === "balanced") return base + 5;
-    return base;
+    const standard = base + (minister?.mode === "aggressive" ? 8 : minister?.mode === "mobilization" ? 10 : minister?.mode === "balanced" ? 5 : 0);
+    if (!activeWar) return standard;
+    const enemyId = Number(activeWar.attackerId) === Number(country.id) ? Number(activeWar.defenderId) : Number(activeWar.attackerId);
+    const ratingGap = Math.max(0, militaryRating(enemyId) / 1.15 - militaryRating(country.id));
+    const expectedRecruitRating = 750 * (0.55 + 58 / 200) / 12;
+    const reinforcements = Math.ceil(ratingGap / expectedRecruitRating);
+    return Math.max(standard, runtime.armies.length + reinforcements);
   }
 
   function bestRecruitRegion(country, runtime, minimumSoldiers = 500) {
@@ -1499,14 +1530,14 @@
   }
 
   function createAutomatedArmy(country, runtime, minister = null) {
-    const minimum = minister?.mode === "mobilization" ? 250 : minister?.mode === "aggressive" ? 300 : 400;
-    const activeWar = strategyState.wars.find((war) => war.active && (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)));
+    const activeWar = primaryWarForCountry(country);
+    const minimum = activeWar ? 250 : minister?.mode === "mobilization" ? 250 : minister?.mode === "aggressive" ? 300 : 400;
     const enemyId = activeWar ? (Number(activeWar.attackerId) === Number(country.id) ? activeWar.defenderId : activeWar.attackerId) : null;
     const picked = bestFrontRecruitRegion(country, runtime, countryById(enemyId), minimum);
     if (!picked) return null;
     const soldiers = Math.min(minister?.mode === "aggressive" ? 1200 : minister?.mode === "mobilization" ? 900 : 750, Math.floor(picked.profile.readySoldiers));
     const cost = Math.max(6, Math.ceil(soldiers / 70));
-    const budgetFloor = minister?.mode === "aggressive" ? 4 : minister?.mode === "mobilization" ? 10 : 20;
+    const budgetFloor = activeWar ? 0 : minister?.mode === "aggressive" ? 4 : minister?.mode === "mobilization" ? 10 : 20;
     if (runtime.budget - cost < budgetFloor || soldiers < 100) return null;
     runtime.budget -= cost;
     picked.profile.readySoldiers -= soldiers;
@@ -1526,6 +1557,29 @@
     return army;
   }
 
+  function reinforceFrontArmy(country, runtime, enemyId) {
+    if (!runtime.armies.length || runtime.budget <= 10) return;
+    const defenders = strategyState.countryStates[String(enemyId)]?.armies || [];
+    if (!defenders.length) return;
+    const strongest = runtime.armies.slice().sort((left, right) =>
+      Number(right.soldiers || 0) * (0.55 + Number(right.readiness || 0) / 200) -
+      Number(left.soldiers || 0) * (0.55 + Number(left.readiness || 0) / 200))[0];
+    if (canMilitaryOvercome(country.id, enemyId, strongest)) return;
+    const defenderAverage = defenders.reduce((sum, army) =>
+      sum + Number(army.soldiers || 0) * (0.55 + Number(army.readiness || 0) / 200), 0) / defenders.length;
+    const requiredSoldiers = Math.ceil(defenderAverage * 1.36 / (0.55 + Number(strongest.readiness || 0) / 200));
+    const missing = requiredSoldiers - Number(strongest.soldiers || 0);
+    const reserve = bestRecruitRegion(country, runtime, 100);
+    if (!reserve || missing <= 0) return;
+    const affordable = Math.floor(Math.max(0, runtime.budget - 5) * 35);
+    const soldiers = Math.min(5000, missing, Math.floor(reserve.profile.readySoldiers), affordable);
+    if (soldiers < 100) return;
+    runtime.budget -= Math.ceil(soldiers / 70);
+    reserve.profile.readySoldiers -= soldiers;
+    strongest.soldiers += soldiers;
+    strongest.readiness = clamp(strongest.readiness + 1, 0, 100);
+  }
+
   function canAutoTargetRegion(regionId, controllerCountryId) {
     const owner = ownerOfRegion(regionId);
     if (!owner) return false;
@@ -1534,14 +1588,16 @@
     return true;
   }
 
-  function dislodgeDefendingArmies(regionId, attackerId) {
-    const defender = ownerOfRegion(regionId);
+  function dislodgeDefendingArmies(regionId, attackerId, defenderId = ownerOfRegion(regionId)?.id) {
+    const defender = countryById(defenderId);
     const defenderRuntime = defender && strategyState?.countryStates[String(defender.id)];
-    if (!defender || !defenderRuntime || Number(defender.id) === Number(attackerId)) return;
+    if (!defender || !defenderRuntime || Number(defender.id) === Number(attackerId)) return 0;
     const fallback = [...adjacentRegionIds(regionId)].find((neighborId) =>
       Number(controllerOfRegion(neighborId)?.id) === Number(defender.id));
+    let losses = 0;
     defenderRuntime.armies = defenderRuntime.armies.filter((army) => {
       if (Number(army.regionId) !== Number(regionId)) return true;
+      const before = Number(army.soldiers || 0);
       if (fallback) {
         army.regionId = Number(fallback);
         army.movingTo = null;
@@ -1550,10 +1606,76 @@
         army.order = "Отход после боя";
         army.readiness = clamp(Number(army.readiness || 0) - 45, 5, 100);
         army.soldiers = Math.max(0, Math.floor(Number(army.soldiers || 0) * 0.55));
+        losses += before - army.soldiers;
+        army.lastBattleLosses = before - army.soldiers;
         return army.soldiers >= 100;
       }
+      losses += before;
       return false;
     });
+    return losses;
+  }
+
+  function resolveRegionBattle(regionId, attackerId, defenderId, attackingArmy) {
+    const defenderRuntime = strategyState.countryStates[String(defenderId)];
+    const defenderSoldiers = (defenderRuntime?.armies || [])
+      .filter((army) => Number(army.regionId) === Number(regionId))
+      .reduce((sum, army) => sum + Number(army.soldiers || 0), 0);
+    const attackerSoldiers = Number(attackingArmy?.soldiers || 0);
+    const lossRate = defenderSoldiers
+      ? clamp(0.04 + defenderSoldiers / Math.max(1, attackerSoldiers) * 0.08, 0.04, 0.18)
+      : 0.015;
+    const attackerLosses = attackingArmy ? Math.min(Math.max(0, attackerSoldiers - 1), Math.max(1, Math.round(attackerSoldiers * lossRate))) : 0;
+    if (attackingArmy) {
+      attackingArmy.soldiers -= attackerLosses;
+      attackingArmy.lastBattleLosses = attackerLosses;
+      attackingArmy.readiness = clamp(Number(attackingArmy.readiness || 0) - (defenderSoldiers ? 10 : 4), 5, 100);
+    }
+    let defenderLosses = dislodgeDefendingArmies(regionId, attackerId, defenderId);
+    if (!defenderSoldiers && defenderRuntime) {
+      const garrisonLosses = Math.min(Math.floor(Number(defenderRuntime.manpower || 0)), Math.max(1, Math.round(attackerSoldiers * 0.01)));
+      defenderRuntime.manpower -= garrisonLosses;
+      defenderLosses += garrisonLosses;
+    }
+    if (Number(attackerId) === Number(strategyState.playerCountryId) || Number(defenderId) === Number(strategyState.playerCountryId)) {
+      const regionName = gameData.regionById.get(Number(regionId))?.name || regionId;
+      addLog(`Бой за ${regionName}: ${countryById(attackerId)?.name || "наступающие"} потеряли ${attackerLosses}, ${countryById(defenderId)?.name || "обороняющиеся"} — ${defenderLosses} солдат.`);
+    }
+    return { attackerLosses, defenderLosses };
+  }
+
+  function repelRegionAttack(regionId, attackerId, defenderId, attackingArmy, fallbackRegionId) {
+    const defenderRuntime = strategyState.countryStates[String(defenderId)];
+    const defenders = (defenderRuntime?.armies || []).filter((army) => Number(army.regionId) === Number(regionId));
+    const attackerSoldiers = Number(attackingArmy.soldiers || 0);
+    const defenderSoldiers = defenders.reduce((sum, army) => sum + Number(army.soldiers || 0), 0);
+    const attackerLosses = Math.min(Math.max(0, attackerSoldiers - 1), Math.max(1, Math.round(attackerSoldiers *
+      clamp(0.06 + defenderSoldiers / Math.max(1, attackerSoldiers) * 0.03, 0.06, 0.16))));
+    attackingArmy.soldiers -= attackerLosses;
+    attackingArmy.lastBattleLosses = attackerLosses;
+    attackingArmy.readiness = clamp(Number(attackingArmy.readiness || 0) - 14, 5, 100);
+    let defenderLosses = 0;
+    defenders.forEach((army) => {
+      const losses = Math.min(Math.max(0, Number(army.soldiers || 0) - 1), Math.max(1, Math.round(Number(army.soldiers || 0) * 0.03)));
+      army.soldiers -= losses;
+      army.lastBattleLosses = losses;
+      defenderLosses += losses;
+    });
+    if (!defenders.length && defenderRuntime) {
+      defenderLosses = Math.min(Math.floor(Number(defenderRuntime.manpower || 0)), Math.max(1, Math.round(attackerSoldiers * 0.005)));
+      defenderRuntime.manpower -= defenderLosses;
+    }
+    if (fallbackRegionId) attackingArmy.regionId = Number(fallbackRegionId);
+    attackingArmy.route = [];
+    attackingArmy.movingTo = null;
+    attackingArmy.eta = 0;
+    attackingArmy.order = "Атака отбита";
+    const retryDate = new Date(strategyState.date.getTime());
+    retryDate.setDate(retryDate.getDate() + 7);
+    attackingArmy.counterattackUntil = retryDate.toISOString().slice(0, 10);
+    if (Number(attackerId) === Number(strategyState.playerCountryId) || Number(defenderId) === Number(strategyState.playerCountryId)) {
+      addLog(`Атака на ${gameData.regionById.get(Number(regionId))?.name || regionId} отбита: ${countryById(attackerId)?.name || "наступающие"} потеряли ${attackerLosses}, ${countryById(defenderId)?.name || "обороняющиеся"} — ${defenderLosses} солдат.`);
+    }
   }
 
   // This ranking intentionally remains internal: it represents training,
@@ -1707,6 +1829,7 @@
       })
       .filter((occupation) => Number(occupation.controllerCountryId) === Number(enemy.id))
       .map((occupation) => Number(occupation.regionId));
+    const liberationSet = new Set(liberationTargets);
     const targetable = (enemy.regionIds || [])
       .map(Number)
       .filter((regionId) => !occupied.has(regionId) && canAutoTargetRegion(regionId, country.id));
@@ -1719,8 +1842,12 @@
             ? [regionId]
             : armyRoute(strategyState.countryStates[String(country.id)], army, regionId, allowNaval),
         }))
-        .filter((item) => item.route?.length && !isSeaRegion(army.regionId) && !isSeaRegion(item.regionId) && canMilitaryOvercome(country.id, enemy.id, army))
+        .filter((item) => item.route?.length && !isSeaRegion(army.regionId) && !isSeaRegion(item.regionId) &&
+          (liberationSet.has(item.regionId) || canMilitaryOvercome(country.id, enemy.id, army)))
         .sort((a, b) => {
+          if (preferLiberation && liberationSet.has(a.regionId) !== liberationSet.has(b.regionId)) {
+            return liberationSet.has(a.regionId) ? -1 : 1;
+          }
           return a.route.length - b.route.length;
         })
         .slice(0, limit)
@@ -1745,7 +1872,7 @@
     const readinessNeed = minister.mode === "aggressive" ? 35 : minister.mode === "mobilization" ? 42 : 48;
     if (army.readiness < readinessNeed) return false;
     gameData.scenario.occupations.push({ regionId, controllerCountryId: Number(country.id) });
-    dislodgeDefendingArmies(regionId, country.id);
+    resolveRegionBattle(regionId, country.id, owner.id, army);
     checkForLiberationOpportunity(country.id, regionId);
     markMapDirty();
     army.readiness = clamp(army.readiness - 10, 5, 100);
@@ -1761,6 +1888,14 @@
     if (!isAtWar(country.id, occupation.controllerCountryId)) return false;
     const readinessNeed = minister.mode === "aggressive" ? 28 : minister.mode === "mobilization" ? 34 : 40;
     if (army.readiness < readinessNeed) return false;
+    if (!canMilitaryOvercome(country.id, occupation.controllerCountryId, army)) {
+      if (!army.movingTo && (!army.counterattackUntil || army.counterattackUntil <= strategyState.date.toISOString().slice(0, 10))) {
+        const fallback = [...adjacentRegionIds(regionId)].find((neighborId) => Number(controllerOfRegion(neighborId)?.id) === Number(country.id));
+        repelRegionAttack(regionId, country.id, occupation.controllerCountryId, army, fallback);
+      }
+      return false;
+    }
+    resolveRegionBattle(regionId, country.id, occupation.controllerCountryId, army);
     gameData.scenario.occupations = gameData.scenario.occupations.filter((item) => Number(item.regionId) !== regionId);
     checkForGovernmentInExileLiberation(country.id, regionId);
     army.readiness = clamp(army.readiness - 7, 5, 100);
@@ -1800,11 +1935,16 @@
 
   function automateCountryArmies(country, runtime, options = {}) {
     const minister = options.minister || ARMY_MINISTERS.find((item) => item.id === runtime.armyMinister) || ARMY_MINISTERS[0];
-    const activeWar = strategyState.wars.find((war) => war.active && (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)));
-    const desiredArmies = targetArmyCount(country, runtime, minister);
-    const recruitmentBursts = minister.mode === "aggressive" ? 3 : minister.mode === "mobilization" ? 4 : 2;
+    const activeWar = primaryWarForCountry(country);
+    if (activeWar) {
+      const enemyId = Number(activeWar.attackerId) === Number(country.id) ? Number(activeWar.defenderId) : Number(activeWar.attackerId);
+      reinforceFrontArmy(country, runtime, enemyId);
+    }
+    const desiredArmies = targetArmyCount(country, runtime, minister, activeWar);
+    const shortfall = Math.max(0, desiredArmies - runtime.armies.length);
+    const recruitmentBursts = activeWar ? Math.min(12, Math.max(4, Math.ceil(shortfall / 5))) : minister.mode === "aggressive" ? 3 : minister.mode === "mobilization" ? 4 : 2;
     for (let index = 0; index < recruitmentBursts; index += 1) {
-      const canRecruit = runtime.budget > (minister.mode === "aggressive" ? 12 : 22) && runtime.armies.length < desiredArmies;
+      const canRecruit = runtime.budget > (activeWar ? 5 : minister.mode === "aggressive" ? 12 : 22) && runtime.armies.length < desiredArmies;
       if (!canRecruit) break;
       const created = createAutomatedArmy(country, runtime, minister);
       if (created && options.logForPlayer) addLog(`${minister.name} сформировал ${created.name}.`);
@@ -1823,17 +1963,24 @@
       return owner && areMilitaryAllies(country.id, owner.id) && Number(occupation.controllerCountryId) === Number(enemyId);
     }).length;
     runtime.coalitionRole = alliedOccupationCount ? "liberator" : runtime.aiAgenda === "security" ? "defender" : "attacker";
-    const freeArmies = runtime.armies.filter((item) => !item.movingTo);
+    const homelandUnderOccupation = (gameData.scenario.occupations || []).some((occupation) =>
+      Number(ownerOfRegion(occupation.regionId)?.id) === Number(country.id) &&
+      Number(occupation.controllerCountryId) === Number(enemyId));
+    const today = strategyState.date.toISOString().slice(0, 10);
+    const freeArmies = runtime.armies.filter((item) => !item.movingTo && Number(item.soldiers || 0) >= 100 &&
+      (!item.counterattackUntil || item.counterattackUntil <= today));
     const ordersPerTick = minister.mode === "aggressive" ? 5 : minister.mode === "mobilization" ? 4 : 3;
     const assignedTargets = new Set();
     const defenseTargets = strategicDefenseRegions(country, enemyId);
     const pressureTargets = frontTargetRegions(country, enemy, Math.max(ordersPerTick * 3, 10), freeArmies[0], true, false);
-    const mainAxis = pressureTargets[0];
+    const mainAxis = homelandUnderOccupation ? null : pressureTargets[0];
     freeArmies
-      .sort((a, b) => b.readiness - a.readiness)
+      .sort((a, b) => homelandUnderOccupation
+        ? Number(b.soldiers || 0) * Number(b.readiness || 0) - Number(a.soldiers || 0) * Number(a.readiness || 0)
+        : b.readiness - a.readiness)
       .slice(0, ordersPerTick)
       .forEach((army, index) => {
-      const defenseSlots = Math.max(1, Math.floor(Math.min(freeArmies.length, ordersPerTick) / 3));
+      const defenseSlots = homelandUnderOccupation ? 0 : Math.max(1, Math.floor(Math.min(freeArmies.length, ordersPerTick) / 3));
       if (index < defenseSlots && defenseTargets.length) {
         const defenseTarget = defenseTargets.find((regionId) => !assignedTargets.has(regionId)) || defenseTargets[0];
         if (setArmyRoute(runtime, army, defenseTarget, "general", true)) {
@@ -1846,9 +1993,10 @@
       // pressure on the enemy instead of chasing every distant occupation.
       const liberationShare = runtime.coalitionRole === "liberator" ? 0.7 : runtime.coalitionRole === "defender" ? 0.55 : 0.3;
       const liberationSlots = Math.max(1, Math.ceil(Math.min(freeArmies.length, ordersPerTick) * liberationShare));
-      const targetRegions = frontTargetRegions(country, enemy, Math.max(ordersPerTick * 3, 10), army, true, index < liberationSlots);
+      const targetRegions = frontTargetRegions(country, enemy, Math.max(ordersPerTick * 3, 10), army, true, homelandUnderOccupation || index < liberationSlots);
       const targetRegion = mainAxis && index < ordersPerTick - 1 ? mainAxis : targetRegions.find((regionId) => !assignedTargets.has(regionId)) || targetRegions[0];
       if (!targetRegion) return;
+      if (homelandUnderOccupation && assignedTargets.has(Number(targetRegion))) return;
       assignedTargets.add(Number(targetRegion));
       const routed = setArmyRoute(runtime, army, targetRegion, "general", true);
       if (!routed) return;
@@ -2307,9 +2455,23 @@
     if (monthlyCheck) strategyState.lastAiPeaceMonth = currentMonth;
   }
 
+  function runHistoricalAiArmies() {
+    gameData.scenario.countries.forEach((country) => {
+      if (Number(country.id) === Number(strategyState.playerCountryId)) return;
+      const runtime = strategyState.countryStates[String(country.id)];
+      if (!runtime) return;
+      const atWar = strategyState.wars.some((war) => war.active &&
+        (Number(war.attackerId) === Number(country.id) || Number(war.defenderId) === Number(country.id)));
+      if (atWar) automateCountryArmies(country, runtime, { minister: ARMY_MINISTERS[1] });
+    });
+  }
+
   function runAiTurn() {
     if (!gameData || !strategyState) return;
-    if (isHistoricalPhaseActive()) return;
+    if (isHistoricalPhaseActive()) {
+      runHistoricalAiArmies();
+      return;
+    }
     aiMaybeStartWars();
     aiMaybeJoinWars();
     aiMaybeProposePeace();
@@ -2337,7 +2499,10 @@
 
   async function runAiTurnAsync() {
     if (!gameData || !strategyState) return;
-    if (isHistoricalPhaseActive()) return;
+    if (isHistoricalPhaseActive()) {
+      runHistoricalAiArmies();
+      return;
+    }
     aiMaybeStartWars();
     await yieldToUi();
     if (!gameData || !strategyState) return;
@@ -2452,6 +2617,7 @@
       await runAiTurnAsync();
       if (!strategyState || !gameData) return;
       strategyState.date.setDate(strategyState.date.getDate() + 1);
+      applyRecognitionPressure();
       runHistoricalEvents();
       applyImperialDefeats();
       if (historicalViewerMode && strategyState?.historicalWorldModernized) stopRealtimeClock();
@@ -3324,7 +3490,7 @@
       return;
     }
     gameData.scenario.occupations.push({ regionId, controllerCountryId: player.id });
-    dislodgeDefendingArmies(regionId, player.id);
+    resolveRegionBattle(regionId, player.id, target.id, attackingArmy);
     checkForLiberationOpportunity(player.id, regionId);
     markMapDirty();
     addLog(`Установлена оккупация региона: ${gameData.regionById.get(regionId)?.name || regionId}. Присоединение возможно позже отдельным решением.`);
@@ -3455,32 +3621,40 @@
     renderStrategyPanel();
   }
 
-  function recruitArmy(regionId, options = {}) {
+  function recruitArmies(regionId, count = 1, options = {}) {
     const player = currentPlayerCountry();
     const runtime = currentPlayerState();
-    const profile = runtime.regionProfiles[String(regionId)];
-    if (!player || !runtime || !profile) return null;
+    const profile = runtime?.regionProfiles[String(regionId)];
+    if (!player || !runtime || !profile) return [];
+    const amount = Number(count);
+    if (!Number.isInteger(amount) || amount < 1 || amount > 100) {
+      addLog("Укажите количество дивизий от 1 до 100.");
+      if (!options.silent) renderStrategyPanel();
+      return [];
+    }
     const foreignBase = (runtime.bases || []).some((base) => Number(base.regionId) === Number(regionId) && Number(base.ownerCountryId) === Number(player.id));
     if (Number(controllerOfRegion(regionId)?.id) !== Number(player.id) && !foreignBase) {
       addLog("Набор невозможен: регион находится под оккупацией.");
-      renderStrategyPanel();
-      return null;
+      if (!options.silent) renderStrategyPanel();
+      return [];
     }
-    const soldiers = Math.min(500, Math.floor(profile.readySoldiers));
-    const cost = Math.max(5, Math.ceil(soldiers / 60));
-    if (runtime.budget < cost || soldiers < 100) {
-      addLog("Недостаточно бюджета или готовых солдат в выбранном регионе.");
-      renderStrategyPanel();
-      return null;
+    const soldiersPerDivision = 500;
+    const requiredSoldiers = soldiersPerDivision * amount;
+    const cost = Math.max(5, Math.ceil(soldiersPerDivision / 60)) * amount;
+    if (runtime.budget < cost || profile.readySoldiers < requiredSoldiers) {
+      addLog(`Для ${amount} дивизий нужно ${requiredSoldiers} готовых солдат и ${cost} бюджета. Сейчас доступно ${Math.floor(profile.readySoldiers)} солдат и ${Math.floor(runtime.budget)} бюджета.`);
+      if (!options.silent) renderStrategyPanel();
+      return [];
     }
     runtime.budget -= cost;
-    profile.readySoldiers -= soldiers;
+    profile.readySoldiers -= requiredSoldiers;
     const army = {
-      id: `${player.id}-${Date.now()}`,
+      id: `${player.id}-${Date.now()}-${runtime.armies.length}`,
       name: `${runtime.armies.length + 1}-я армия`,
       ownerCountryId: Number(player.id),
       regionId: Number(regionId),
-      soldiers,
+      soldiers: requiredSoldiers,
+      divisions: amount,
       readiness: 55,
       movingTo: null,
       eta: 0,
@@ -3488,15 +3662,19 @@
       lastSupply: runtime.supply?.level || 100,
     };
     runtime.armies.push(army);
-    addLog(`Сформирована ${army.name}.`);
+    addLog(`Сформирована ${army.name}: ${amount} дивизий, ${army.soldiers} солдат.`);
     if (!options.silent) {
       renderStrategyPanel();
       renderGameMap();
     }
-    return army;
+    return [army];
   }
 
-  function recruitAndDeployArmy(originRegionId, targetCountryId) {
+  function recruitArmy(regionId, options = {}) {
+    return recruitArmies(regionId, 1, options)[0] || null;
+  }
+
+  function recruitAndDeployArmy(originRegionId, targetCountryId, count = 1) {
     const player = currentPlayerCountry();
     const target = countryById(targetCountryId);
     if (!player || !target) return;
@@ -3505,16 +3683,19 @@
       renderStrategyPanel();
       return;
     }
-    const army = recruitArmy(originRegionId, { silent: true });
-    if (!army) return;
-    const targetRegionId = frontTargetRegions(player, target, 8, army)[0];
-    if (!targetRegionId) {
+    const armies = recruitArmies(originRegionId, count, { silent: true });
+    if (!armies.length) { renderStrategyPanel(); return; }
+    let deployed = 0;
+    armies.forEach((army) => {
+      const targetRegionId = frontTargetRegions(player, target, 8, army)[0];
+      if (targetRegionId && setArmyRoute(currentPlayerState(), army, targetRegionId)) deployed += 1;
+    });
+    if (!deployed) {
       addLog("Нет соседнего региона фронта. Сначала подведите армию к границе через смежные регионы.");
-      renderStrategyPanel();
-      renderGameMap();
-      return;
+    } else {
+      addLog(`${armies[0].name} (${armies[0].divisions} дивизий) получила приказ идти на фронт против ${target.name}.`);
     }
-    moveArmy(army.id, targetRegionId);
+    renderStrategyPanel();
     renderGameMap();
   }
 

@@ -107,7 +107,7 @@
   }
 
   function loadUserSettings() {
-    const defaults = { language: "ru", smoothing: "off", politicalMap: "standard" };
+    const defaults = { language: "ru", smoothing: "off", politicalMap: "standard", gameMode: "historical" };
     try {
       const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
       return { ...defaults, ...(raw ? JSON.parse(raw) : {}) };
@@ -190,6 +190,7 @@
   function applyUserSettings() {
     settingsLanguage.value = userSettings.language || "ru";
     settingsSmoothing.value = userSettings.smoothing || "off";
+    settingsGameMode.value = userSettings.gameMode === "focus" ? "focus" : "historical";
     settingsPoliticalMap.value = userSettings.politicalMap || "standard";
     applyLanguage();
     applySmoothing();
@@ -198,7 +199,15 @@
 
   function openSettings() {
     updateSettingsPlayerOptions();
+    syncPoliticalMapOptions();
     settingsModal.hidden = false;
+  }
+
+  function syncPoliticalMapOptions() {
+    document.querySelectorAll("[data-map-display]").forEach((button) => {
+      const selected = button.dataset.mapDisplay === settingsPoliticalMap.value;
+      button.setAttribute("aria-pressed", String(selected));
+    });
   }
 
   function closeSettings() {
@@ -854,6 +863,125 @@
     };
   }
 
+  const RECOGNITION_ENTITIES = [
+    { key: "palestine", name: "Государство Палестина", kind: "state", nonMember: true, aliases: ["Палестина"], governments: ["Государство Палестина", "Палестинская администрация"], referenceRecognizedCount: 161, referenceDate: "09.2026" },
+    { key: "kosovo", name: "Косово", kind: "state", nonMember: true, aliases: ["Косово"], governments: ["Республика Косово"] },
+    { key: "taiwan", name: "Тайвань (Китайская Республика)", kind: "state", nonMember: true, aliases: ["Тайвань"], governments: ["Китайская Республика"] },
+    { key: "western-sahara", name: "Западная Сахара / САДР", kind: "state", nonMember: true, aliases: ["Западная Сахара", "САДР"], governments: ["Сахарская Арабская Демократическая Республика", "Марокко"] },
+    { key: "somaliland", name: "Сомалиленд", kind: "state", nonMember: true, aliases: ["Сомалиленд"], governments: ["Республика Сомалиленд"] },
+    { key: "northern-cyprus", name: "Северный Кипр", kind: "state", nonMember: true, aliases: ["Северный Кипр"], governments: ["Турецкая Республика Северного Кипра"] },
+    { key: "transnistria", name: "Приднестровье", kind: "state", nonMember: true, aliases: ["Приднестровье"], governments: ["Приднестровская Молдавская Республика"] },
+    { key: "transnistria-status", name: "Статус Приднестровья", kind: "territory", nonMember: false, aliases: ["Приднестровье", "ПМР"], governments: ["Часть Молдавии", "Независимое государство", "Часть России"] },
+    { key: "abkhazia", name: "Абхазия", kind: "state", nonMember: true, aliases: ["Абхазия"], governments: ["Республика Абхазия"] },
+    { key: "south-ossetia", name: "Южная Осетия", kind: "state", nonMember: true, aliases: ["Южная Осетия"], governments: ["Республика Южная Осетия"] },
+    { key: "artsakh", name: "Арцах (Нагорный Карабах)", kind: "state", nonMember: true, aliases: ["Арцах", "Нагорный Карабах"], governments: ["Республика Арцах"] },
+    { key: "donetsk-peoples-republic", name: "Донецкая Народная Республика (ДНР)", kind: "state", nonMember: true, aliases: ["Донецк"], activeFrom: 2014, inactiveFrom: 2022, governments: ["ДНР"] },
+    { key: "luhansk-peoples-republic", name: "Луганская Народная Республика (ЛНР)", kind: "state", nonMember: true, aliases: ["Луганск"], activeFrom: 2014, inactiveFrom: 2022, governments: ["ЛНР"] },
+    { key: "novorossiya-project", name: "Проект Новороссия (2014)", kind: "state", nonMember: true, aliases: ["Новороссия"], activeFrom: 2014, inactiveFrom: 2015, projectAreas: true, statusText: "Проект охватывает Донецкую, Луганскую, Харьковскую, Днепропетровскую, Запорожскую, Херсонскую, Николаевскую и Одесскую области. Крым рассматривается отдельно и в проект не входит." },
+    { key: "afghanistan-government", name: "Власть Афганистана", kind: "government", nonMember: false, aliases: ["Афганистан"], governments: ["Исламский Эмират Афганистан (Талибан)", "Исламская Республика Афганистан"] },
+    { key: "syria-government", name: "Власть Сирии", kind: "government", nonMember: false, aliases: ["Сирия"], governments: ["Переходное правительство Сирии", "Правительство Башара Асада"] },
+    { key: "donetsk-status", name: "Донецк и Луганск", kind: "territory", nonMember: false, aliases: ["Донецк", "Луганск"], governments: ["Часть Украины", "Независимые государства", "Часть России"] },
+    { key: "crimea-status", name: "Крым", kind: "territory", nonMember: false, aliases: ["Крым"], governments: ["Часть Украины", "Часть России"] },
+    { key: "golan-status", name: "Голанские высоты", kind: "territory", nonMember: false, aliases: ["Голан"], governments: ["Часть Сирии", "Часть Израиля"] },
+  ];
+
+  function seedRecognitionState(scenario) {
+    const year = Number(scenario.year) || 2026;
+    const countries = scenario.countries || [];
+    const nameAliases = {
+      "США": ["Соединенные Штаты Америки", "Соединённые Штаты Америки", "Соединенные Штаты"],
+      "Северная Корея": ["КНДР", "Корейская Народно-Демократическая Республика"],
+      "Южная Корея": ["Республика Корея"],
+      "ЮАР": ["Южно-Африканская Республика", "Южная Африка"],
+      "Россия": ["Российская Федерация"],
+    };
+    const byName = (names) => countries.filter((country) => names.some((name) => [name, ...(nameAliases[name] || [])].some((variant) => country.name.toLocaleLowerCase("ru").includes(variant.toLocaleLowerCase("ru"))))).map((country) => Number(country.id));
+    const unMemberStart = { "Палестина": 2012, "Государство Палестина": 2012, "Косово": 9999, "Тайвань": 9999, "Китайская Республика": 9999, "Ватикан": 9999, "Святой Престол": 9999, "Северный Кипр": 9999, "Сомалиленд": 9999, "Приднестровье": 9999, "Абхазия": 9999, "Южная Осетия": 9999, "Западная Сахара": 9999 };
+    const joinedYear = { "Италия": 1955, "Германия": 1973, "Япония": 1956, "Австрия": 1955, "Финляндия": 1955, "Испания": 1955, "Швейцария": 2002, "Корея": 1991, "Южный Судан": 2011, "Черногория": 2006, "Сербия": 2000, "Россия": 1991, "СССР": 1945, "Чехия": 1993, "Словакия": 1993, "Эстония": 1991, "Латвия": 1991, "Литва": 1991, "Украина": 1945, "Белоруссия": 1945, "Албания": 1955, "Болгария": 1955, "Венгрия": 1955, "Румыния": 1955, "Ирландия": 1955, "Исландия": 1946, "Швеция": 1946, "Португалия": 1955, "Кипр": 1960, "Мальта": 1964, "Монако": 1993, "Андорра": 1993, "Лихтенштейн": 1990, "Сан-Марино": 1992, "Босния и Герцеговина": 1992, "Хорватия": 1992, "Словения": 1992, "Северная Македония": 1993, "Молдова": 1992, "Грузия": 1992, "Армения": 1992, "Азербайджан": 1992, "Казахстан": 1992, "Узбекистан": 1992, "Кыргызстан": 1992, "Таджикистан": 1992, "Туркменистан": 1992 };
+    const members = countries.filter((country) => {
+      const name = String(country.name || "");
+      const start = unMemberStart[name] ?? joinedYear[name] ?? Number(country.createdYear || 1945);
+      return year >= start && !(Number(country.createdYear) > year);
+    }).map((country) => Number(country.id));
+    const recognizedBy = (key) => {
+      if (key === "palestine") {
+        const refusal = byName(["США", "Израиль", "Германия", "Австрия", "Чехия", "Венгрия", "Италия", "Нидерланды", "Швеция", "Япония", "Южная Корея", "Канада", "Австралия", "Новая Зеландия", "Аргентина", "Уругвай", "Парагвай", "Панама", "Мексика", "Колумбия", "Перу", "Эквадор", "Коста-Рика", "Гватемала", "Гондурас", "Сальвадор", "Доминиканская Республика", "Гаити", "Фиджи", "Тонга", "Самоа", "Палау", "Маршалловы Острова", "Микронезия", "Науру", "Тувалу", "Кирибати", "Папуа-Новая Гвинея", "Камерун", "Эритрея", "Южный Судан", "Того", "Панама"]);
+        return year >= 1988 ? members.filter((id) => !refusal.includes(id)) : [];
+      }
+      if (key === "kosovo") return year >= 2008 ? byName(["США", "Великобритания", "Франция", "Германия", "Италия", "Албания", "Турция", "Канада", "Япония", "Австралия", "Хорватия", "Словения", "Болгария", "Черногория", "Северная Македония"]) : [];
+      if (key === "taiwan") return year >= 1949 ? byName(["Парагвай", "Гватемала", "Белиз", "Гаити", "Палау", "Маршалловы Острова", "Тувалу", "Эсватини", "Ватикан", "Сент-Люсия", "Сент-Китс", "Сент-Винсент", "Науру"]) : [];
+      if (key === "western-sahara") return year >= 1976 ? byName(["Алжир", "ЮАР", "Мексика", "Венесуэла", "Куба", "Никарагуа", "Боливия", "Уругвай", "Колумбия", "Эквадор", "Ангола", "Мозамбик", "Намибия", "Танзания", "Нигерия", "Эфиопия"]) : [];
+      if (key === "somaliland" || key === "northern-cyprus" || key === "transnistria" || key === "artsakh") return [];
+      if (key === "abkhazia" || key === "south-ossetia") return year >= 2008 ? byName(["Россия", "Никарагуа", "Венесуэла", "Науру", "Сирия"]) : [];
+      return [];
+    };
+    const entities = RECOGNITION_ENTITIES.filter((entity) => {
+      if (entity.key === "palestine") return year >= 1948;
+      if (entity.key === "kosovo") return year >= 2008;
+      if (entity.key === "taiwan") return year >= 1949;
+      if (entity.key === "western-sahara") return year >= 1976;
+      if (entity.key === "afghanistan-government") return year >= 1996;
+      if (entity.key === "syria-government") return year >= 2011;
+      if (entity.key === "donetsk-status" || entity.key === "crimea-status" || entity.key === "novorossiya-project") return year >= 2014;
+      if (entity.key === "golan-status") return year >= 1967;
+      if (entity.key === "transnistria-status") return year >= 1991;
+      return year >= 1991;
+    }).filter((entity) => (!entity.activeFrom || year >= entity.activeFrom) && (!entity.activeUntil || year <= entity.activeUntil)).map((entity) => ({ ...entity, historicalOnly: Boolean(entity.inactiveFrom && year >= entity.inactiveFrom), recognizedBy: recognizedBy(entity.key), governmentBy: {}, territoryBy: {} }));
+    const afghanistan = entities.find((entity) => entity.key === "afghanistan-government");
+    if (afghanistan) afghanistan.governmentBy = Object.fromEntries(byName(["Россия"]).map((id) => [id, "Исламский Эмират Афганистан (Талибан)"]));
+    const syria = entities.find((entity) => entity.key === "syria-government");
+    if (syria) syria.governmentBy = year >= 2024
+      ? Object.fromEntries(members.filter((id) => !byName(["Россия", "Иран", "Северная Корея"]).includes(id)).map((id) => [id, "Переходное правительство Сирии"]))
+      : Object.fromEntries(byName(["Россия", "Иран", "Белоруссия", "Китай"]).map((id) => [id, "Правительство Башара Асада"]));
+    const territorySeed = (key, defaultPosition, alternatePosition, alternateCountries, excludedCountries = []) => {
+      const entity = entities.find((item) => item.key === key);
+      if (!entity) return;
+      const excluded = new Set(byName(excludedCountries));
+      entity.territoryBy = Object.fromEntries(members.filter((id) => !excluded.has(id)).map((id) => [id, defaultPosition]));
+      byName(alternateCountries).forEach((id) => { entity.territoryBy[id] = alternatePosition; });
+    };
+    if (year >= 2022) territorySeed("donetsk-status", "Часть Украины", "Часть России", ["Россия", "Сирия", "Северная Корея"]);
+    else if (year >= 2014) territorySeed("donetsk-status", "Часть Украины", "Независимые государства", ["Россия"]);
+    if (year >= 2014) territorySeed("crimea-status", "Часть Украины", "Часть России", ["Россия", "Сирия", "Северная Корея"]);
+    if (year >= 1991) territorySeed("transnistria-status", "Часть Молдавии", "Часть России", []);
+    if (year >= 1981) territorySeed("golan-status", "Часть Сирии", "Часть Израиля", ["США", "Соединённые Штаты Америки", "Израиль"]);
+    const novorossiya = entities.find((entity) => entity.key === "novorossiya-project");
+    if (novorossiya && gameData?.regionById) {
+      const area = /^(?:Украина: (?:(?:Донецкая|Луганская|Харьковская|Днепропетровская|Запорожская|Херсонская|Николаевская|Одесская) область|Донецкая Народная Республика|Луганская Народная Республика)|Россия: (?:Донецкая Народная Республика|Луганская Народная Республика))/;
+      novorossiya.mapRegionIds = [...gameData.regionById.entries()].filter(([, region]) => area.test(String(region?.name || ""))).map(([id]) => Number(id));
+    }
+    return { entities, unMembers: members, history: [] };
+  }
+
+  function recognitionPressureForCountry(countryId) {
+    const recognition = strategyState?.recognition;
+    if (!recognition || !recognition.unMembers?.includes(Number(countryId))) return 0;
+    const total = Math.max(1, recognition.unMembers.length);
+    return (recognition.entities || []).filter((entity) => {
+      if (entity.kind !== "state" || entity.recognizedBy?.includes(Number(countryId))) return false;
+      const rate = entity.referenceRecognizedCount ? entity.referenceRecognizedCount / 193 : (entity.recognizedBy?.length || 0) / total;
+      return rate >= 0.65;
+    }).length;
+  }
+
+  function applyRecognitionPressure() {
+    if (Number(gameData?.scenario?.year) < 1945 || strategyState.date.getDate() !== 1) return;
+    const month = strategyState.date.toISOString().slice(0, 7);
+    if (strategyState.recognition.lastPressureMonth === month) return;
+    strategyState.recognition.lastPressureMonth = month;
+    let playerPenalty = 0;
+    (gameData.scenario.countries || []).forEach((country) => {
+      const pressure = Math.min(3, recognitionPressureForCountry(country.id));
+      if (!pressure) return;
+      const runtime = strategyState.countryStates[String(country.id)];
+      if (!runtime) return;
+      runtime.stability = clamp(runtime.stability - 0.25 * pressure, 0, 100);
+      runtime.politicalPower = Math.max(0, runtime.politicalPower - pressure);
+      if (Number(country.id) === Number(strategyState.playerCountryId)) playerPenalty = pressure;
+    });
+    if (playerPenalty) addLog(`Дипломатическое давление: отказ признавать широко признанное государство снизил стабильность и политическую силу (${playerPenalty} досье).`);
+  }
+
   function createInitialStrategyState(scenario, playerCountry) {
     const countryStates = {};
     scenario.countries.forEach((country) => {
@@ -892,10 +1020,12 @@
     });
     const state = {
       date: new Date(Number(scenario.year) || 2026, 0, 1),
+      gameMode: !historicalViewerMode && userSettings.gameMode === "focus" ? "focus" : "historical",
       playerCountryId: Number(playerCountry.id),
       countryStates,
       relations: {},
       organizations: [],
+      recognition: Number(scenario.year) >= 1945 ? seedRecognitionState(scenario) : { entities: [], unMembers: [], history: [] },
       accessTreaties: [],
       visaTreaties: [],
       trades: [],
@@ -924,6 +1054,7 @@
       orgInfluence: {},
       lastUNGeneralAssemblyAt: null,
       lastUNGeneralAssembly: null,
+      unResolutionHistory: [],
       lastRenderedDay: "",
       log: ["Кабинет сформирован. Доступны фокусы, дипломатия, торговля и военные решения."],
     };
@@ -1049,6 +1180,34 @@
     if (!Array.isArray(state.sanctions)) state.sanctions = [];
     if (!Array.isArray(state.navalIncidents)) state.navalIncidents = [];
     if (!Array.isArray(state.wars)) state.wars = [];
+    if (!state.recognition) state.recognition = Number(scenario?.year) >= 1945 ? seedRecognitionState(scenario) : { entities: [], unMembers: [], history: [] };
+    if (!Array.isArray(state.recognition.entities)) state.recognition.entities = [];
+    if (!Array.isArray(state.recognition.unMembers)) state.recognition.unMembers = [];
+    if (!Array.isArray(state.recognition.history)) state.recognition.history = [];
+    if (Number(scenario?.year) >= 1945) {
+      const seed = seedRecognitionState(scenario);
+      seed.entities.forEach((entity) => {
+        const existing = state.recognition.entities.find((item) => item.key === entity.key);
+        const target = existing || entity;
+        if (!existing) state.recognition.entities.push(entity);
+        else if (entity.referenceRecognizedCount) {
+          target.referenceRecognizedCount = entity.referenceRecognizedCount;
+          target.referenceDate = entity.referenceDate;
+        }
+        if (entity.projectAreas) {
+          target.mapRegionIds = entity.mapRegionIds || [];
+          target.statusText = entity.statusText;
+        }
+        if (target.kind === "territory" && entity.kind === "territory") {
+          Object.entries(entity.territoryBy || {}).forEach(([countryId, position]) => {
+            if (!Object.prototype.hasOwnProperty.call(target.territoryBy || {}, countryId)) {
+              if (!target.territoryBy) target.territoryBy = {};
+              target.territoryBy[countryId] = position;
+            }
+          });
+        }
+      });
+    }
     state.wars.forEach((war) => {
       if (!WAR_GOALS.some((goal) => goal.id === war.goal)) war.goal = "border";
     });
@@ -1057,6 +1216,7 @@
     state.claims = state.claims.filter((claim) => claim && claim.active !== false && Number.isFinite(Number(claim.claimantId)) && Number.isFinite(Number(claim.targetId)) && Number.isFinite(Number(claim.regionId)));
     if (!Array.isArray(state.nonAggressionPacts)) state.nonAggressionPacts = [];
     if (!Array.isArray(state.historicalEvents)) state.historicalEvents = [];
+    if (state.gameMode !== "focus") state.gameMode = "historical";
     if (!Array.isArray(state.crises)) state.crises = [];
     if (!Array.isArray(state.regionalElections)) state.regionalElections = [];
     if (!Object.prototype.hasOwnProperty.call(state, "lastRegionalElectionMonth")) state.lastRegionalElectionMonth = "";
@@ -1081,6 +1241,7 @@
     )) : [];
     if (!Object.prototype.hasOwnProperty.call(state, "lastCrisisMonth")) state.lastCrisisMonth = "";
     if (!Object.prototype.hasOwnProperty.call(state, "lastUNGeneralAssemblyAt")) state.lastUNGeneralAssemblyAt = null;
+    if (!Array.isArray(state.unResolutionHistory)) state.unResolutionHistory = [];
     if (!Object.prototype.hasOwnProperty.call(state, "lastUNGeneralAssembly")) state.lastUNGeneralAssembly = null;
     scenario?.countries?.forEach((country) => {
       const runtime = state.countryStates[stateKey(country)];
@@ -1601,6 +1762,43 @@
     addLog(`Генеральная Ассамблея ООН ${year}: ${agenda.slice(0, 3).join(" · ")}.`);
   }
 
+  function submitUNResolution(entityKey) {
+    const year = Number(strategyState?.date?.getFullYear());
+    const recognition = strategyState?.recognition;
+    const entity = recognition?.entities?.find((item) => item.key === entityKey);
+    const playerId = Number(strategyState?.playerCountryId);
+    const player = currentPlayerState();
+    if (year < 1945 || !entity || !player || !recognition.unMembers?.includes(playerId) || player.politicalPower < 3) return;
+    if (!Array.isArray(strategyState.unResolutionHistory)) strategyState.unResolutionHistory = [];
+    if (strategyState.unResolutionHistory.some((item) => item.year === year && item.proposerId === playerId)) {
+      addLog("В этом году ваша страна уже вносила резолюцию Генассамблеи ООН.");
+      return;
+    }
+    const field = entity.kind === "government" ? "governmentBy" : entity.kind === "territory" ? "territoryBy" : null;
+    const playerPosition = field ? entity[field]?.[playerId] : null;
+    const playerRecognizes = entity.kind === "state" && entity.recognizedBy?.includes(playerId);
+    if (!playerPosition && !playerRecognizes) { addLog("Сначала задайте позицию своей страны по этому досье."); return; }
+    const votes = { yes: [], no: [], abstain: [] };
+    recognition.unMembers.forEach((memberId) => {
+      if (!countryById(memberId)) return;
+      if (Number(memberId) === playerId) { votes.yes.push(Number(memberId)); return; }
+      const position = field ? entity[field]?.[memberId] : null;
+      if (field && !position) { votes.abstain.push(Number(memberId)); return; }
+      const supports = field ? position === playerPosition : Boolean(entity.recognizedBy?.includes(Number(memberId))) === playerRecognizes;
+      const relation = getRelation(playerId, memberId);
+      if (supports || relation > 55) votes.yes.push(Number(memberId));
+      else if (!supports || relation < -40) votes.no.push(Number(memberId));
+      else votes.abstain.push(Number(memberId));
+    });
+    const passed = votes.yes.length > votes.no.length;
+    const record = { year, date: strategyState.date.toISOString().slice(0, 10), proposerId: playerId, proposerName: currentPlayerCountry()?.name || "", entityKey, entityName: entity.name, position: playerPosition || "Поддержать признание", votes, passed };
+    player.politicalPower -= 3;
+    strategyState.unResolutionHistory.push(record);
+    if (strategyState.unResolutionHistory.length > 30) strategyState.unResolutionHistory.shift();
+    if (passed) player.stability = clamp(player.stability + 0.5, 0, 100);
+    addLog(`Резолюция по досье «${entity.name}» ${passed ? "принята" : "не набрала большинство"}: за ${votes.yes.length}, против ${votes.no.length}, воздержались ${votes.abstain.length}. Решение рекомендательное и не меняет признание автоматически.`);
+  }
+
   function yearInRange(year, start = -Infinity, end = Infinity) {
     return year >= start && year <= end;
   }
@@ -1780,6 +1978,7 @@
   }
 
   function historicalPhaseForScenario(scenario = gameData?.scenario) {
+    if (strategyState?.gameMode === "focus") return null;
     const scenarioYear = Number(scenario?.year);
     const phase = (window.HISTORICAL_PHASES || []).find((item) => Number(item.scenarioYear) === scenarioYear);
     return phase ? { ...phase, endsOn: window.HISTORICAL_TIMELINE_END || phase.endsOn } : null;
@@ -1796,6 +1995,7 @@
 
   function isHistoricalPhaseActive() {
     if (!strategyState) return false;
+    if (strategyState.gameMode === "focus") return false;
     if (strategyState.historicalDiverged) return false;
     const today = strategyState.date.toISOString().slice(0, 10);
     const events = historicalEventsForScenario();
@@ -1961,6 +2161,7 @@
     // country IDs belonged to states that ceased to exist during the chronology.
     gameData.scenario = modernScenario;
     strategyState = createInitialStrategyState(modernScenario, modernPlayer);
+    strategyState.gameMode = previousState.gameMode;
     strategyState.date = previousState.date;
     strategyState.historicalEvents = previousState.historicalEvents;
     strategyState.historicalDiverged = false;
@@ -1979,6 +2180,7 @@
   }
 
   function runHistoricalEvents() {
+    if (strategyState?.gameMode === "focus") return;
     const events = historicalEventsForScenario();
     if (!strategyState || !events.length) return;
     // Once the player has broken a prerequisite, remaining dated events must
