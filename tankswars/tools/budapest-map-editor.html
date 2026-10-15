@@ -161,13 +161,15 @@
     const addRoad=(points,name,w=24)=>{const o=make('road',points[0]);Object.assign(o,{points,w,name});state.objects.push(o);};
     // The visible fragment is composed around the Danube: Buda is organic,
     // Pest is a regular city grid, and Margaret Island is the central green mass.
-    const island=make('island',{x:2170,y:850});Object.assign(island,{w:300,h:1500,name:'Остров Маргит',points:[{x:2130,y:90},{x:2240,y:120},{x:2290,y:360},{x:2270,y:700},{x:2300,y:1030},{x:2260,y:1350},{x:2180,y:1670},{x:2100,y:1770},{x:2030,y:1540},{x:2050,y:1250},{x:2020,y:900},{x:2060,y:560},{x:2090,y:260}]});state.objects.push(island);
+    const island=make('island',{x:2165,y:690});Object.assign(island,{w:260,h:1320,name:'Остров Маргит',points:[{x:2135,y:40},{x:2225,y:70},{x:2270,y:300},{x:2250,y:570},{x:2275,y:850},{x:2240,y:1100},{x:2185,y:1330},{x:2110,y:1430},{x:2050,y:1250},{x:2065,y:1010},{x:2035,y:760},{x:2070,y:500},{x:2100,y:220}]});state.objects.push(island);
     state.ground='#dfdbc5';$('ground').value=state.ground;
     const river=make('river',{x:2200,y:0});Object.assign(river,{points:[{x:2200,y:-100},{x:2180,y:330},{x:2210,y:760},{x:2170,y:1180},{x:2210,y:1600},{x:2180,y:2050},{x:2210,y:2900}],w:700,name:'Дунай'});state.objects=[river,island];
     // Margaret Bridge, its approaches, and the smaller north/south crossings.
-    addRoad([{x:520,y:1430},{x:1500,y:1430},{x:2200,y:1430},{x:3000,y:1430},{x:3650,y:1430}], 'Мост Маргит', 105);
-    addRoad([{x:1520,y:330},{x:1900,y:330},{x:2500,y:330},{x:2850,y:330}], 'Северная набережная', 30);
-    addRoad([{x:1510,y:2220},{x:1900,y:2220},{x:2500,y:2220},{x:3100,y:2220}], 'Южная набережная', 30);
+    addRoad([{x:1450,y:1430},{x:1770,y:1430},{x:2630,y:1430},{x:3050,y:1430}], 'Подходы к мосту Маргит', 34);
+    addRoad([{x:1520,y:330},{x:1900,y:330}], 'Северная набережная Буды', 30);
+    addRoad([{x:2500,y:330},{x:2850,y:330}], 'Северная набережная Пешта', 30);
+    addRoad([{x:1510,y:2220},{x:1900,y:2220}], 'Южная набережная Буды', 30);
+    addRoad([{x:2500,y:2220},{x:3100,y:2220}], 'Южная набережная Пешта', 30);
     addRoad([{x:1610,y:0},{x:1610,y:500},{x:1610,y:1000},{x:1610,y:1500},{x:1610,y:2050},{x:1610,y:2800}], 'Будайская набережная', 32);
     // Pest: straight streets and rectangular blocks from the source map.
     [2850,3150,3450,3750,4050].forEach((x,i)=>addRoad([{x,y:120},{x,y:520},{x,y:950},{x,y:1380},{x,y:1840},{x,y:2300},{x,y:2800}], 'Улица Пешта '+(i+1), 22));
@@ -183,7 +185,7 @@
     [[280,420],[560,330],[880,430],[1210,480],[260,760],[540,680],[850,780],[1180,700],[1420,820],[220,1080],[520,1010],[820,1120],[1140,980],[1370,1100],[300,1510],[620,1430],[930,1510],[1240,1430],[1420,1570],[380,1930],[720,1840],[1060,1940],[1320,1840]].forEach((q,i)=>addBuilding(q[0],q[1],110+(i%3)*35,80+(i%2)*28,'Квартал Буды '+(i+1),i%5?'intact':'damaged'));
     // Parks and trees visible on both banks.
     [[420,260],[730,290],[1080,430],[460,730],[760,870],[1150,780],[300,1280],[680,1320],[1120,1230],[430,1760],[820,1780],[1210,1660],[2040,420],[2250,620],[2070,980],[2220,1180],[2100,1510]].forEach((q,i)=>{const o=make('tree',{x:q[0],y:q[1]});Object.assign(o,{w:70+(i%3)*20,h:70+(i%2)*18,name:'Дерево'});state.objects.push(o);});
-    const bridge=make('bridge',{x:2200,y:1430});Object.assign(bridge,{w:1280,h:120,name:'Мост Маргит'});state.objects.push(bridge);
+    const bridge=make('bridge',{x:2200,y:1430});Object.assign(bridge,{w:900,h:105,name:'Мост Маргит'});state.objects.push(bridge);
     select(null);
   }
   function select(o){state.selected=o?.id||null;$('emptyProps').hidden=!!o;$('props').hidden=!o;if(o){$('propType').value=o.type;$('propName').value=o.name||'';$('propX').value=Math.round(o.x);$('propY').value=Math.round(o.y);$('propW').value=Math.round(o.w);$('propH').value=Math.round(o.h);$('propAngle').value=o.angle||0;$('propState').value=o.state||'intact';}draw();}
