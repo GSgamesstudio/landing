@@ -46,6 +46,7 @@
   <button id="saveMap">Сохранить JSON</button><button id="loadMap">Загрузить JSON</button>
   <input id="fileInput" type="file" accept="application/json" hidden>
   <button id="exportMap">Экспорт details</button>
+  <button id="referenceButton">Подложка карты</button><input id="referenceInput" type="file" accept="image/*" hidden>
   <span class="hint" id="zoomLabel">100%</span><span class="hint" id="dirtyLabel"></span>
 </header>
 <main>
@@ -64,6 +65,8 @@
       <label><input id="grid" type="checkbox" checked> Сетка</label>
       <label><input id="snap" type="checkbox" checked> Привязка к сетке</label>
       <label>Шаг сетки<input id="gridSize" type="number" value="100" min="10" step="10"></label>
+      <label><input id="referenceVisible" type="checkbox" checked> Показывать подложку</label>
+      <label>Прозрачность подложки<input id="referenceOpacity" type="range" min="0" max="100" value="42"></label>
     </div>
     <div class="group">
       <h3>Слои</h3>
@@ -111,7 +114,7 @@
 (() => {
   const canvas = document.querySelector('#map'), ctx = canvas.getContext('2d');
   const viewport = document.querySelector('#viewport');
-  const state = { mapWidth:4200, mapHeight:2800, ground:'#b7c2c3', objects:[], tool:'select', selected:null, line:null, zoom:.22, panX:0, panY:0, dragging:null, panning:null, history:[], future:[], dirty:false };
+  const state = { mapWidth:4200, mapHeight:2800, ground:'#b7c2c3', objects:[], tool:'select', selected:null, line:null, zoom:.22, panX:0, panY:0, dragging:null, panning:null, history:[], future:[], dirty:false, reference:null };
   const $ = (id) => document.getElementById(id);
   const colors = { building:'#6c7470', road:'#3c474a', river:'#2e6178', bridge:'#536568', poi:'#b08a4c', tree:'#3e6543', crater:'#443d34', wreck:'#292b29' };
   const snap = (v) => $('snap').checked ? Math.round(v / Number($('gridSize').value || 100)) * Number($('gridSize').value || 100) : v;
@@ -131,7 +134,8 @@
     else {ctx.fillRect(-w/2,-h/2,w,h);ctx.strokeRect(-w/2,-h/2,w,h); if(o.type==='building'){ctx.strokeStyle='rgba(230,240,237,.28)';for(let x=-w/2+12;x<w/2;x+=22){ctx.beginPath();ctx.moveTo(x,-h/2+4);ctx.lineTo(x,h/2-4);ctx.stroke();} if(o.state!=='intact'){ctx.fillStyle='rgba(25,29,28,.7)';ctx.fillRect(-w*.2,-h*.2,w*.4,h*.38);}} if(o.type==='bridge'){ctx.fillStyle='#293538';ctx.fillRect(-w/2,-h*.14,w,h*.28);}}
     if(o.type==='poi'){ctx.fillStyle='#f4d27a';ctx.beginPath();ctx.arc(0,0,Math.min(w,h)*.28,0,Math.PI*2);ctx.fill();ctx.fillStyle='#332919';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText(o.name||'POI',0,4);}
     ctx.restore(); }
-  function draw(){ ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.fillStyle=state.ground;ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight); const tl=worldToScreen(0,0), br=worldToScreen(state.mapWidth,state.mapHeight);ctx.fillStyle='rgba(245,250,250,.22)';ctx.fillRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);drawGrid();state.objects.forEach(drawObject);if(state.line){ctx.strokeStyle=colors[state.line.type];ctx.lineWidth=(state.line.type==='river'?120:80)*state.zoom;ctx.lineCap='round';ctx.beginPath();state.line.points.forEach((q,i)=>{const p=worldToScreen(q.x,q.y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.stroke();} $('objectCount').textContent='Объектов: '+state.objects.length; $('zoomLabel').textContent=Math.round(state.zoom*100)+'%'; $('dirtyLabel').textContent=state.dirty?'● изменено':''; $('jsonPreview').value=JSON.stringify(exportDetails(),null,2); const list=$('objectList');list.innerHTML='';state.objects.forEach(o=>{const item=document.createElement('div');item.className='object-item'+(o.id===state.selected?' selected':'');item.innerHTML='<span>'+o.name+'</span><small>'+o.type+'</small>';item.onclick=()=>select(o);list.appendChild(item);}); }
+  function drawReference(){if(!state.reference||!$('referenceVisible').checked)return;const tl=worldToScreen(0,0),br=worldToScreen(state.mapWidth,state.mapHeight);ctx.save();ctx.globalAlpha=Number($('referenceOpacity').value)/100;ctx.imageSmoothingEnabled=false;ctx.drawImage(state.reference,tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.restore();}
+  function draw(){ ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.fillStyle=state.ground;ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight); const tl=worldToScreen(0,0), br=worldToScreen(state.mapWidth,state.mapHeight);ctx.fillStyle='rgba(245,250,250,.22)';ctx.fillRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);drawReference();drawGrid();state.objects.forEach(drawObject);if(state.line){ctx.strokeStyle=colors[state.line.type];ctx.lineWidth=(state.line.type==='river'?120:80)*state.zoom;ctx.lineCap='round';ctx.beginPath();state.line.points.forEach((q,i)=>{const p=worldToScreen(q.x,q.y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.stroke();} $('objectCount').textContent='Объектов: '+state.objects.length; $('zoomLabel').textContent=Math.round(state.zoom*100)+'%'; $('dirtyLabel').textContent=state.dirty?'● изменено':''; $('jsonPreview').value=JSON.stringify(exportDetails(),null,2); const list=$('objectList');list.innerHTML='';state.objects.forEach(o=>{const item=document.createElement('div');item.className='object-item'+(o.id===state.selected?' selected':'');item.innerHTML='<span>'+o.name+'</span><small>'+o.type+'</small>';item.onclick=()=>select(o);list.appendChild(item);}); }
   function exportDetails(){ const d={buildings:[],roads:[],rivers:[],bridges:[],pois:[],trees:[],craters:[],wrecks:[]};state.objects.forEach(o=>{if(o.type==='building')d.buildings.push([o.x,o.y,o.w,o.h,o.angle||0,o.state]);else if(o.type==='road')d.roads.push(o.points);else if(o.type==='river')d.rivers.push({width:o.w,points:o.points});else d[o.type==='bridge'?'bridges':o.type==='poi'?'pois':o.type==='tree'?'trees':o.type==='crater'?'craters':'wrecks'].push({x:o.x,y:o.y,width:o.w,height:o.h,name:o.name,state:o.state});});return d; }
   function objectsFromDetails(d){
     if(Array.isArray(d.objects)) return d.objects;
@@ -173,6 +177,9 @@
   $('undo').onclick=undo; $('redo').onclick=redo; $('fitMap').onclick=fitMap;
   $('duplicateObject').onclick=()=>{const source=state.objects.find(o=>o.id===state.selected);if(!source)return;remember();const copy=JSON.parse(JSON.stringify(source));copy.id='object-'+(nextId++);copy.name=source.name+' копия';copy.x+=Number($('gridSize').value||100);copy.y+=Number($('gridSize').value||100);state.objects.push(copy);select(copy);};
   document.querySelectorAll('[data-layer]').forEach(input=>input.onchange=draw);
+  $('referenceButton').onclick=()=>$('referenceInput').click();
+  $('referenceInput').onchange=e=>{const file=e.target.files[0];if(!file)return;const image=new Image();image.onload=()=>{state.reference=image;draw();};image.src=URL.createObjectURL(file);};
+  $('referenceVisible').onchange=draw; $('referenceOpacity').oninput=draw;
   new ResizeObserver(resize).observe(viewport); seed(); resize();
 })();
 </script>
