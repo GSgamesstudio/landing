@@ -36,3 +36,8 @@ TW/
 **/.tmp-*
 **/review-*.png
 **/review-shorts-*.png
+**/docs/
+**/scripts/
+**/AGENTS.md
+**/*DRAFT*.md
+**/*PLANS*.md
