@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const CACHE_VERSION = '20261007-181327';
+  const CACHE_VERSION = '20261015-fullscreen-prompt';
   const modules = ['js/app-01.js', 'js/app-02.js', 'js/app-03.js', 'js/app-04.js', 'js/app-05.js', 'js/app-06-select-ui.js'];
   Promise.all(modules.map(async (path) => {
     const response = await fetch(path + '?v=' + CACHE_VERSION, { cache: 'no-store' });
@@ -16,4 +16,3 @@
       document.body.insertAdjacentHTML('beforeend', '<p style="position:fixed;inset:auto 16px 16px;z-index:9999;padding:12px;background:#401b1b;color:#fff;border:1px solid #e99">Ошибка загрузки модулей игры. Обновите страницу.</p>');
     });
 })();
-

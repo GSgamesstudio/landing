@@ -2870,6 +2870,23 @@
     });
   });
   settingsFullscreen.addEventListener("click", toggleFullscreen);
+  mobileFullscreenAccept?.addEventListener("click", async () => {
+    try {
+      const entered = await requestFullscreenMode();
+      if (entered) closeMobileFullscreenPrompt();
+      else {
+        const text = document.getElementById("mobileFullscreenText");
+        if (text) text.textContent = "Этот браузер не даёт сайту включить fullscreen. Добавьте игру на экран Домой и запустите её оттуда.";
+      }
+    } catch (error) {
+      console.warn("Не удалось включить полноэкранный режим.", error);
+    }
+  });
+  mobileFullscreenClose?.addEventListener("click", () => closeMobileFullscreenPrompt());
+  mobileFullscreenLater?.addEventListener("click", () => closeMobileFullscreenPrompt());
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement) closeMobileFullscreenPrompt(false);
+  });
   settingsApplyPlayer.addEventListener("click", () => {
     ensureAudio();
     playSound("click");
@@ -2884,4 +2901,5 @@
   updateContinueButton();
   loadCatalogs();
   window.setInterval(loadCatalogs, CATALOG_REFRESH_MS);
+  window.setTimeout(showMobileFullscreenPrompt, 900);
 })();
