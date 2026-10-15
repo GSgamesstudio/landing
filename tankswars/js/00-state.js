@@ -67,25 +67,26 @@
       modeIds: ["company", "platoon", "duel", "commander", "war", "survival"]
     };
     const oiExperimentalEvent = {
-      id: "oi_experimental_2026",
-      title: "Эксперимент 120 тонн",
-      subtitle: "Соберите секретный японский сверхтяжёлый прототип",
+      id: "winter_budapest_2026",
+      title: "Зимняя осада Будапешта",
+      subtitle: "Пройди три этапа кампании и получи Т-22 ср.",
       year: 2026,
-      month: 7,
-      fromDay: 1,
-      toDay: 7,
-      rewardTankName: "O-I Experimental",
-      stateKey: "oi_experimental_event_2026_state",
+      startYear: 2026,
+      startMonth: 11,
+      startDay: 15,
+      endYear: 2027,
+      endMonth: 0,
+      endDay: 5,
+      rewardTankName: "Т-22 ср.",
+      stateKey: "winter_budapest_event_2026_state",
       stageRewardBlueprints: 100,
-      stageRewardSilver: 50000,
-      finalRewardGold: 500,
+      stageRewardSilver: 25000,
+      finalRewardGold: 0,
       modeIds: ["company", "platoon", "duel", "commander", "war", "survival"],
       stages: [
-        { id: "project", title: "Проект", description: "Провести 7 боёв", stat: "battles", target: 7 },
-        { id: "armor", title: "Броневые листы", description: "Заблокировать 4 000 урона", stat: "blockedDamage", target: 4000 },
-        { id: "engine", title: "Силовая установка", description: "Победить в 8 боях", stat: "wins", target: 8 },
-        { id: "gun", title: "Главное орудие", description: "Нанести 15 000 урона", stat: "damage", target: 15000 },
-        { id: "trials", title: "Испытательный полигон", description: "Уничтожить 15 противников", stat: "kills", target: 15 }
+        { id: "approach", title: "15–20 декабря · Подступы к Дунаю", description: "Провести 10 боёв", stat: "battles", target: 10, rewardText: "+25 000 серебра" },
+        { id: "island", title: "21–27 декабря · Остров Маргит", description: "Нанести 25 000 урона", stat: "damage", target: 25000, rewardTankName: "Т-34-85 НГ" },
+        { id: "bridge", title: "28 декабря–5 января · Мост Маргит", description: "Победить в 12 боях", stat: "wins", target: 12, rewardTankName: "КВ-2 НГ" }
       ]
     };
     const developerModeKey = "ujfgav8b6rvcb75av5tva7sr4av4456w*/va5*4w-bva4/-4gb-w89`7`9y7fhg9a";

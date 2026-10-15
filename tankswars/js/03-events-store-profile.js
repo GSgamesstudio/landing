@@ -82,10 +82,9 @@
     }
 
     function oiExperimentalEventIsActive(date = new Date()) {
-      return date.getFullYear() === oiExperimentalEvent.year
-        && date.getMonth() === oiExperimentalEvent.month
-        && date.getDate() >= oiExperimentalEvent.fromDay
-        && date.getDate() <= oiExperimentalEvent.toDay;
+      const start = new Date(oiExperimentalEvent.startYear, oiExperimentalEvent.startMonth, oiExperimentalEvent.startDay, 0, 0, 0, 0);
+      const end = new Date(oiExperimentalEvent.endYear, oiExperimentalEvent.endMonth, oiExperimentalEvent.endDay, 23, 59, 59, 999);
+      return date >= start && date <= end;
     }
 
     function oiExperimentalEventModeIsEligible(mode = selectedBattleMode) {
@@ -161,11 +160,21 @@
       }
 
       state.claimedStageIds.push(stage.id);
-      playerResources.blueprints += oiExperimentalEvent.stageRewardBlueprints;
-      playerResources.silver += oiExperimentalEvent.stageRewardSilver;
+      const rewardTank = stage.rewardTankName
+        ? loadedTanks.find((tank) => normalizeTankName(tank.name) === normalizeTankName(stage.rewardTankName))
+        : null;
+
+      if (rewardTank) {
+        rewardTank.state = 2;
+        saveTankState(rewardTank);
+      } else {
+        playerResources.blueprints += oiExperimentalEvent.stageRewardBlueprints;
+        playerResources.silver += oiExperimentalEvent.stageRewardSilver;
+      }
       saveOiExperimentalEventState(state);
       savePlayerResources();
       renderTopBar();
+      renderTankBar(loadedTanks);
       return true;
     }
 
@@ -988,7 +997,7 @@
       progressText.className = "oiEventProgressText";
       button.className = "oiEventPrimaryButton";
       button.type = "button";
-      eyebrow.textContent = `Ограниченное событие · 1–7 августа ${oiExperimentalEvent.year}`;
+      eyebrow.textContent = "Ограниченное событие · 15 декабря–5 января";
       title.textContent = oiExperimentalEvent.title;
       text.textContent = oiExperimentalEvent.subtitle;
       progressFill.style.width = `${completed / oiExperimentalEvent.stages.length * 100}%`;
@@ -1031,7 +1040,7 @@
       description.textContent = stage.description;
       progressFill.style.width = `${progress / stage.target * 100}%`;
       progressText.textContent = `${formatStoredNumber(progress)} / ${formatStoredNumber(stage.target)}`;
-      reward.textContent = `Награда: +${formatStoredNumber(oiExperimentalEvent.stageRewardBlueprints)} чертежей · +${formatStoredNumber(oiExperimentalEvent.stageRewardSilver)} серебра`;
+      reward.textContent = `Награда: ${stage.rewardTankName || stage.rewardText || `+${formatStoredNumber(oiExperimentalEvent.stageRewardSilver)} серебра`}`;
       button.textContent = claimed ? "Получено" : complete ? "Забрать награду" : "В процессе";
       button.disabled = claimed || !complete;
       button.addEventListener("click", () => {
@@ -1087,19 +1096,19 @@
       backButton.type = "button";
       finalButton.type = "button";
       backButton.textContent = "← К событиям";
-      eyebrow.textContent = `Секретный проект · 1–7 августа ${oiExperimentalEvent.year}`;
+      eyebrow.textContent = "Зимняя кампания · 15 декабря–5 января";
       title.textContent = oiExperimentalEvent.title;
-      text.textContent = "Завершите пять инженерных этапов, соберите прототип и получите коллекционный O-I Experimental. Прогресс учитывается во всех боевых режимах, кроме тренировки и тест-драйва.";
-      status.textContent = state.rewardClaimed ? "Награда получена" : active ? "Событие активно" : new Date() < new Date(oiExperimentalEvent.year, oiExperimentalEvent.month, oiExperimentalEvent.fromDay) ? "Скоро начнётся" : "Событие завершено";
+      text.textContent = "Пройдите три этапа зимней кампании, получите Т-34-85 НГ и КВ-2 НГ, а за полное завершение — коллекционный Т-22 ср. Прогресс учитывается во всех боевых режимах, кроме тренировки и тест-драйва.";
+      status.textContent = state.rewardClaimed ? "Награда получена" : active ? "Событие активно" : new Date() < new Date(oiExperimentalEvent.startYear, oiExperimentalEvent.startMonth, oiExperimentalEvent.startDay) ? "Скоро начнётся" : "Событие завершено";
       overallFill.style.width = `${completed / oiExperimentalEvent.stages.length * 100}%`;
       finalTitle.textContent = "Главная награда";
-      finalText.textContent = `${oiExperimentalEvent.rewardTankName} · коллекционный тяжёлый танк · +${formatStoredNumber(oiExperimentalEvent.finalRewardGold)} золота`;
-      finalButton.textContent = state.rewardClaimed ? "Получено" : completed >= oiExperimentalEvent.stages.length ? "Получить O-I Experimental" : `Завершите все этапы (${completed}/${oiExperimentalEvent.stages.length})`;
+      finalText.textContent = `${oiExperimentalEvent.rewardTankName} · коллекционный средний танк`;
+      finalButton.textContent = state.rewardClaimed ? "Получено" : completed >= oiExperimentalEvent.stages.length ? `Получить ${oiExperimentalEvent.rewardTankName}` : `Завершите все этапы (${completed}/${oiExperimentalEvent.stages.length})`;
       finalButton.disabled = state.rewardClaimed || completed < oiExperimentalEvent.stages.length;
       backButton.addEventListener("click", renderEventsScreen);
       finalButton.addEventListener("click", () => {
         if (claimOiExperimentalFinalReward()) {
-          showGameNotification(`${oiExperimentalEvent.title}: O-I Experimental получен`, "success");
+          showGameNotification(`${oiExperimentalEvent.title}: ${oiExperimentalEvent.rewardTankName} получен`, "success");
           openOiExperimentalEventDetails();
         }
       });
@@ -1163,7 +1172,7 @@
     }
 
     function getStoreContainerDefinitions() {
-      return [
+      const definitions = [
         {
           id: "all",
           name: containerName,
@@ -1190,13 +1199,27 @@
           tankPool: loadedTanks.filter((tank) => russoBaltContainerTankNames.includes(tank.name) && !tank.developerOnly)
         }
       ];
+      if (oiExperimentalEventIsActive()) {
+        definitions.unshift({
+          id: "winter-budapest",
+          name: "Зимний контейнер Будапешта",
+          price: 1000,
+          tankDropChance: 0.1,
+          tankPool: loadedTanks.filter((tank) => tank.name === "БЗ-155" && !tank.developerOnly),
+          resourceRewardTypes: ["gold", "silver", "blueprints"]
+        });
+      }
+      return definitions;
     }
 
     function getPremiumStoreTanks() {
-      return loadedTanks.filter((tank) => tank.premium && !tank.developerOnly);
+      return loadedTanks.filter((tank) => tank.premium && !tank.developerOnly && (tank.name !== "Nexor" || oiExperimentalEventIsActive()));
     }
 
     function getPremiumTankGoldPrice(tank) {
+      if (tank?.name === "Nexor" && oiExperimentalEventIsActive()) {
+        return 25000;
+      }
       const level = Math.max(1, Math.min(10, normalizeNumber(tank?.level || 1) || 1));
 
       return premiumTankGoldPricesByLevel[level] || premiumTankGoldPricesByLevel[10];
@@ -1260,7 +1283,9 @@
       goldButton.className = "storeActionButton premiumStoreButton";
       blueprintButton.className = "storeActionButton premiumStoreButton";
       name.textContent = tank.name;
-      meta.textContent = `${toRoman(tank.level)} \u0443\u0440\u043e\u0432\u0435\u043d\u044c | ${tank.className || "-"} | ${tank.nation || "-"}`;
+      meta.textContent = tank.name === "Nexor" && oiExperimentalEventIsActive()
+        ? "Зимняя продажа · до 5 января · 25 000 золота"
+        : `${toRoman(tank.level)} \u0443\u0440\u043e\u0432\u0435\u043d\u044c | ${tank.className || "-"} | ${tank.nation || "-"}`;
       goldButton.textContent = owned ? "\u0412 \u0430\u043d\u0433\u0430\u0440\u0435" : `\u041a\u0443\u043f\u0438\u0442\u044c: ${formatStoredNumber(goldPrice)} \u0437\u043e\u043b\u043e\u0442\u0430`;
       blueprintButton.textContent = owned ? "\u041f\u043e\u043b\u0443\u0447\u0435\u043d" : `\u041a\u0443\u043f\u0438\u0442\u044c: ${formatStoredNumber(blueprintPrice)} \u0447\u0435\u0440\u0442\u0435\u0436\u0435\u0439`;
       goldButton.disabled = owned || playerResources.gold < goldPrice;
