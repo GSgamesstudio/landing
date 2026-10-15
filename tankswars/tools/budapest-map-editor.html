@@ -5,24 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tanks Wars — редактор карт</title>
   <style>
-    :root { color-scheme: dark; --bg:#14191b; --panel:#20282b; --line:#3b4a4d; --accent:#e0b45d; }
+    :root { color-scheme: dark; --bg:#0f1416; --panel:#1b2427; --panel2:#233034; --line:#3b4a4d; --accent:#e0b45d; --muted:#8e9b9d; }
     * { box-sizing:border-box; }
     body { margin:0; font:14px Segoe UI,Arial,sans-serif; background:var(--bg); color:#e8eeee; overflow:hidden; }
-    header { height:48px; display:flex; align-items:center; gap:8px; padding:7px 10px; background:#0d1112; border-bottom:1px solid var(--line); }
+    header { height:54px; display:flex; align-items:center; gap:7px; padding:8px 12px; background:linear-gradient(180deg,#182124,#0d1112); border-bottom:1px solid var(--line); box-shadow:0 4px 18px #0007; }
     header strong { color:var(--accent); margin-right:10px; }
-    button, input, select { color:inherit; background:#293336; border:1px solid #506064; border-radius:4px; padding:6px 8px; }
+    button, input, select { color:inherit; background:#293336; border:1px solid #506064; border-radius:5px; padding:6px 8px; }
     button { cursor:pointer; } button:hover { border-color:var(--accent); } button.active { background:#765a2b; border-color:var(--accent); }
-    main { height:calc(100vh - 48px); display:grid; grid-template-columns:210px 1fr 260px; }
-    aside { background:var(--panel); padding:10px; overflow:auto; border-right:1px solid var(--line); }
+    main { height:calc(100vh - 54px); display:grid; grid-template-columns:226px 1fr 286px; }
+    aside { background:linear-gradient(180deg,var(--panel),#151d1f); padding:12px; overflow:auto; border-right:1px solid var(--line); }
     aside.right { border-right:0; border-left:1px solid var(--line); }
     h3 { font-size:12px; color:#b9c7c8; text-transform:uppercase; letter-spacing:.08em; margin:5px 0 8px; }
     .tools { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
     .tools button { min-height:34px; }
     .group { border-top:1px solid var(--line); margin-top:14px; padding-top:10px; }
+    .section-title { display:flex; justify-content:space-between; align-items:center; }
+    .mini { padding:3px 7px; font-size:12px; }
+    .object-list { max-height:230px; overflow:auto; display:grid; gap:4px; }
+    .object-item { display:flex; justify-content:space-between; gap:5px; padding:6px 7px; border:1px solid transparent; border-radius:4px; background:#172022; color:#c7d1d1; cursor:pointer; }
+    .object-item:hover,.object-item.selected { border-color:var(--accent); background:#3a3324; }
+    .object-item small { color:var(--muted); }
+    .layers { display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:12px; color:#becaca; }
+    .layers label { margin:0; padding:4px; background:#172022; border-radius:4px; }
     label { display:block; color:#b9c7c8; font-size:12px; margin:8px 0 3px; }
     input[type=number], input[type=text], select { width:100%; }
     .hint { color:#8e9b9d; font-size:12px; line-height:1.4; }
-    #viewport { position:relative; overflow:hidden; background:#9caeb0; }
+    #viewport { position:relative; overflow:hidden; background:#9caeb0; box-shadow:inset 0 0 60px #0005; }
     canvas { display:block; width:100%; height:100%; cursor:crosshair; }
     #status { position:absolute; left:10px; bottom:10px; padding:5px 8px; background:#111a1ccc; border:1px solid #536265; border-radius:4px; pointer-events:none; }
     .row { display:flex; gap:6px; } .row > * { flex:1; }
@@ -34,10 +42,11 @@
 <header>
   <strong>РЕДАКТОР КАРТ TANKS WARS</strong>
   <button id="newMap">Новая</button><button id="seedMap">Budapest</button>
+  <button id="undo" title="Ctrl+Z">↶</button><button id="redo" title="Ctrl+Y">↷</button><button id="fitMap">Вписать</button>
   <button id="saveMap">Сохранить JSON</button><button id="loadMap">Загрузить JSON</button>
   <input id="fileInput" type="file" accept="application/json" hidden>
   <button id="exportMap">Экспорт details</button>
-  <span class="hint" id="zoomLabel">100%</span>
+  <span class="hint" id="zoomLabel">100%</span><span class="hint" id="dirtyLabel"></span>
 </header>
 <main>
   <aside>
@@ -55,6 +64,14 @@
       <label><input id="grid" type="checkbox" checked> Сетка</label>
       <label><input id="snap" type="checkbox" checked> Привязка к сетке</label>
       <label>Шаг сетки<input id="gridSize" type="number" value="100" min="10" step="10"></label>
+    </div>
+    <div class="group">
+      <h3>Слои</h3>
+      <div class="layers">
+        <label><input data-layer="building" type="checkbox" checked> Здания</label><label><input data-layer="road" type="checkbox" checked> Дороги</label>
+        <label><input data-layer="river" type="checkbox" checked> Реки</label><label><input data-layer="bridge" type="checkbox" checked> Мосты</label>
+        <label><input data-layer="poi" type="checkbox" checked> Ориентиры</label><label><input data-layer="tree" type="checkbox" checked> Декор</label>
+      </div>
     </div>
     <div class="group hint">
       ЛКМ — поставить объект или начать линию.<br>
@@ -84,13 +101,17 @@
       <button id="copyJson">Скопировать JSON</button>
       <textarea id="jsonPreview" readonly></textarea>
     </div>
+    <div class="group">
+      <div class="section-title"><h3>Объекты</h3><button id="duplicateObject" class="mini">Дублировать</button></div>
+      <div id="objectList" class="object-list"></div>
+    </div>
   </aside>
 </main>
 <script>
 (() => {
   const canvas = document.querySelector('#map'), ctx = canvas.getContext('2d');
   const viewport = document.querySelector('#viewport');
-  const state = { mapWidth:4200, mapHeight:2800, ground:'#b7c2c3', objects:[], tool:'select', selected:null, line:null, zoom:.22, panX:0, panY:0, dragging:null, panning:null };
+  const state = { mapWidth:4200, mapHeight:2800, ground:'#b7c2c3', objects:[], tool:'select', selected:null, line:null, zoom:.22, panX:0, panY:0, dragging:null, panning:null, history:[], future:[], dirty:false };
   const $ = (id) => document.getElementById(id);
   const colors = { building:'#6c7470', road:'#3c474a', river:'#2e6178', bridge:'#536568', poi:'#b08a4c', tree:'#3e6543', crater:'#443d34', wreck:'#292b29' };
   const snap = (v) => $('snap').checked ? Math.round(v / Number($('gridSize').value || 100)) * Number($('gridSize').value || 100) : v;
@@ -101,7 +122,7 @@
   const make = (type,p) => ({ id:'object-'+(nextId++), type, name:type, x:snap(p.x), y:snap(p.y), w:type==='tree'||type==='crater'?80:240, h:type==='tree'||type==='crater'?80:150, angle:0, state:type==='building'?'damaged':'intact', points:null });
   const objectAt = (p) => [...state.objects].reverse().find(o => { if(o.points) return false; return Math.abs(p.x-o.x)<=o.w/2+25 && Math.abs(p.y-o.y)<=o.h/2+25; });
   function drawGrid() { if(!$('grid').checked) return; ctx.save(); ctx.strokeStyle='rgba(45,65,67,.16)'; ctx.lineWidth=1; const step=Number($('gridSize').value||100)*state.zoom; if(step<8){ctx.restore();return;} const a=worldToScreen(0,0), b=worldToScreen(state.mapWidth,state.mapHeight); for(let x=a.x%step;x<canvas.clientWidth;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.clientHeight);ctx.stroke();} for(let y=a.y%step;y<canvas.clientHeight;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.clientWidth,y);ctx.stroke();} ctx.restore(); }
-  function drawObject(o) { const p=worldToScreen(o.x,o.y), w=o.w*state.zoom, h=o.h*state.zoom; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(o.angle||0); ctx.globalAlpha=o.state==='destroyed'?.66:1;
+  function drawObject(o) { const layerInput=document.querySelector('input[data-layer="'+o.type+'"]'); if(layerInput&&!layerInput.checked)return; const p=worldToScreen(o.x,o.y), w=o.w*state.zoom, h=o.h*state.zoom; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(o.angle||0); ctx.globalAlpha=o.state==='destroyed'?.66:1;
     if(o.type==='road'||o.type==='river'){ const pts=o.points.map(q=>worldToScreen(q.x,q.y)); ctx.translate(-p.x,-p.y); ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=o.type==='river'?'#2e6178':'#3c474a'; ctx.lineWidth=o.w*state.zoom; ctx.beginPath(); pts.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke(); if(o.type==='road'){ctx.strokeStyle='rgba(235,243,244,.6)';ctx.lineWidth=4;ctx.setLineDash([22,26]);ctx.stroke();} ctx.restore();return; }
     ctx.fillStyle=colors[o.type]||'#777'; ctx.strokeStyle=o.id===state.selected?'#ffd36b':'#202729'; ctx.lineWidth=o.id===state.selected?4:2;
     if(o.type==='tree'){ctx.fillStyle='#31583a';ctx.beginPath();ctx.arc(0,0,w*.35,0,Math.PI*2);ctx.fill();ctx.fillStyle='#203c2b';ctx.fillRect(-w*.06,0,w*.12,h*.35);}
@@ -110,7 +131,7 @@
     else {ctx.fillRect(-w/2,-h/2,w,h);ctx.strokeRect(-w/2,-h/2,w,h); if(o.type==='building'){ctx.strokeStyle='rgba(230,240,237,.28)';for(let x=-w/2+12;x<w/2;x+=22){ctx.beginPath();ctx.moveTo(x,-h/2+4);ctx.lineTo(x,h/2-4);ctx.stroke();} if(o.state!=='intact'){ctx.fillStyle='rgba(25,29,28,.7)';ctx.fillRect(-w*.2,-h*.2,w*.4,h*.38);}} if(o.type==='bridge'){ctx.fillStyle='#293538';ctx.fillRect(-w/2,-h*.14,w,h*.28);}}
     if(o.type==='poi'){ctx.fillStyle='#f4d27a';ctx.beginPath();ctx.arc(0,0,Math.min(w,h)*.28,0,Math.PI*2);ctx.fill();ctx.fillStyle='#332919';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText(o.name||'POI',0,4);}
     ctx.restore(); }
-  function draw(){ ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.fillStyle=state.ground;ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight); const tl=worldToScreen(0,0), br=worldToScreen(state.mapWidth,state.mapHeight);ctx.fillStyle='rgba(245,250,250,.22)';ctx.fillRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);drawGrid();state.objects.forEach(drawObject);if(state.line){ctx.strokeStyle=colors[state.line.type];ctx.lineWidth=(state.line.type==='river'?120:80)*state.zoom;ctx.lineCap='round';ctx.beginPath();state.line.points.forEach((q,i)=>{const p=worldToScreen(q.x,q.y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.stroke();} $('objectCount').textContent='Объектов: '+state.objects.length; $('zoomLabel').textContent=Math.round(state.zoom*100)+'%'; $('jsonPreview').value=JSON.stringify(exportDetails(),null,2); }
+  function draw(){ ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.fillStyle=state.ground;ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight); const tl=worldToScreen(0,0), br=worldToScreen(state.mapWidth,state.mapHeight);ctx.fillStyle='rgba(245,250,250,.22)';ctx.fillRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);drawGrid();state.objects.forEach(drawObject);if(state.line){ctx.strokeStyle=colors[state.line.type];ctx.lineWidth=(state.line.type==='river'?120:80)*state.zoom;ctx.lineCap='round';ctx.beginPath();state.line.points.forEach((q,i)=>{const p=worldToScreen(q.x,q.y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.stroke();} $('objectCount').textContent='Объектов: '+state.objects.length; $('zoomLabel').textContent=Math.round(state.zoom*100)+'%'; $('dirtyLabel').textContent=state.dirty?'● изменено':''; $('jsonPreview').value=JSON.stringify(exportDetails(),null,2); const list=$('objectList');list.innerHTML='';state.objects.forEach(o=>{const item=document.createElement('div');item.className='object-item'+(o.id===state.selected?' selected':'');item.innerHTML='<span>'+o.name+'</span><small>'+o.type+'</small>';item.onclick=()=>select(o);list.appendChild(item);}); }
   function exportDetails(){ const d={buildings:[],roads:[],rivers:[],bridges:[],pois:[],trees:[],craters:[],wrecks:[]};state.objects.forEach(o=>{if(o.type==='building')d.buildings.push([o.x,o.y,o.w,o.h,o.angle||0,o.state]);else if(o.type==='road')d.roads.push(o.points);else if(o.type==='river')d.rivers.push({width:o.w,points:o.points});else d[o.type==='bridge'?'bridges':o.type==='poi'?'pois':o.type==='tree'?'trees':o.type==='crater'?'craters':'wrecks'].push({x:o.x,y:o.y,width:o.w,height:o.h,name:o.name,state:o.state});});return d; }
   function objectsFromDetails(d){
     if(Array.isArray(d.objects)) return d.objects;
@@ -129,20 +150,29 @@
     const bridge=make('bridge',{x:2050,y:1370});Object.assign(bridge,{w:920,h:150,name:'Цепной мост Сечени'});state.objects.push(bridge);select(null);
   }
   function select(o){state.selected=o?.id||null;$('emptyProps').hidden=!!o;$('props').hidden=!o;if(o){$('propType').value=o.type;$('propName').value=o.name||'';$('propX').value=Math.round(o.x);$('propY').value=Math.round(o.y);$('propW').value=Math.round(o.w);$('propH').value=Math.round(o.h);$('propAngle').value=o.angle||0;$('propState').value=o.state||'intact';}draw();}
+  const snapshot=()=>JSON.stringify({mapWidth:state.mapWidth,mapHeight:state.mapHeight,ground:state.ground,objects:state.objects});
+  function remember(){state.history.push(snapshot());if(state.history.length>40)state.history.shift();state.future=[];state.dirty=true;}
+  function restore(raw){const d=JSON.parse(raw);state.mapWidth=d.mapWidth;state.mapHeight=d.mapHeight;state.ground=d.ground;state.objects=d.objects||[];state.selected=null;state.dirty=true;select(null);}
+  function undo(){if(!state.history.length)return;state.future.push(snapshot());restore(state.history.pop());}
+  function redo(){if(!state.future.length)return;state.history.push(snapshot());restore(state.future.pop());}
+  function fitMap(){const pad=70;state.zoom=Math.min((canvas.clientWidth-pad*2)/state.mapWidth,(canvas.clientHeight-pad*2)/state.mapHeight);state.panX=0;state.panY=0;draw();}
   function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
   document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{state.tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));});
-  canvas.addEventListener('pointerdown',e=>{if(e.button===1){state.panning={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY};canvas.setPointerCapture(e.pointerId);return;}const p=screenToWorld(e);if(state.tool==='select'){const o=objectAt(p);select(o);if(o)state.dragging={o,dx:p.x-o.x,dy:p.y-o.y};}else if(state.tool==='erase'){const o=objectAt(p);if(o)state.objects=state.objects.filter(x=>x!==o);}else if(state.tool==='road'||state.tool==='river'){if(!state.line)state.line={type:state.tool,points:[]};state.line.points.push({x:snap(p.x),y:snap(p.y)});}else{const o=make(state.tool,p);state.objects.push(o);select(o);}draw();});
+  canvas.addEventListener('pointerdown',e=>{if(e.button===1){state.panning={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY};canvas.setPointerCapture(e.pointerId);return;}const p=screenToWorld(e);if(state.tool==='select'){const o=objectAt(p);select(o);if(o){remember();state.dragging={o,dx:p.x-o.x,dy:p.y-o.y};}}else if(state.tool==='erase'){const o=objectAt(p);if(o){remember();state.objects=state.objects.filter(x=>x!==o);state.dirty=true;}}else if(state.tool==='road'||state.tool==='river'){if(!state.line)state.line={type:state.tool,points:[]};state.line.points.push({x:snap(p.x),y:snap(p.y)});}else{remember();const o=make(state.tool,p);state.objects.push(o);select(o);}draw();});
   canvas.addEventListener('pointermove',e=>{const p=screenToWorld(e);$('status').textContent='x: '+Math.round(p.x)+'  y: '+Math.round(p.y);if(state.panning){state.panX=state.panning.px+e.clientX-state.panning.x;state.panY=state.panning.py+e.clientY-state.panning.y;}if(state.dragging){state.dragging.o.x=snap(p.x-state.dragging.dx);state.dragging.o.y=snap(p.y-state.dragging.dy);}draw();});
   canvas.addEventListener('pointerup',()=>{state.dragging=null;state.panning=null;});
   canvas.addEventListener('wheel',e=>{e.preventDefault();const before=screenToWorld(e), factor=e.deltaY<0?1.1:.9;state.zoom=Math.max(.08,Math.min(1.3,state.zoom*factor));const after=screenToWorld(e);state.panX+=(after.x-before.x)*state.zoom;state.panY+=(after.y-before.y)*state.zoom;draw();},{passive:false});
-  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&state.line){if(state.line.points.length>1){const o=make(state.line.type,state.line.points[0]);o.points=state.line.points;o.w=state.line.type==='river'?120:90;o.name=state.line.type==='river'?'Дунай':'Улица';state.objects.push(o);}state.line=null;draw();}if(e.key==='Delete'&&state.selected){state.objects=state.objects.filter(o=>o.id!==state.selected);select(null);}if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();$('saveMap').click();}});
-  $('applyProps').onclick=()=>{const o=state.objects.find(x=>x.id===state.selected);if(!o)return;Object.assign(o,{name:$('propName').value,x:Number($('propX').value),y:Number($('propY').value),w:Number($('propW').value),h:Number($('propH').value),angle:Number($('propAngle').value),state:$('propState').value});draw();};
-  $('deleteObject').onclick=()=>{if(state.selected){state.objects=state.objects.filter(o=>o.id!==state.selected);select(null);}};
-  $('newMap').onclick=()=>{state.objects=[];state.selected=null;draw();}; $('seedMap').onclick=seed;
-  $('saveMap').onclick=()=>download(($('mapName').value||'map')+'.json',JSON.stringify({mapWidth:state.mapWidth,mapHeight:state.mapHeight,ground:state.ground,objects:state.objects},null,2),'application/json');
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&state.line){if(state.line.points.length>1){remember();const o=make(state.line.type,state.line.points[0]);o.points=state.line.points;o.w=state.line.type==='river'?120:90;o.name=state.line.type==='river'?'Дунай':'Улица';state.objects.push(o);}state.line=null;draw();}if(e.key==='Delete'&&state.selected){remember();state.objects=state.objects.filter(o=>o.id!==state.selected);select(null);}if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();$('saveMap').click();}if(e.ctrlKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}if(e.ctrlKey&&e.key.toLowerCase()==='y'){e.preventDefault();redo();}});
+  $('applyProps').onclick=()=>{const o=state.objects.find(x=>x.id===state.selected);if(!o)return;remember();Object.assign(o,{name:$('propName').value,x:Number($('propX').value),y:Number($('propY').value),w:Number($('propW').value),h:Number($('propH').value),angle:Number($('propAngle').value),state:$('propState').value});draw();};
+  $('deleteObject').onclick=()=>{if(state.selected){remember();state.objects=state.objects.filter(o=>o.id!==state.selected);select(null);}};
+  $('newMap').onclick=()=>{remember();state.objects=[];state.selected=null;draw();}; $('seedMap').onclick=()=>{remember();seed();};
+  $('saveMap').onclick=()=>{download(($('mapName').value||'map')+'.json',JSON.stringify({mapWidth:state.mapWidth,mapHeight:state.mapHeight,ground:state.ground,objects:state.objects},null,2),'application/json');state.dirty=false;draw();};
   $('loadMap').onclick=()=>$('fileInput').click(); $('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const d=JSON.parse(r.result);Object.assign(state,{mapWidth:d.mapWidth||4200,mapHeight:d.mapHeight||2800,ground:d.ground||'#b7c2c3',objects:objectsFromDetails(d)});select(null);draw();};r.readAsText(f);};
   $('exportMap').onclick=()=>download(($('mapName').value||'map')+'-details.json',JSON.stringify(exportDetails(),null,2),'application/json'); $('copyJson').onclick=()=>navigator.clipboard?.writeText($('jsonPreview').value);
   $('mapWidth').onchange=e=>{state.mapWidth=Number(e.target.value)||4200;draw();}; $('mapHeight').onchange=e=>{state.mapHeight=Number(e.target.value)||2800;draw();}; $('ground').onchange=e=>{state.ground=e.target.value;draw();}; $('grid').onchange=draw; $('snap').onchange=draw; $('gridSize').onchange=draw;
+  $('undo').onclick=undo; $('redo').onclick=redo; $('fitMap').onclick=fitMap;
+  $('duplicateObject').onclick=()=>{const source=state.objects.find(o=>o.id===state.selected);if(!source)return;remember();const copy=JSON.parse(JSON.stringify(source));copy.id='object-'+(nextId++);copy.name=source.name+' копия';copy.x+=Number($('gridSize').value||100);copy.y+=Number($('gridSize').value||100);state.objects.push(copy);select(copy);};
+  document.querySelectorAll('[data-layer]').forEach(input=>input.onchange=draw);
   new ResizeObserver(resize).observe(viewport); seed(); resize();
 })();
 </script>
