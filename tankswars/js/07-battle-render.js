@@ -70,10 +70,10 @@
       battleState.rivers.forEach((river) => {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        ctx.strokeStyle = "rgba(38, 69, 48, 0.52)";
+        ctx.strokeStyle = preset.snow ? "rgba(180, 205, 211, 0.62)" : "rgba(38, 69, 48, 0.52)";
         ctx.lineWidth = river.width + 30;
         drawPolyline(ctx, river.points);
-        ctx.strokeStyle = "#2f8bb6";
+        ctx.strokeStyle = preset.snow ? "#315f78" : "#2f8bb6";
         ctx.lineWidth = river.width;
         drawPolyline(ctx, river.points);
         ctx.strokeStyle = "rgba(134, 198, 219, 0.44)";
@@ -83,6 +83,10 @@
         ctx.lineWidth = Math.max(3, river.width * 0.04);
         drawPolyline(ctx, river.points.map((point, index) => ({ x: point.x + Math.sin(time + index) * 8, y: point.y - river.width * 0.34 })));
       });
+
+      if (details.budapest) {
+        drawBudapestLandmarks(ctx, details.budapest, time);
+      }
 
       details.grass.forEach(([x, y, width, height]) => {
         ctx.fillStyle = "rgba(45, 92, 42, 0.52)";
@@ -154,6 +158,9 @@
       details.wrecks.forEach(([x, y, angle]) => drawWreck(ctx, x, y, angle));
       details.fires.forEach(([x, y, size]) => drawBattleFire(ctx, x, y, size, time));
       details.smoke.forEach(([x, y, size], index) => drawBattleSmoke(ctx, x, y, size, time + index * 0.7));
+      if (preset.snow) {
+        drawSnowfall(ctx, time);
+      }
       drawWorldAtmosphere(ctx, preset, time);
     }
 
@@ -955,6 +962,67 @@
         ctx.arc(beamStart - 2 * sizeScale, offset * sizeScale, 2.2 * sizeScale, 0, Math.PI * 2);
         ctx.fill();
       });
+      ctx.restore();
+    }
+
+    function drawBudapestLandmarks(ctx, landmarks, time) {
+      const drawBridge = ([x, y, width, height]) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = "rgba(10, 18, 23, .38)";
+        ctx.fillRect(-width / 2 + 18, -height / 2 + 18, width, height);
+        ctx.fillStyle = "#575f62";
+        ctx.strokeStyle = "#22292d";
+        ctx.lineWidth = 7;
+        ctx.fillRect(-width / 2, -height / 2, width, height);
+        ctx.strokeRect(-width / 2, -height / 2, width, height);
+        ctx.strokeStyle = "#b7c6c9";
+        ctx.lineWidth = 4;
+        for (let offset = -width / 2 + 35; offset < width / 2; offset += 48) {
+          ctx.beginPath(); ctx.moveTo(offset, -height / 2); ctx.lineTo(offset, height / 2); ctx.stroke();
+        }
+        ctx.strokeStyle = "#1e292d";
+        ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(-width / 2, -height * .32); ctx.lineTo(width / 2, -height * .32); ctx.moveTo(-width / 2, height * .32); ctx.lineTo(width / 2, height * .32); ctx.stroke();
+        ctx.restore();
+      };
+
+      const [parliamentX, parliamentY, parliamentW, parliamentH] = landmarks.parliament;
+      drawProjectedShadow(ctx, parliamentX, parliamentY, parliamentW + 42, parliamentH + 30, 0, .34);
+      ctx.save(); ctx.translate(parliamentX, parliamentY);
+      ctx.fillStyle = "#817f77"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 6;
+      ctx.fillRect(-parliamentW / 2, -parliamentH / 2, parliamentW, parliamentH); ctx.strokeRect(-parliamentW / 2, -parliamentH / 2, parliamentW, parliamentH);
+      ctx.fillStyle = "#686a68"; ctx.beginPath(); ctx.arc(0, -parliamentH * .1, parliamentW * .16, Math.PI, 0); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#3c4548"; for (let x = -parliamentW * .38; x < parliamentW * .4; x += 46) { ctx.fillRect(x, -parliamentH * .08, 20, parliamentH * .48); }
+      ctx.fillStyle = "#d8d6c9"; ctx.fillRect(-parliamentW * .46, -parliamentH * .42, parliamentW * .92, 16); ctx.restore();
+
+      const [castleX, castleY, castleW, castleH] = landmarks.castle;
+      drawProjectedShadow(ctx, castleX, castleY, castleW + 55, castleH + 38, 0, .34);
+      ctx.save(); ctx.translate(castleX, castleY); ctx.fillStyle = "#756d64"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 7;
+      ctx.fillRect(-castleW / 2, -castleH / 2, castleW, castleH); ctx.strokeRect(-castleW / 2, -castleH / 2, castleW, castleH);
+      ctx.fillStyle = "#5b514b"; ctx.fillRect(-castleW * .44, -castleH * .65, castleW * .18, castleH * .26); ctx.fillRect(castleW * .26, -castleH * .65, castleW * .18, castleH * .26);
+      ctx.fillStyle = "#343a3d"; ctx.fillRect(-castleW * .1, castleH * .04, castleW * .2, castleH * .46); ctx.restore();
+
+      drawBridge(landmarks.margaretBridge); drawBridge(landmarks.chainBridge); drawBridge(landmarks.libertyBridge);
+
+      const [basilicaX, basilicaY, basilicaW, basilicaH] = landmarks.basilica;
+      ctx.save(); ctx.translate(basilicaX, basilicaY); ctx.fillStyle = "#7b7e7d"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 5;
+      ctx.fillRect(-basilicaW / 2, -basilicaH / 2, basilicaW, basilicaH); ctx.beginPath(); ctx.arc(0, -basilicaH * .08, basilicaW * .26, Math.PI, 0); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, -basilicaH * .7); ctx.lineTo(0, -basilicaH * .38); ctx.stroke(); ctx.restore();
+
+      const [bastionX, bastionY, bastionW, bastionH] = landmarks.bastion;
+      ctx.save(); ctx.translate(bastionX, bastionY); ctx.fillStyle = "#a0a29c"; ctx.strokeStyle = "#303436"; ctx.lineWidth = 5;
+      ctx.fillRect(-bastionW / 2, -bastionH / 2, bastionW, bastionH); for (let x = -bastionW / 2 + 24; x < bastionW / 2; x += 62) { ctx.beginPath(); ctx.moveTo(x, -bastionH / 2); ctx.lineTo(x + 25, -bastionH * .82); ctx.lineTo(x + 50, -bastionH / 2); ctx.fill(); ctx.stroke(); } ctx.restore();
+      void time;
+    }
+
+    function drawSnowfall(ctx, time) {
+      ctx.save(); ctx.fillStyle = "rgba(244, 250, 255, .72)";
+      for (let index = 0; index < 180; index += 1) {
+        const x = (seededNoise(index, 19, 7) * battleState.mapWidth + Math.sin(time * .35 + index) * 22) % battleState.mapWidth;
+        const y = (seededNoise(index, 23, 7) * battleState.mapHeight + time * (14 + index % 5)) % battleState.mapHeight;
+        const size = 1.5 + seededNoise(index, 29, 7) * 3.2;
+        ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.restore();
     }
 
