@@ -143,7 +143,8 @@
     const activeGeneral = runtime.characters?.find((character) => character.id === runtime.activeGeneralId && character.active && character.role === "Генерал");
     const regionOptions = ownRegions.map((regionId) => {
       const region = gameData.regionById.get(Number(regionId));
-      return `<option value="${regionId}">${region?.name || `Регион ${regionId}`}</option>`;
+      const ready = Math.floor(Number(runtime.regionProfiles[String(regionId)]?.readySoldiers || 0) / 500);
+      return `<option value="${regionId}">${region?.name || `Регион ${regionId}`} · доступно ${ready} див.</option>`;
     }).join("");
     strategyContent.innerHTML = `
       <section class="tab-section">
@@ -171,17 +172,19 @@
           <small>Автокомандование работает каждый игровой день: набирает армии, отправляет несколько отрядов на разные регионы противника и автоматически оформляет оккупации.</small>
         </article>
         <article class="strategy-card">
-          <strong>Сформировать армию</strong>
+          <strong>Сформировать дивизии</strong>
           <select id="recruitRegion" class="strategy-select">${regionOptions}</select>
+          <label class="settings-field"><span>Количество дивизий</span><input id="recruitCount" class="strategy-select" type="number" min="1" max="100" step="1" value="1"></label>
           <button class="mini-button" type="button" data-action="recruit">Сформировать</button>
-          <small>Стоимость зависит от размера отряда. Нужно минимум 100 готовых солдат в регионе.</small>
+          <small>Все дивизии войдут в одну армию. Каждая требует ровно 500 готовых солдат и 9 бюджета.</small>
         </article>
         <article class="strategy-card accent-card">
           <strong>Сформировать и отправить на фронт</strong>
           <select id="deployRecruitRegion" class="strategy-select">${regionOptions}</select>
           <select id="deployTargetCountry" class="strategy-select">${countryOptions()}</select>
+          <label class="settings-field"><span>Количество дивизий</span><input id="deployRecruitCount" class="strategy-select" type="number" min="1" max="100" step="1" value="1"></label>
           <button class="danger-button" type="button" data-action="recruit-deploy">Создать и отправить</button>
-          <small>Работает, если с выбранной страной уже идет война. Армия получит приказ на первый доступный регион противника.</small>
+          <small>Каждая дивизия требует 500 готовых солдат и 9 бюджета. Армия получит маршрут, если с целью идёт война.</small>
         </article>
         ${runtime.armies.map((army) => {
           const location = gameData.regionById.get(Number(army.regionId));
@@ -191,7 +194,8 @@
           const canMove = targetRegionId && armyRoute(runtime, army, targetRegionId)?.length;
           return `
             <article class="strategy-card">
-              <header><strong>${army.name}</strong><small>${Math.floor(army.soldiers)} солд. · ${Math.round(army.readiness)}% · снаб. ${Math.round(army.lastSupply || runtime.supply?.level || 100)}%</small></header>
+              <header><strong>${army.name}</strong><small>${army.divisions ? `${army.divisions} див. · ` : ""}${Math.floor(army.soldiers)} солд. · ${Math.round(army.readiness)}% · снаб. ${Math.round(army.lastSupply || runtime.supply?.level || 100)}%</small></header>
+              ${army.lastBattleLosses ? `<small>Потери в последнем бою: ${army.lastBattleLosses} солдат</small>` : ""}
               <p>${army.movingTo ? `Движется: ${army.eta} дн.` : `Регион: ${location?.name || army.regionId}`}</p>
               ${army.order ? `<small>Приказ: ${army.order}</small>` : ""}
               <small>Цель: ${target?.name || "не выбрана"}</small>
@@ -326,7 +330,9 @@
               ${Object.keys(RESOURCE_LABELS).map((resource) => `<span class="resource-pill"><small>${RESOURCE_LABELS[resource]}</small><strong>${profile.resources[resource]}</strong></span>`).join("")}
             </div>
           ` : "<p>Нет данных региона.</p>"}
-          <button class="mini-button" type="button" data-action="recruit-selected" ${owner?.id !== player.id || !profile ? "disabled" : ""}>Сформировать армию здесь</button>
+          <label class="settings-field"><span>Количество дивизий</span><input id="selectedRecruitCount" class="strategy-select" type="number" min="1" max="100" step="1" value="1"></label>
+          <button class="mini-button" type="button" data-action="recruit-selected" ${owner?.id !== player.id || !profile ? "disabled" : ""}>Сформировать здесь</button>
+          <small>Одна дивизия: 500 готовых солдат и 9 бюджета.</small>
           <button class="mini-button" type="button" data-action="integrate" data-id="${id}" ${occupiedByPlayer ? "" : "disabled"}>Интегрировать оккупацию</button>
           <button class="mini-button" type="button" data-action="release-occupation" data-id="${id}" ${occupiedByPlayer ? "" : "disabled"}>Деоккупировать</button>
           ${occupiedByPlayer ? renderOccupationProclamationChoices(id) : ""}
@@ -2253,6 +2259,7 @@
     gameData = buildRuntimeGameData(map, scenario, protectedRussianRegionIds);
     strategyState = restoredState ? restoreStrategyState(restoredState) : createInitialStrategyState(scenario, playerCountry);
     normalizeStrategyState(strategyState, scenario);
+    settingsGameMode.value = strategyState.gameMode;
     enforceSpecialRelations(strategyState, scenario);
     activeTab = "focuses";
     mapMode = "political";
@@ -2569,9 +2576,9 @@
     if (action === "ceasefire") offerCeasefire(document.getElementById("pressureTarget")?.value);
     if (action === "operation") startOperation(document.getElementById("operationType")?.value, document.getElementById("operationTarget")?.value);
     if (action === "army-minister") appointArmyMinister(document.getElementById("armyMinister")?.value);
-    if (action === "recruit") recruitArmy(document.getElementById("recruitRegion")?.value);
-    if (action === "recruit-deploy") recruitAndDeployArmy(document.getElementById("deployRecruitRegion")?.value, document.getElementById("deployTargetCountry")?.value);
-    if (action === "recruit-selected") recruitArmy(strategyState.selectedRegionId || currentPlayerCountry()?.capitalRegionId);
+    if (action === "recruit") recruitArmies(document.getElementById("recruitRegion")?.value, document.getElementById("recruitCount")?.value);
+    if (action === "recruit-deploy") recruitAndDeployArmy(document.getElementById("deployRecruitRegion")?.value, document.getElementById("deployTargetCountry")?.value, document.getElementById("deployRecruitCount")?.value);
+    if (action === "recruit-selected") recruitArmies(strategyState.selectedRegionId || currentPlayerCountry()?.capitalRegionId, document.getElementById("selectedRecruitCount")?.value);
     if (action === "move-army") moveArmy(button.dataset.id, button.dataset.targetId || strategyState.selectedRegionId);
     if (action === "integrate") integrateOccupation(button.dataset.id);
     if (action === "release-occupation") releaseSelectedOccupation(button.dataset.id);
@@ -2824,6 +2831,7 @@
     playSound("click");
     openSettings();
   });
+  gameSettingsButton.addEventListener("click", openSettings);
   settingsClose.addEventListener("click", closeSettings);
   settingsModal.addEventListener("click", (event) => {
     if (event.target === settingsModal) closeSettings();
@@ -2844,6 +2852,16 @@
     saveUserSettings();
     syncPoliticalMapOptions();
     if (gameData && mapMode === "political") renderGameMap();
+  });
+  settingsGameMode.addEventListener("change", () => {
+    const mode = settingsGameMode.value === "focus" ? "focus" : "historical";
+    userSettings.gameMode = mode;
+    saveUserSettings();
+    if (!strategyState || !gameData || historicalViewerMode) return;
+    strategyState.gameMode = mode;
+    addLog(mode === "focus" ? "Включён фокусный режим: страны действуют по национальным фокусам." : "Включён исторический режим: активен календарь событий.");
+    renderStrategyPanel();
+    saveGame("game-mode");
   });
   document.querySelectorAll("[data-map-display]").forEach((button) => {
     button.addEventListener("click", () => {

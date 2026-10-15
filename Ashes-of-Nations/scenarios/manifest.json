@@ -34,7 +34,7 @@
       "path": "scenarios/Европа 2026.json",
       "mapFile": "Европа.json",
       "mapName": "Европа",
-      "countries": 75
+      "countries": 76
     },
     {
       "name": "Мир 2026",
@@ -152,6 +152,15 @@
       "mapFile": "мир.json",
       "mapName": "Мир",
       "countries": 75
+    },
+    {
+      "name": "Европа 1933",
+      "year": 1933,
+      "file": "Европа 1933.json",
+      "path": "scenarios/Европа 1933.json",
+      "mapFile": "Европа.json",
+      "mapName": "Европа",
+      "countries": 63
     },
     {
       "name": "Мир 1933",

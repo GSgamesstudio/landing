@@ -107,7 +107,7 @@
   }
 
   function loadUserSettings() {
-    const defaults = { language: "ru", smoothing: "off", politicalMap: "standard" };
+    const defaults = { language: "ru", smoothing: "off", politicalMap: "standard", gameMode: "historical" };
     try {
       const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
       return { ...defaults, ...(raw ? JSON.parse(raw) : {}) };
@@ -190,6 +190,7 @@
   function applyUserSettings() {
     settingsLanguage.value = userSettings.language || "ru";
     settingsSmoothing.value = userSettings.smoothing || "off";
+    settingsGameMode.value = userSettings.gameMode === "focus" ? "focus" : "historical";
     settingsPoliticalMap.value = userSettings.politicalMap || "standard";
     applyLanguage();
     applySmoothing();
@@ -1019,6 +1020,7 @@
     });
     const state = {
       date: new Date(Number(scenario.year) || 2026, 0, 1),
+      gameMode: !historicalViewerMode && userSettings.gameMode === "focus" ? "focus" : "historical",
       playerCountryId: Number(playerCountry.id),
       countryStates,
       relations: {},
@@ -1214,6 +1216,7 @@
     state.claims = state.claims.filter((claim) => claim && claim.active !== false && Number.isFinite(Number(claim.claimantId)) && Number.isFinite(Number(claim.targetId)) && Number.isFinite(Number(claim.regionId)));
     if (!Array.isArray(state.nonAggressionPacts)) state.nonAggressionPacts = [];
     if (!Array.isArray(state.historicalEvents)) state.historicalEvents = [];
+    if (state.gameMode !== "focus") state.gameMode = "historical";
     if (!Array.isArray(state.crises)) state.crises = [];
     if (!Array.isArray(state.regionalElections)) state.regionalElections = [];
     if (!Object.prototype.hasOwnProperty.call(state, "lastRegionalElectionMonth")) state.lastRegionalElectionMonth = "";
@@ -1975,6 +1978,7 @@
   }
 
   function historicalPhaseForScenario(scenario = gameData?.scenario) {
+    if (strategyState?.gameMode === "focus") return null;
     const scenarioYear = Number(scenario?.year);
     const phase = (window.HISTORICAL_PHASES || []).find((item) => Number(item.scenarioYear) === scenarioYear);
     return phase ? { ...phase, endsOn: window.HISTORICAL_TIMELINE_END || phase.endsOn } : null;
@@ -1991,6 +1995,7 @@
 
   function isHistoricalPhaseActive() {
     if (!strategyState) return false;
+    if (strategyState.gameMode === "focus") return false;
     if (strategyState.historicalDiverged) return false;
     const today = strategyState.date.toISOString().slice(0, 10);
     const events = historicalEventsForScenario();
@@ -2156,6 +2161,7 @@
     // country IDs belonged to states that ceased to exist during the chronology.
     gameData.scenario = modernScenario;
     strategyState = createInitialStrategyState(modernScenario, modernPlayer);
+    strategyState.gameMode = previousState.gameMode;
     strategyState.date = previousState.date;
     strategyState.historicalEvents = previousState.historicalEvents;
     strategyState.historicalDiverged = false;
@@ -2174,6 +2180,7 @@
   }
 
   function runHistoricalEvents() {
+    if (strategyState?.gameMode === "focus") return;
     const events = historicalEventsForScenario();
     if (!strategyState || !events.length) return;
     // Once the player has broken a prerequisite, remaining dated events must

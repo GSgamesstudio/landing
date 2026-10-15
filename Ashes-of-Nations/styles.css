@@ -59,7 +59,7 @@ input, textarea, select {
   padding: clamp(30px, 7vw, 100px);
   background:
     linear-gradient(90deg, rgba(7, 10, 12, .97) 0%, rgba(7, 10, 12, .82) 38%, rgba(7, 10, 12, .25) 100%),
-    url("assets/menu-background.jpg?v=20261004-145022") center/cover,
+    url("assets/menu-background.jpg?v=20261007-181327") center/cover,
     radial-gradient(circle at 75% 35%, #5f5340, #12181c 55%, #090c0e);
 }
 
@@ -1208,7 +1208,7 @@ footer {
   overflow: auto;
   background: radial-gradient(circle at 50% -20%, #7a5d36 0, #27201b 33%, #101417 76%);
 }
-.peace-screen { background: linear-gradient(180deg, rgba(4,8,13,.18), rgba(4,8,13,.74)), url("assets/versailles-conference-background.png?v=20261004-145022") center/cover fixed; }
+.peace-screen { background: linear-gradient(180deg, rgba(4,8,13,.18), rgba(4,8,13,.74)), url("assets/versailles-conference-background.png?v=20261007-181327") center/cover fixed; }
 .peace-screen::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 30%, transparent 20%, rgba(3,7,11,.22) 68%, rgba(2,5,8,.68)); z-index: 0; }
 .peace-screen > * { position: relative; z-index: 1; }
 .peace-screen .peace-3d-canvas,
@@ -1774,7 +1774,7 @@ footer {
   height: 180px;
   background:
     linear-gradient(rgba(13, 20, 24, .15), rgba(13, 20, 24, .72)),
-    url("assets/europe-preview.jpg?v=20261004-145022") center/cover,
+    url("assets/europe-preview.jpg?v=20261007-181327") center/cover,
     radial-gradient(circle at 45% 45%, #8a896c, #465b5e 48%, #1c3038 70%);
 }
 
@@ -1919,6 +1919,8 @@ footer {
   .game-topbar .text-button { min-height: 42px; padding: 6px; font: 12px Arial, sans-serif; white-space: nowrap; }
   .game-controls { flex: 0 0 auto; gap: 4px; }
   .game-controls .turn-indicator, #gameGuideButton { display: none; }
+  #gameSettingsButton { width: 42px; font-size: 0; }
+  #gameSettingsButton::before { content: "⚙"; font-size: 20px; }
   .game-zoom { gap: 2px; }
   .game-zoom button { width: 40px; height: 40px; font-size: 21px; }
   #gameZoomLabel { display: none; }

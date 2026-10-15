@@ -64,7 +64,7 @@
   let selectedAdministrativeRegionId = null;
   let mapMode = "territory";
 
-  const PROJECT_CACHE_VERSION = "20261004-145022";
+  const PROJECT_CACHE_VERSION = "20261007-181327";
 
   function hexToRgb(hex) {
     const value = hex.replace("#", "");
@@ -568,10 +568,10 @@
     if (source.startsWith("data:")) return source;
     if (source.startsWith("../")) {
       const path = source.replace("flags/pixel/", "flags/");
-      return `${path}${path.includes("?") ? "&" : "?"}v=20260912-154513`;
+      return `${path}${path.includes("?") ? "&" : "?"}v=${PROJECT_CACHE_VERSION}`;
     }
     const path = `../${source.replace(/^flags\/pixel\//, "flags/")}`;
-    return `${path}${path.includes("?") ? "&" : "?"}v=20260912-154513`;
+    return `${path}${path.includes("?") ? "&" : "?"}v=${PROJECT_CACHE_VERSION}`;
   }
 
   function renderCountryForm() {

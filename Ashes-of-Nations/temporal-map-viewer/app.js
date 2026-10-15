@@ -56,9 +56,9 @@
     }
   }
   Promise.all([
-    fetch("../data/cshapes_2_gw.topojson?v=20261004-145022").then((response) => response.json()),
-    fetch("../data/ne_10m_admin_0_countries.geojson?v=20261004-145022").then((response) => response.json()),
-    fetch("../data/ne_10m_admin_1_states_provinces.geojson?v=20261004-145022").then((response) => response.json()),
+    fetch("../data/cshapes_2_gw.topojson?v=20261007-181327").then((response) => response.json()),
+    fetch("../data/ne_10m_admin_0_countries.geojson?v=20261007-181327").then((response) => response.json()),
+    fetch("../data/ne_10m_admin_1_states_provinces.geojson?v=20261007-181327").then((response) => response.json()),
   ]).then(([history, countries, subdivisions]) => { historical = history; modern = countries; admin = subdivisions; render(); })
     .catch((error) => { status.textContent = `Не удалось загрузить карту: ${error.message}`; });
   year.addEventListener("input", render); adminToggle.addEventListener("change", render);

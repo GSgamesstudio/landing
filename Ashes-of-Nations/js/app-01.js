@@ -18,6 +18,7 @@
   const settingsClose = document.getElementById("settingsClose");
   const settingsLanguage = document.getElementById("settingsLanguage");
   const settingsSmoothing = document.getElementById("settingsSmoothing");
+  const settingsGameMode = document.getElementById("settingsGameMode");
   const settingsPoliticalMap = document.getElementById("settingsPoliticalMap");
   const settingsPlayer = document.getElementById("settingsPlayer");
   const settingsFullscreen = document.getElementById("settingsFullscreen");
@@ -57,6 +58,7 @@
   const strategyContent = document.getElementById("strategyContent");
   const strategyFullscreenButton = document.getElementById("strategyFullscreenButton");
   const gameGuideButton = document.getElementById("gameGuideButton");
+  const gameSettingsButton = document.getElementById("gameSettingsButton");
   const nextTurnButton = document.getElementById("nextTurnButton");
   const turnStatus = document.getElementById("turnStatus");
   const tutorialModal = document.getElementById("tutorialModal");
@@ -81,7 +83,7 @@
   const FOCUS_CSV_DIR = "focuses";
   const CATALOG_REFRESH_MS = 30000;
   // Change this number whenever bundled UI/assets change to invalidate browser caches.
-  const CACHE_VERSION = "20261004-145022";
+  const CACHE_VERSION = "20261007-181327";
   const NUCLEAR_CAPABLE_COUNTRIES = new Set(["Россия", "СССР", "США", "Китай", "Франция", "Великобритания", "Индия", "Пакистан", "КНДР", "Израиль"]);
 
   let peace3dRenderer = null;
@@ -1099,6 +1101,10 @@
       settingsTitle: "Настройки",
       languageLabel: "Язык",
       smoothingLabel: "Сглаживание карты",
+      gameModeLabel: "Режим игры",
+      historicalMode: "Исторический",
+      focusMode: "Фокусный",
+      gameModeHint: "Исторический следует календарю событий; фокусный развивает страны через национальные фокусы.",
       playerLabel: "Игрок",
       fullscreenButton: "Полноэкранный режим",
       applyPlayerButton: "Сменить игрока",
@@ -1120,6 +1126,10 @@
       settingsTitle: "Settings",
       languageLabel: "Language",
       smoothingLabel: "Map smoothing",
+      gameModeLabel: "Game mode",
+      historicalMode: "Historical",
+      focusMode: "Focus driven",
+      gameModeHint: "Historical follows dated events; focus driven develops countries through national focuses.",
       playerLabel: "Player",
       fullscreenButton: "Fullscreen",
       applyPlayerButton: "Switch player",

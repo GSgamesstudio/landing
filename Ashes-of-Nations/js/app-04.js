@@ -1378,6 +1378,7 @@
     const pmr = gameData.scenario.countries.find((country) => country.name === pmrName);
     const runtime = pmr && strategyState.countryStates[String(pmr.id)];
     if (!pmr || !runtime) return false;
+    pmr.flag = "flags/01-современные-страны/Приднестровская Молдавская Республика.png";
     pmr.color = "#3f74a8";
     runtime.subjectOf = Number(player.id);
     runtime.subjectType = "vassal";
@@ -1408,6 +1409,24 @@
         return false;
       }
     }
+    const endedOn = strategyState.date.toISOString().slice(0, 10);
+    strategyState.wars.forEach((war) => {
+      if (!war.active || (Number(war.attackerId) !== Number(target.id) && Number(war.defenderId) !== Number(target.id))) return;
+      war.active = false;
+      war.ended = endedOn;
+      war.capitulation = true;
+    });
+    const clearedOccupations = clearCapitulationOccupations(target.id, target.regionIds);
+    const homeRegionId = Number(target.capitalRegionId || target.regionIds[0]);
+    runtime.armies.forEach((army) => {
+      if (Number(controllerOfRegion(army.regionId)?.id) === Number(target.id)) return;
+      army.regionId = homeRegionId;
+      army.movingTo = null;
+      army.route = [];
+      army.eta = 0;
+      army.order = "Возвращение после мира";
+    });
+    if (strategyState.peaceConference?.participants?.some((id) => Number(id) === Number(target.id))) strategyState.peaceConference = null;
     runtime.subjectOf = Number(overlord.id);
     runtime.subjectType = ["puppet", "vassal", "colony"].includes(type) ? type : "puppet";
     runtime.subjectAutonomy = type === "colony" ? 0 : type === "puppet" ? 1 : 3;
@@ -1419,9 +1438,12 @@
     setRelation(overlord.id, target.id, 100);
     strategyState.wars.filter((war) => war.active && (Number(war.attackerId) === Number(overlord.id) || Number(war.defenderId) === Number(overlord.id))).forEach((war) => {
       const enemyId = Number(war.attackerId) === Number(overlord.id) ? Number(war.defenderId) : Number(war.attackerId);
-      if (!isAtWar(target.id, enemyId)) strategyState.wars.push({ attackerId: Number(war.attackerId) === Number(overlord.id) ? Number(target.id) : enemyId, defenderId: Number(war.defenderId) === Number(overlord.id) ? Number(target.id) : enemyId, start: strategyState.date.toISOString().slice(0, 10), active: true, subjectWar: true });
+      if (enemyId !== Number(target.id) && !isAtWar(target.id, enemyId)) strategyState.wars.push({ attackerId: Number(war.attackerId) === Number(overlord.id) ? Number(target.id) : enemyId, defenderId: Number(war.defenderId) === Number(overlord.id) ? Number(target.id) : enemyId, start: endedOn, active: true, subjectWar: true });
     });
-    addLog(`${target.name} становится: ${subjectLabel(runtime.subjectType)} страны ${overlord.name}.`);
+    markMapDirty();
+    addLog(`${target.name} становится: ${subjectLabel(runtime.subjectType)} страны ${overlord.name}. Война завершена, снято оккупаций: ${clearedOccupations}.`);
+    playSound("peace");
+    renderGameMap();
     renderStrategyPanel();
     return true;
   }
