@@ -440,13 +440,13 @@
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.strokeStyle = "rgba(36, 47, 52, .42)";
-      ctx.lineWidth = 106;
+      ctx.lineWidth = 60;
       drawPolyline(ctx, road.map((point) => ({ x: point.x + 10, y: point.y + 14 })));
       ctx.strokeStyle = "#343c40";
-      ctx.lineWidth = 86;
+      ctx.lineWidth = 46;
       drawPolyline(ctx, road);
       ctx.strokeStyle = "#566267";
-      ctx.lineWidth = 70;
+      ctx.lineWidth = 36;
       drawPolyline(ctx, road);
       ctx.strokeStyle = "rgba(235, 243, 244, .72)";
       ctx.lineWidth = 8;
@@ -1124,6 +1124,31 @@
         ctx.beginPath(); ctx.moveTo(-width / 2, -height / 2); ctx.lineTo(width / 2, -height / 2); ctx.stroke();
         ctx.restore();
       };
+
+      if (landmarks.island) {
+        const points = landmarks.island.points || landmarks.island;
+        ctx.save();
+        ctx.fillStyle = "rgba(20, 38, 31, .35)";
+        ctx.strokeStyle = "#263f35";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        points.forEach((point, index) => index ? ctx.lineTo(point.x + 18, point.y + 18) : ctx.moveTo(point.x + 18, point.y + 18));
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#6e8b62";
+        ctx.strokeStyle = "#294735";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        points.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "rgba(230, 241, 228, .7)";
+        points.forEach((point, index) => { if (index % 2 === 0) { ctx.beginPath(); ctx.arc(point.x, point.y, 8, 0, Math.PI * 2); ctx.fill(); } });
+        ctx.restore();
+      }
+      if (!landmarks.parliament) {
+        if (landmarks.chainBridge) drawChainBridge(landmarks.chainBridge);
+        void time;
+        return;
+      }
 
       const [parliamentX, parliamentY, parliamentW, parliamentH] = landmarks.parliament;
       drawProjectedShadow(ctx, parliamentX, parliamentY, parliamentW + 42, parliamentH + 30, 0, .34);
