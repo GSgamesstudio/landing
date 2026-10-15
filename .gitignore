@@ -24,3 +24,15 @@ tankswars-newera/
 tankswars/3d/
 tankswarsЯИ/
 TW/
+
+# Generated and local-only artifacts (all projects)
+**/dist-fullscreen/
+**/trailer/
+**/reference/
+**/electron/
+**/tools/
+**/*-source.*
+**/*.b64
+**/.tmp-*
+**/review-*.png
+**/review-shorts-*.png
