@@ -464,64 +464,51 @@
 
     function drawBudapestBuilding(ctx, x, y, width, height, index) {
       const collapse = index % 4;
-      const wall = index % 2 ? "#5a5d5b" : "#686862";
-      const darkWall = index % 2 ? "#3a4141" : "#444744";
-      const snow = "rgba(239, 246, 246, .78)";
+      const roof = index % 2 ? "#596361" : "#68706c";
+      const roofDark = index % 2 ? "#35403f" : "#424b49";
       drawProjectedShadow(ctx, x, y, width + 46, height + 38, 0, .38);
       ctx.save();
       ctx.translate(x, y);
-      ctx.fillStyle = "rgba(11, 17, 20, .38)";
-      ctx.fillRect(-width / 2 + 16, -height / 2 + 20, width, height);
-      ctx.fillStyle = wall;
+      // Budapest is rendered from above: the visible surface is a roof plan,
+      // while damage is shown as collapsed roof sections and exposed rooms.
+      ctx.fillStyle = "rgba(11, 17, 20, .42)";
+      ctx.fillRect(-width / 2 + 18, -height / 2 + 22, width, height);
+      ctx.fillStyle = roof;
       ctx.strokeStyle = "#202729";
       ctx.lineWidth = 6;
       ctx.fillRect(-width / 2, -height / 2, width, height);
       ctx.strokeRect(-width / 2, -height / 2, width, height);
 
-      const floors = Math.max(2, Math.floor(height / 42));
-      const windows = Math.max(3, Math.floor(width / 48));
-      for (let row = 0; row < floors; row += 1) {
-        for (let column = 0; column < windows; column += 1) {
-          const broken = (row * 3 + column + index) % 5 === 0;
-          const windowX = -width / 2 + 28 + column * ((width - 56) / Math.max(1, windows - 1));
-          const windowY = -height / 2 + 26 + row * ((height - 52) / Math.max(1, floors - 1));
-          ctx.fillStyle = broken ? "#171f21" : "#263b42";
-          ctx.fillRect(windowX - 8, windowY - 10, 16, 20);
-          if (!broken) {
-            ctx.strokeStyle = "rgba(214, 228, 229, .24)";
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(windowX, windowY - 10); ctx.lineTo(windowX, windowY + 10); ctx.stroke();
-          }
-        }
+      ctx.strokeStyle = "rgba(226, 235, 233, .24)";
+      ctx.lineWidth = 3;
+      for (let line = -width / 2 + 42; line < width / 2; line += 48) {
+        ctx.beginPath(); ctx.moveTo(line, -height / 2 + 12); ctx.lineTo(line, height / 2 - 12); ctx.stroke();
+      }
+      for (let line = -height / 2 + 38; line < height / 2; line += 46) {
+        ctx.beginPath(); ctx.moveTo(-width / 2 + 12, line); ctx.lineTo(width / 2 - 12, line); ctx.stroke();
       }
 
-      ctx.fillStyle = snow;
-      ctx.beginPath();
-      ctx.moveTo(-width / 2 - 4, -height / 2 - 2);
-      ctx.lineTo(width / 2 + 4, -height / 2 - 2);
-      ctx.lineTo(width / 2 - 10, -height / 2 + 16);
-      ctx.lineTo(-width / 2 + 12, -height / 2 + 12);
-      ctx.closePath(); ctx.fill();
-
-      ctx.fillStyle = darkWall;
+      ctx.fillStyle = roofDark;
       if (collapse === 0 || collapse === 2) {
         ctx.beginPath();
-        ctx.moveTo(-width / 2, height / 2 - 42);
-        ctx.lineTo(-width * .18, height / 2 - 18);
-        ctx.lineTo(width * .08, height / 2 - 48);
-        ctx.lineTo(width / 2, height / 2 - 22);
-        ctx.lineTo(width / 2, height / 2);
-        ctx.lineTo(-width / 2, height / 2);
+        ctx.moveTo(-width / 2 + 8, -height / 2 + 8);
+        ctx.lineTo(-width * .12, -height * .18);
+        ctx.lineTo(width * .12, -height * .34);
+        ctx.lineTo(width / 2 - 8, -height * .12);
+        ctx.lineTo(width / 2 - 8, height / 2 - 8);
+        ctx.lineTo(-width / 2 + 8, height / 2 - 8);
         ctx.closePath(); ctx.fill();
       }
       if (collapse === 1 || collapse === 3) {
-        ctx.fillRect(width * .18, -height / 2, width * .3, height * .28);
+        ctx.fillRect(-width * .38, -height * .38, width * .32, height * .3);
         ctx.strokeStyle = "#171d1e"; ctx.lineWidth = 5;
         ctx.beginPath(); ctx.moveTo(width * .18, -height * .72); ctx.lineTo(width * .48, -height * .34); ctx.stroke();
       }
-      ctx.fillStyle = "rgba(214, 218, 211, .62)";
-      ctx.fillRect(-width * .42, height / 2 - 18, width * .28, 12);
-      ctx.fillRect(width * .12, height / 2 - 14, width * .22, 10);
+      ctx.fillStyle = "rgba(239, 246, 246, .76)";
+      ctx.fillRect(-width / 2 - 3, -height / 2 - 3, width + 6, 13);
+      ctx.fillRect(-width / 2 - 3, height / 2 - 10, width + 6, 10);
+      ctx.fillStyle = "#171e20";
+      ctx.fillRect(-width * .1, -height * .08, width * .2, height * .25);
       ctx.restore();
     }
 
@@ -1069,19 +1056,24 @@
         ctx.translate(x, y);
         ctx.fillStyle = "rgba(10, 18, 23, .38)";
         ctx.fillRect(-width / 2 + 18, -height / 2 + 18, width, height);
-        ctx.fillStyle = "#575f62";
+        ctx.fillStyle = "#4d5b5e";
         ctx.strokeStyle = "#22292d";
         ctx.lineWidth = 7;
         ctx.fillRect(-width / 2, -height / 2, width, height);
         ctx.strokeRect(-width / 2, -height / 2, width, height);
+        ctx.fillStyle = "#293538";
+        ctx.fillRect(-width / 2, -height * .13, width, height * .26);
+        ctx.strokeStyle = "rgba(236, 245, 245, .72)";
+        ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(-width / 2, -height / 2); ctx.lineTo(width / 2, -height / 2); ctx.stroke();
         ctx.strokeStyle = "#b7c6c9";
         ctx.lineWidth = 4;
         for (let offset = -width / 2 + 35; offset < width / 2; offset += 48) {
-          ctx.beginPath(); ctx.moveTo(offset, -height / 2); ctx.lineTo(offset, height / 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(offset, -height / 2 + 10); ctx.lineTo(offset, height / 2 - 10); ctx.stroke();
         }
-        ctx.strokeStyle = "#1e292d";
-        ctx.lineWidth = 8;
-        ctx.beginPath(); ctx.moveTo(-width / 2, -height * .32); ctx.lineTo(width / 2, -height * .32); ctx.moveTo(-width / 2, height * .32); ctx.lineTo(width / 2, height * .32); ctx.stroke();
+        ctx.fillStyle = "#7b8889";
+        ctx.fillRect(-width * .32, -height * .5, width * .08, height);
+        ctx.fillRect(width * .24, -height * .5, width * .08, height);
         ctx.restore();
       };
 
@@ -1090,7 +1082,7 @@
         ctx.translate(x, y);
         ctx.fillStyle = "rgba(8, 14, 18, .48)";
         ctx.fillRect(-width / 2 + 20, -height / 2 + 22, width, height);
-        ctx.fillStyle = "#3f4b4e";
+        ctx.fillStyle = "#4a585b";
         ctx.strokeStyle = "#1d2528";
         ctx.lineWidth = 7;
         ctx.fillRect(-width / 2, -height / 2, width, height);
@@ -1099,21 +1091,19 @@
         [-1, 1].forEach((side) => {
           const towerX = side * width * .22;
           ctx.fillStyle = "#687375";
-          ctx.fillRect(towerX - 34, -height * .75, 68, height * 1.5);
-          ctx.strokeRect(towerX - 34, -height * .75, 68, height * 1.5);
-          ctx.fillStyle = "#b7c4c5";
-          ctx.fillRect(towerX - 43, -height * .77, 86, 18);
+          ctx.fillRect(towerX - 42, -height / 2 - 12, 84, height + 24);
+          ctx.strokeRect(towerX - 42, -height / 2 - 12, 84, height + 24);
           ctx.fillStyle = "#30393c";
-          ctx.fillRect(towerX - 13, -height * .3, 26, height * .72);
+          ctx.fillRect(towerX - 18, -height * .24, 36, height * .48);
         });
 
         ctx.strokeStyle = "#c2d0d1";
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(-width / 2, -height * .38);
-        ctx.quadraticCurveTo(-width * .31, height * .26, -width * .22, -height * .52);
-        ctx.quadraticCurveTo(0, height * .42, width * .22, -height * .52);
-        ctx.quadraticCurveTo(width * .31, height * .26, width / 2, -height * .38);
+        ctx.moveTo(-width / 2, -height * .22);
+        ctx.quadraticCurveTo(-width * .3, height * .3, -width * .22, -height * .28);
+        ctx.quadraticCurveTo(0, height * .3, width * .22, -height * .28);
+        ctx.quadraticCurveTo(width * .3, height * .3, width / 2, -height * .22);
         ctx.stroke();
 
         ctx.strokeStyle = "#9eabad";
@@ -1121,10 +1111,10 @@
         for (let offset = -width / 2 + 42; offset < width / 2; offset += 46) {
           const distance = Math.min(Math.abs(offset), width * .22);
           const cableY = distance < width * .22
-            ? -height * .52 + (height * .94 * (distance / (width * .22)))
-            : -height * .38 + height * .64 * ((width / 2 - Math.abs(offset)) / (width * .28));
+            ? -height * .28 + (height * .56 * (distance / (width * .22)))
+            : -height * .22 + height * .42 * ((width / 2 - Math.abs(offset)) / (width * .28));
           ctx.beginPath();
-          ctx.moveTo(offset, -height / 2);
+          ctx.moveTo(offset, -height * .46);
           ctx.lineTo(offset, cableY);
           ctx.stroke();
         }
@@ -1140,22 +1130,28 @@
       ctx.save(); ctx.translate(parliamentX, parliamentY);
       ctx.fillStyle = "#817f77"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 6;
       ctx.fillRect(-parliamentW / 2, -parliamentH / 2, parliamentW, parliamentH); ctx.strokeRect(-parliamentW / 2, -parliamentH / 2, parliamentW, parliamentH);
-      ctx.fillStyle = "#686a68"; ctx.beginPath(); ctx.arc(0, -parliamentH * .1, parliamentW * .16, Math.PI, 0); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = "#3c4548"; for (let x = -parliamentW * .38; x < parliamentW * .4; x += 46) { ctx.fillRect(x, -parliamentH * .08, 20, parliamentH * .48); }
+      ctx.fillStyle = "#3c4548";
+      ctx.fillRect(-parliamentW * .36, -parliamentH * .3, parliamentW * .72, parliamentH * .6);
+      ctx.strokeStyle = "#a6aaa1"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, parliamentW * .16, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = "#686a68"; ctx.beginPath(); ctx.arc(0, 0, parliamentW * .13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#d8d6c9"; ctx.fillRect(-parliamentW * .46, -parliamentH * .42, parliamentW * .92, 16); ctx.restore();
 
       const [castleX, castleY, castleW, castleH] = landmarks.castle;
       drawProjectedShadow(ctx, castleX, castleY, castleW + 55, castleH + 38, 0, .34);
       ctx.save(); ctx.translate(castleX, castleY); ctx.fillStyle = "#756d64"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 7;
       ctx.fillRect(-castleW / 2, -castleH / 2, castleW, castleH); ctx.strokeRect(-castleW / 2, -castleH / 2, castleW, castleH);
-      ctx.fillStyle = "#5b514b"; ctx.fillRect(-castleW * .44, -castleH * .65, castleW * .18, castleH * .26); ctx.fillRect(castleW * .26, -castleH * .65, castleW * .18, castleH * .26);
-      ctx.fillStyle = "#343a3d"; ctx.fillRect(-castleW * .1, castleH * .04, castleW * .2, castleH * .46); ctx.restore();
+      ctx.fillStyle = "#5b514b";
+      ctx.fillRect(-castleW * .42, -castleH * .38, castleW * .2, castleH * .76);
+      ctx.fillRect(castleW * .22, -castleH * .38, castleW * .2, castleH * .76);
+      ctx.fillStyle = "#343a3d"; ctx.fillRect(-castleW * .1, -castleH * .22, castleW * .2, castleH * .44); ctx.restore();
 
       drawBridge(landmarks.margaretBridge); drawChainBridge(landmarks.chainBridge); drawBridge(landmarks.libertyBridge);
 
       const [basilicaX, basilicaY, basilicaW, basilicaH] = landmarks.basilica;
       ctx.save(); ctx.translate(basilicaX, basilicaY); ctx.fillStyle = "#7b7e7d"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 5;
-      ctx.fillRect(-basilicaW / 2, -basilicaH / 2, basilicaW, basilicaH); ctx.beginPath(); ctx.arc(0, -basilicaH * .08, basilicaW * .26, Math.PI, 0); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, -basilicaH * .7); ctx.lineTo(0, -basilicaH * .38); ctx.stroke(); ctx.restore();
+      ctx.fillRect(-basilicaW / 2, -basilicaH / 2, basilicaW, basilicaH); ctx.strokeRect(-basilicaW / 2, -basilicaH / 2, basilicaW, basilicaH);
+      ctx.fillStyle = "#596465"; ctx.beginPath(); ctx.arc(0, 0, basilicaW * .28, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
 
       const [bastionX, bastionY, bastionW, bastionH] = landmarks.bastion;
       ctx.save(); ctx.translate(bastionX, bastionY); ctx.fillStyle = "#a0a29c"; ctx.strokeStyle = "#303436"; ctx.lineWidth = 5;
