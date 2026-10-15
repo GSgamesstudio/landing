@@ -43,6 +43,10 @@
       });
 
       details.roads.forEach((road) => {
+        if (details.budapest) {
+          drawBudapestRoad(ctx, road);
+          return;
+        }
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
         ctx.strokeStyle = "rgba(0, 0, 0, 0.18)";
@@ -60,7 +64,11 @@
       });
 
       (details.buildings || []).forEach(([x, y, width, height, angle = 0], index) => {
-        drawBattleBuilding(ctx, x, y, width, height, angle, index);
+        if (details.budapest) {
+          drawBudapestBuilding(ctx, x, y, width, height, index);
+        } else {
+          drawBattleBuilding(ctx, x, y, width, height, angle, index);
+        }
       });
       (details.destructibles || []).forEach((item, index) => drawDestructibleObject(ctx, item, index));
       if (details.reichstag) {
@@ -424,6 +432,96 @@
       ctx.moveTo(-width / 2 + roofInset + 10, -height / 2 + roofInset + 10);
       ctx.lineTo(width / 2 - roofInset - 16, -height / 2 + roofInset + 10);
       ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBudapestRoad(ctx, road) {
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "rgba(36, 47, 52, .42)";
+      ctx.lineWidth = 106;
+      drawPolyline(ctx, road.map((point) => ({ x: point.x + 10, y: point.y + 14 })));
+      ctx.strokeStyle = "#343c40";
+      ctx.lineWidth = 86;
+      drawPolyline(ctx, road);
+      ctx.strokeStyle = "#566267";
+      ctx.lineWidth = 70;
+      drawPolyline(ctx, road);
+      ctx.strokeStyle = "rgba(235, 243, 244, .72)";
+      ctx.lineWidth = 8;
+      drawPolyline(ctx, road.map((point) => ({ x: point.x, y: point.y - 38 })));
+      ctx.strokeStyle = "rgba(203, 216, 218, .56)";
+      ctx.lineWidth = 5;
+      drawPolyline(ctx, road.map((point) => ({ x: point.x, y: point.y + 38 })));
+      ctx.setLineDash([34, 42]);
+      ctx.strokeStyle = "rgba(220, 226, 222, .42)";
+      ctx.lineWidth = 3;
+      drawPolyline(ctx, road);
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    function drawBudapestBuilding(ctx, x, y, width, height, index) {
+      const collapse = index % 4;
+      const wall = index % 2 ? "#5a5d5b" : "#686862";
+      const darkWall = index % 2 ? "#3a4141" : "#444744";
+      const snow = "rgba(239, 246, 246, .78)";
+      drawProjectedShadow(ctx, x, y, width + 46, height + 38, 0, .38);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "rgba(11, 17, 20, .38)";
+      ctx.fillRect(-width / 2 + 16, -height / 2 + 20, width, height);
+      ctx.fillStyle = wall;
+      ctx.strokeStyle = "#202729";
+      ctx.lineWidth = 6;
+      ctx.fillRect(-width / 2, -height / 2, width, height);
+      ctx.strokeRect(-width / 2, -height / 2, width, height);
+
+      const floors = Math.max(2, Math.floor(height / 42));
+      const windows = Math.max(3, Math.floor(width / 48));
+      for (let row = 0; row < floors; row += 1) {
+        for (let column = 0; column < windows; column += 1) {
+          const broken = (row * 3 + column + index) % 5 === 0;
+          const windowX = -width / 2 + 28 + column * ((width - 56) / Math.max(1, windows - 1));
+          const windowY = -height / 2 + 26 + row * ((height - 52) / Math.max(1, floors - 1));
+          ctx.fillStyle = broken ? "#171f21" : "#263b42";
+          ctx.fillRect(windowX - 8, windowY - 10, 16, 20);
+          if (!broken) {
+            ctx.strokeStyle = "rgba(214, 228, 229, .24)";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(windowX, windowY - 10); ctx.lineTo(windowX, windowY + 10); ctx.stroke();
+          }
+        }
+      }
+
+      ctx.fillStyle = snow;
+      ctx.beginPath();
+      ctx.moveTo(-width / 2 - 4, -height / 2 - 2);
+      ctx.lineTo(width / 2 + 4, -height / 2 - 2);
+      ctx.lineTo(width / 2 - 10, -height / 2 + 16);
+      ctx.lineTo(-width / 2 + 12, -height / 2 + 12);
+      ctx.closePath(); ctx.fill();
+
+      ctx.fillStyle = darkWall;
+      if (collapse === 0 || collapse === 2) {
+        ctx.beginPath();
+        ctx.moveTo(-width / 2, height / 2 - 42);
+        ctx.lineTo(-width * .18, height / 2 - 18);
+        ctx.lineTo(width * .08, height / 2 - 48);
+        ctx.lineTo(width / 2, height / 2 - 22);
+        ctx.lineTo(width / 2, height / 2);
+        ctx.lineTo(-width / 2, height / 2);
+        ctx.closePath(); ctx.fill();
+      }
+      if (collapse === 1 || collapse === 3) {
+        ctx.fillRect(width * .18, -height / 2, width * .3, height * .28);
+        ctx.strokeStyle = "#171d1e"; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(width * .18, -height * .72); ctx.lineTo(width * .48, -height * .34); ctx.stroke();
+      }
+      ctx.fillStyle = "rgba(214, 218, 211, .62)";
+      ctx.fillRect(-width * .42, height / 2 - 18, width * .28, 12);
+      ctx.fillRect(width * .12, height / 2 - 14, width * .22, 10);
       ctx.restore();
     }
 
@@ -987,6 +1085,56 @@
         ctx.restore();
       };
 
+      const drawChainBridge = ([x, y, width, height]) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = "rgba(8, 14, 18, .48)";
+        ctx.fillRect(-width / 2 + 20, -height / 2 + 22, width, height);
+        ctx.fillStyle = "#3f4b4e";
+        ctx.strokeStyle = "#1d2528";
+        ctx.lineWidth = 7;
+        ctx.fillRect(-width / 2, -height / 2, width, height);
+        ctx.strokeRect(-width / 2, -height / 2, width, height);
+
+        [-1, 1].forEach((side) => {
+          const towerX = side * width * .22;
+          ctx.fillStyle = "#687375";
+          ctx.fillRect(towerX - 34, -height * .75, 68, height * 1.5);
+          ctx.strokeRect(towerX - 34, -height * .75, 68, height * 1.5);
+          ctx.fillStyle = "#b7c4c5";
+          ctx.fillRect(towerX - 43, -height * .77, 86, 18);
+          ctx.fillStyle = "#30393c";
+          ctx.fillRect(towerX - 13, -height * .3, 26, height * .72);
+        });
+
+        ctx.strokeStyle = "#c2d0d1";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(-width / 2, -height * .38);
+        ctx.quadraticCurveTo(-width * .31, height * .26, -width * .22, -height * .52);
+        ctx.quadraticCurveTo(0, height * .42, width * .22, -height * .52);
+        ctx.quadraticCurveTo(width * .31, height * .26, width / 2, -height * .38);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#9eabad";
+        ctx.lineWidth = 3;
+        for (let offset = -width / 2 + 42; offset < width / 2; offset += 46) {
+          const distance = Math.min(Math.abs(offset), width * .22);
+          const cableY = distance < width * .22
+            ? -height * .52 + (height * .94 * (distance / (width * .22)))
+            : -height * .38 + height * .64 * ((width / 2 - Math.abs(offset)) / (width * .28));
+          ctx.beginPath();
+          ctx.moveTo(offset, -height / 2);
+          ctx.lineTo(offset, cableY);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = "rgba(241, 248, 248, .88)";
+        ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(-width / 2, -height / 2); ctx.lineTo(width / 2, -height / 2); ctx.stroke();
+        ctx.restore();
+      };
+
       const [parliamentX, parliamentY, parliamentW, parliamentH] = landmarks.parliament;
       drawProjectedShadow(ctx, parliamentX, parliamentY, parliamentW + 42, parliamentH + 30, 0, .34);
       ctx.save(); ctx.translate(parliamentX, parliamentY);
@@ -1003,7 +1151,7 @@
       ctx.fillStyle = "#5b514b"; ctx.fillRect(-castleW * .44, -castleH * .65, castleW * .18, castleH * .26); ctx.fillRect(castleW * .26, -castleH * .65, castleW * .18, castleH * .26);
       ctx.fillStyle = "#343a3d"; ctx.fillRect(-castleW * .1, castleH * .04, castleW * .2, castleH * .46); ctx.restore();
 
-      drawBridge(landmarks.margaretBridge); drawBridge(landmarks.chainBridge); drawBridge(landmarks.libertyBridge);
+      drawBridge(landmarks.margaretBridge); drawChainBridge(landmarks.chainBridge); drawBridge(landmarks.libertyBridge);
 
       const [basilicaX, basilicaY, basilicaW, basilicaH] = landmarks.basilica;
       ctx.save(); ctx.translate(basilicaX, basilicaY); ctx.fillStyle = "#7b7e7d"; ctx.strokeStyle = "#252729"; ctx.lineWidth = 5;
