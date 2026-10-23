@@ -20,7 +20,7 @@
     ];
 
     function applyAnnualCursor() {
-      document.documentElement.style.setProperty("--game-cursor", 'url("/img/asseti/cursor.png") 10 10, auto');
+      document.documentElement.style.setProperty("--game-cursor", 'url("/img/asseti/kursor.svg") 8 8, url("/img/asseti/cursor.png") 10 10, auto');
     }
 
     applyAnnualCursor();

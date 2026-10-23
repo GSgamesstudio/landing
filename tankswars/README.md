@@ -1,5 +1,15 @@
 # Tanks Wars
 
+## Изменения `1.1.1.2v46`
+
+- Возвращён SVG-курсор `img/asseti/kursor.svg`.
+- Для браузеров, которые не принимают SVG в CSS-курсоре, оставлен запасной `img/asseti/cursor.png`.
+- Абсолютные пути и новые версии ресурсов исключают ошибочный путь `/css/img/...` и старый кэш.
+
+Затронутые файлы: `README.md`, `css/styles.css`, `css/tankopedia.css`, `js/00-state.js`, `index.html`, `tankopedia.html`.
+
+Проверки: `node --check js/00-state.js`, `git diff --check`; `kursor.svg` и `cursor.png` доступны через `localhost:8001` с корректными ответами сервера.
+
 ## Изменения `1.1.1.2v45`
 
 - Исправлено подключение временного PNG-курсора: теперь используется абсолютный путь `/img/asseti/cursor.png`, независимый от расположения CSS-файла.
