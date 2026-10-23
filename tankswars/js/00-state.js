@@ -16,17 +16,29 @@
     const battleBackButton = document.querySelector("#battleBackButton");
     const battleContext = battleCanvas.getContext("2d");
     const loadingFrames = [
-      "./img/asseti/loading0.png",
-      "./img/asseti/loading1.png",
-      "./img/asseti/loading2.png",
-      "./img/asseti/loading3.png"
+      "./img/asseti/loading-winter.png"
     ];
+
+    function applyAnnualCursor() {
+      document.documentElement.style.setProperty("--game-cursor", 'url("./img/asseti/cursor.png") 16 16, auto');
+    }
+
+    applyAnnualCursor();
+    window.setInterval(applyAnnualCursor, 60 * 60 * 1000);
 
     const frameDelay = 1000;
     const containerTankDropChance = 0.05;
     const containerGoldPrice = 500;
     const containerPrizeCount = 3;
     const containerName = "Все из всех";
+    const giftContainerName = "Подарок";
+    const giftContainerGoldPrice = 5000;
+    const giftContainerTankDropChance = 0.08;
+    const giftContainerPremiumDropChance = 0.02;
+    const nexorBundleName = "Комплект Nexor";
+    const nexorBundleGoldPrice = 25000;
+    const nexorBundleBlueprints = 25;
+    const nexorBundleSilver = 500000;
     const is4ContainerName = "Контейнер ИС-4";
     const is4ContainerGoldPrice = 1000;
     const is4ContainerTankDropChance = 0.1;
@@ -84,9 +96,9 @@
       finalRewardGold: 0,
       modeIds: ["company", "platoon", "duel", "commander", "war", "survival"],
       stages: [
-        { id: "approach", title: "15–20 декабря · Подступы к Дунаю", description: "Провести 10 боёв", stat: "battles", target: 10, rewardText: "+25 000 серебра" },
-        { id: "island", title: "21–27 декабря · Остров Маргит", description: "Нанести 25 000 урона", stat: "damage", target: 25000, rewardTankName: "Т-34-85 НГ" },
-        { id: "bridge", title: "28 декабря–5 января · Мост Маргит", description: "Победить в 12 боях", stat: "wins", target: 12, rewardTankName: "КВ-2 НГ" }
+        { id: "approach", title: "15–20 декабря · Подступы к Дунаю", description: "Провести 20 боёв", stat: "battles", target: 20, rewardText: "+25 000 серебра" },
+        { id: "island", title: "21–27 декабря · Остров Маргит", description: "Нанести 80 000 урона", stat: "damage", target: 80000, rewardTankName: "Т-34-85 НГ" },
+        { id: "bridge", title: "28 декабря–5 января · Мост Маргит", description: "Победить в 25 боях", stat: "wins", target: 25, rewardTankName: "КВ-2 НГ" }
       ]
     };
     const developerModeKey = "ujfgav8b6rvcb75av5tva7sr4av4456w*/va5*4w-bva4/-4gb-w89`7`9y7fhg9a";
@@ -120,49 +132,49 @@
         id: "company",
         title: "\u0420\u043e\u0442\u043d\u044b\u0439 \u0431\u043e\u0439",
         size: 7,
-        image: "./img/asseti/loading0.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u0411\u043e\u043b\u044c\u0448\u043e\u0435 \u0441\u0440\u0430\u0436\u0435\u043d\u0438\u0435 7 \u043d\u0430 7: \u043c\u043d\u043e\u0433\u043e \u0446\u0435\u043b\u0435\u0439, \u0434\u043e\u043b\u0433\u0438\u0439 \u043e\u0431\u043c\u0435\u043d \u043e\u0433\u043d\u0435\u043c \u0438 \u0440\u0435\u0448\u0430\u044e\u0449\u0430\u044f \u0440\u043e\u043b\u044c \u043a\u043e\u043c\u0430\u043d\u0434\u044b."
       },
       {
         id: "platoon",
         title: "\u0412\u0437\u0432\u043e\u0434\u043d\u044b\u0439 \u0431\u043e\u0439",
         size: 5,
-        image: "./img/asseti/loading1.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u0421\u0440\u0435\u0434\u043d\u0438\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 5 \u043d\u0430 5: \u0431\u044b\u0441\u0442\u0440\u0435\u0435 \u0440\u043e\u0442\u043d\u043e\u0433\u043e, \u043d\u043e \u0441 \u043c\u0435\u0441\u0442\u043e\u043c \u0434\u043b\u044f \u043c\u0430\u043d\u0435\u0432\u0440\u0430."
       },
       {
         id: "duel",
         title: "\u0414\u0443\u044d\u043b\u044c",
         size: 1,
-        image: "./img/asseti/loading2.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u0427\u0438\u0441\u0442\u0430\u044f \u0441\u0445\u0432\u0430\u0442\u043a\u0430 1 \u043d\u0430 1: \u0442\u043e\u043b\u044c\u043a\u043e \u0442\u044b, \u0432\u0440\u0430\u0433 \u0438 \u043e\u0448\u0438\u0431\u043a\u0438, \u0437\u0430 \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0441\u0440\u0430\u0437\u0443 \u043f\u043b\u0430\u0442\u044f\u0442."
       },
       {
         id: "commander",
         title: "\u041e\u0445\u043e\u0442\u0430 \u043d\u0430 \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u0430",
         size: 7,
-        image: "./img/asseti/loading3.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u041e\u0441\u043e\u0431\u044b\u0439 \u0431\u043e\u0439 7 \u043d\u0430 7: \u043d\u0430\u0439\u0434\u0438\u0442\u0435 \u0438 \u0443\u043d\u0438\u0447\u0442\u043e\u0436\u044c\u0442\u0435 \u0432\u0440\u0430\u0436\u0435\u0441\u043a\u043e\u0433\u043e \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u0430. \u0422\u0432\u043e\u0439 \u0442\u0430\u043d\u043a \u0442\u043e\u0436\u0435 \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440, \u0435\u0433\u043e \u043f\u043e\u0442\u0435\u0440\u044f \u043e\u0437\u043d\u0430\u0447\u0430\u0435\u0442 \u043f\u043e\u0440\u0430\u0436\u0435\u043d\u0438\u0435."
       },
       {
         id: "war",
         title: "\u0412\u043e\u0439\u043d\u0430",
         size: 15,
-        image: "./img/asseti/loading0.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u041c\u0430\u0441\u0448\u0442\u0430\u0431\u043d\u044b\u0439 \u0431\u043e\u0439 15 \u043d\u0430 15: \u0437\u0430\u0445\u0432\u0430\u0442\u0438\u0442\u0435 4 \u0442\u043e\u0447\u043a\u0438, \u0437\u0430\u0442\u0435\u043c \u0431\u0430\u0437\u0443 \u0432\u0440\u0430\u0433\u0430. \u0422\u0430\u043d\u043a\u0438 \u0432\u043e\u0437\u0440\u043e\u0436\u0434\u0430\u044e\u0442\u0441\u044f \u0434\u043e \u043f\u043e\u0431\u0435\u0434\u044b."
       },
       {
         id: "survival",
         title: "\u0412\u044b\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
         size: 15,
-        image: "./img/asseti/loading1.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u0411\u043e\u0439 \u043a\u0430\u0436\u0434\u044b\u0439 \u0441\u0430\u043c \u0437\u0430 \u0441\u0435\u0431\u044f: 15 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432, \u043f\u043e\u0431\u0435\u0436\u0434\u0430\u0435\u0442 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439. \u041a\u0430\u0436\u0434\u0443\u044e \u043c\u0438\u043d\u0443\u0442\u0443 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438 \u0432\u0441\u0435\u0445 \u0442\u0430\u043d\u043a\u043e\u0432 \u0440\u0430\u0441\u0442\u0443\u0442 \u043d\u0430 5%."
       },
       {
         id: "training",
         title: "\u0422\u0440\u0435\u043d\u0438\u0440\u043e\u0432\u043a\u0430",
         size: 1,
-        image: "./img/asseti/loading2.png",
+        image: "./img/asseti/loading-winter.png",
         description: "\u041e\u0434\u0438\u043d\u043e\u0447\u043d\u044b\u0439 \u0432\u044b\u0435\u0437\u0434 \u0431\u0435\u0437 \u0432\u0440\u0430\u0433\u043e\u0432: \u0441\u0430\u043c \u0432\u044b\u0431\u0435\u0440\u0438 \u043b\u044e\u0431\u0443\u044e \u043a\u0430\u0440\u0442\u0443 \u0438 \u0432\u044b\u0439\u0434\u0438 \u043a\u043d\u043e\u043f\u043a\u043e\u0439 \u00ab\u041d\u0430\u0437\u0430\u0434\u00bb."
       }
     ];

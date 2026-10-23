@@ -1,5 +1,115 @@
 # Tanks Wars
 
+## Изменения `1.1.1.2v44`
+
+- Временно заменены SVG-курсоры на существующий PNG-курсор `img/asseti/cursor.png`, чтобы курсор корректно загружался в браузере.
+- Отключено сезонное переключение между `kursor.svg` и `kursor-NE.svg` до возврата SVG-версии.
+- В эту запись также включены обнаруженные пользовательские изображения, ожидавшие следующего коммита: `kursor.svg`, `kursor-NE.svg`, `loading-winter.png`, `podarok.png`, `winter-budapest-event.png`; удаление `loading0.png`, `loading1.png`, `loading2.png`, `loading3.png` сохранено.
+
+Затронутые файлы: `README.md`, `css/styles.css`, `js/00-state.js`, `img/asseti/kursor.svg`, `img/asseti/kursor-NE.svg`, `img/asseti/loading-winter.png`, `img/asseti/podarok.png`, `img/asseti/winter-budapest-event.png`, удалены `img/asseti/loading0.png`, `img/asseti/loading1.png`, `img/asseti/loading2.png`, `img/asseti/loading3.png`.
+
+Проверки: `node --check js/00-state.js` и проверка доступности `http://localhost:8001/img/asseti/cursor.png` выполнены; SVG-пути больше не используются в активном курсоре.
+
+## Изменения `1.1.1.2v43`
+
+- Переведены на русский язык добавленные записи журнала изменений.
+- В `AGENTS.md` закреплено правило вести новые записи `README.md` только на русском языке.
+
+Затронутые файлы: `README.md`, `AGENTS.md`.
+
+Проверка: визуально проверены верхние записи журнала; английских формулировок в добавленных блоках не осталось.
+
+## Изменения `1.1.1.2v33`
+
+- Обновлена презентация зимнего события «Зимняя осада Будапешта»: на карточке показаны все этапы и предложения магазина.
+- Заменён фон события на новую иллюстрацию зимнего Будапешта с различимыми силуэтами Nexor, БЗ-75, Т-34-85 НГ, КВ-2 НГ и Т-22 ср.
+- Старое летнее событие скрывается вне периода активности.
+
+Затронутые файлы: `README.md`, `index.html`, `css/styles.css`, `js/03-events-store-profile.js`, `img/asseti/winter-budapest-event.png`.
+
+Проверки: `node --check js/00-state.js`, `node --check js/03-events-store-profile.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v36`
+
+- Комплект Nexor оформлен как большая афиша в магазине.
+- На афишу добавлена настоящая игровая текстура `img/tanki/Nexor.png`; оформление адаптировано для узких экранов.
+
+Затронутые файлы: `README.md`, `index.html`, `css/styles.css`, `js/03-events-store-profile.js`.
+
+Проверки: `node --check js/03-events-store-profile.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v39`
+
+- Добавлен сгенерированный новогодний экран загрузки с зимним Будапештом, Дунаем, праздничными огнями и танковым сражением.
+- `loading-winter.png` добавлен первым кадром загрузки, старые кадры сохранены.
+
+Затронутые файлы: `README.md`, `index.html`, `js/00-state.js`, `img/asseti/loading-winter.png`.
+
+Проверки: `node --check js/00-state.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v42`
+
+- Добавлено ежегодное переключение курсора: новогодний `kursor-NE.svg` используется с 1 декабря по 28 февраля, а `kursor.svg` — с 1 марта по 30 ноября.
+- Активный курсор применяется ко всему интерфейсу и обновляется каждый час, пока страница открыта.
+
+Затронутые файлы: `README.md`, `index.html`, `css/styles.css`, `js/00-state.js`.
+
+Проверки: `node --check js/00-state.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v41`
+
+- Удалены устаревшие ассеты `loading0.png`, `loading1.png`, `loading2.png` и `loading3.png`.
+- Оставлен только `loading-winter.png`; список кадров загрузки обновлён и использует его как единственный экран.
+
+Затронутые файлы: `README.md`, `index.html`, `js/00-state.js`; удалены `img/asseti/loading0.png`, `img/asseti/loading1.png`, `img/asseti/loading2.png`, `img/asseti/loading3.png`.
+
+Проверки: `node --check js/00-state.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v40`
+
+- В карточках выбора режима старые изображения заменены новым новогодним экраном загрузки.
+- Обновлена версия кэша скрипта состояния, чтобы браузеры загрузили новые изображения карточек режимов.
+
+Затронутые файлы: `README.md`, `index.html`, `js/00-state.js`.
+
+Проверки: `node --check js/00-state.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v38`
+
+- Карточка зимнего события ограничена заданным сроком: после 5 января 2027 года она больше не отображается в разделе событий.
+- Учёт прогресса и выдача наград события не изменялись.
+
+Затронутые файлы: `README.md`, `index.html`, `js/03-events-store-profile.js`.
+
+Проверки: `node --check js/03-events-store-profile.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v37`
+
+- В карточку контейнера «Подарок» добавлено предоставленное пользователем изображение `img/asseti/podarok.png`.
+- Добавлено красное оформление подарка; остальные карточки контейнеров не изменялись.
+
+Затронутые файлы: `README.md`, `index.html`, `css/styles.css`, `js/03-events-store-profile.js`, `img/asseti/podarok.png` (изображение пользователя).
+
+Проверки: `node --check js/03-events-store-profile.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v35`
+
+- В магазин добавлен одноразовый комплект «Комплект Nexor» за 25 000 золота.
+- Комплект выдаёт Nexor, 25 чертежей и 500 000 серебра.
+
+Затронутые файлы: `README.md`, `index.html`, `js/00-state.js`, `js/03-events-store-profile.js`.
+
+Проверки: `node --check js/00-state.js`, `node --check js/03-events-store-profile.js` и `git diff --check` прошли.
+
+## Изменения `1.1.1.2v34`
+
+- Добавлен контейнер «Подарок» за 5 000 золота.
+- В контейнере отдельные шансы на БЗ-155 (8%) и премиум-танки (2%), а также золото, серебро и чертежи в качестве ресурсных наград.
+
+Затронутые файлы: `README.md`, `js/00-state.js`, `js/03-events-store-profile.js`.
+
+Проверки: `node --check js/00-state.js`, `node --check js/03-events-store-profile.js` и `git diff --check` прошли.
+
 ## Изменения `1.1.1.2v32`
 
 - Добавлено новогоднее событие «Зимняя осада Будапешта» с 15 декабря по 5 января.
