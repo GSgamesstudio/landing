@@ -1,5 +1,14 @@
 # Tanks Wars
 
+## Изменения `1.1.1.2v47`
+
+- Увеличен размер SVG-курсоров до `24×24` пикселей.
+- Точка клика перенесена в центр курсора (`12 12`); PNG fallback сохранён.
+
+Затронутые файлы: `README.md`, `img/asseti/kursor.svg`, `img/asseti/kursor-NE.svg`, `css/styles.css`, `css/tankopedia.css`, `js/00-state.js`.
+
+Проверки: `node --check js/00-state.js`, `git diff --check`; оба SVG проверены как доступные через `localhost:8001`.
+
 ## Изменения `1.1.1.2v46`
 
 - Возвращён SVG-курсор `img/asseti/kursor.svg`.
