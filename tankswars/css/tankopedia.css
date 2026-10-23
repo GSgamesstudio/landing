@@ -1,6 +1,6 @@
 * {
   box-sizing: border-box;
-  cursor: url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto !important;
+  cursor: var(--cursor-default) !important;
 }
 
 :root {
@@ -13,7 +13,15 @@
   --green: #d8f33e;
   --text: #f2f2f2;
   --muted: #b9b9b2;
+  --cursor-default: url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
+  --cursor-pointer: url("/img/asseti/kursor-pointer.svg") 6 2, url("/img/asseti/cursor.png") 10 10, auto;
+  --cursor-disabled: url("/img/asseti/kursor-disabled.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
+  --cursor-text: url("/img/asseti/kursor-text.svg") 12 12, url("/img/asseti/cursor.png") 10 10, text;
 }
+
+button, a, select, [role="button"] { cursor: var(--cursor-pointer) !important; }
+input[type="text"], input[type="search"] { cursor: var(--cursor-text) !important; }
+button:disabled, [aria-disabled="true"] { cursor: var(--cursor-disabled) !important; }
 
 html,
 body {

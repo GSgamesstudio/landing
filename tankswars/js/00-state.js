@@ -19,8 +19,24 @@
       "./img/asseti/loading-winter.png"
     ];
 
-    function applyAnnualCursor() {
-      document.documentElement.style.setProperty("--game-cursor", 'url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto');
+    function applyAnnualCursor(date = new Date()) {
+      const winter = date.getMonth() === 11 || date.getMonth() <= 1;
+      const suffix = winter ? "-NE" : "";
+      const cursorFiles = {
+        default: `kursor${suffix}.svg`,
+        pointer: `kursor-pointer${suffix}.svg`,
+        disabled: `kursor-disabled${suffix}.svg`,
+        notAllowed: `kursor-not-allowed${suffix}.svg`,
+        text: `kursor-text${suffix}.svg`,
+        grab: `kursor-grab${suffix}.svg`,
+        grabbing: `kursor-grabbing${suffix}.svg`,
+        wait: `kursor-wait${suffix}.svg`,
+        move: `kursor-move${suffix}.svg`
+      };
+      const hotspots = { default: "12 12", pointer: "6 2", disabled: "12 12", notAllowed: "12 12", text: "12 12", grab: "10 8", grabbing: "10 8", wait: "12 12", move: "12 12" };
+      Object.entries(cursorFiles).forEach(([name, file]) => {
+        document.documentElement.style.setProperty(`--cursor-${name.replace(/([A-Z])/g, "-$1").toLowerCase()}`, `url("/img/asseti/${file}") ${hotspots[name]}, url("/img/asseti/cursor.png") 10 10, auto`);
+      });
     }
 
     applyAnnualCursor();

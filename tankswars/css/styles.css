@@ -11,6 +11,15 @@
       --tank-bar-height: calc((100vw - var(--left-panel-width)) / 8 * 9 / 16);
       --nation-tab-count: 15;
       --nation-tab-width: calc(100vw / var(--nation-tab-count));
+      --cursor-default: url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
+      --cursor-pointer: url("/img/asseti/kursor-pointer.svg") 6 2, url("/img/asseti/cursor.png") 10 10, auto;
+      --cursor-disabled: url("/img/asseti/kursor-disabled.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
+      --cursor-not-allowed: url("/img/asseti/kursor-not-allowed.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
+      --cursor-text: url("/img/asseti/kursor-text.svg") 12 12, url("/img/asseti/cursor.png") 10 10, text;
+      --cursor-grab: url("/img/asseti/kursor-grab.svg") 10 8, url("/img/asseti/cursor.png") 10 10, grab;
+      --cursor-grabbing: url("/img/asseti/kursor-grabbing.svg") 10 8, url("/img/asseti/cursor.png") 10 10, grabbing;
+      --cursor-wait: url("/img/asseti/kursor-wait.svg") 12 12, url("/img/asseti/cursor.png") 10 10, wait;
+      --cursor-move: url("/img/asseti/kursor-move.svg") 12 12, url("/img/asseti/cursor.png") 10 10, move;
     }
 
     html,
@@ -21,15 +30,34 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
       background: #111;
-      cursor: var(--game-cursor, url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto);
+      cursor: var(--cursor-default);
       -webkit-touch-callout: none;
       touch-action: manipulation;
     }
 
     body,
     body * {
-      cursor: var(--game-cursor, url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto) !important;
+      cursor: var(--cursor-default) !important;
     }
+
+    button:not(:disabled), a, select, [role="button"], .tankCard, .modeCard, .nationTab, .oiEventCard {
+      cursor: var(--cursor-pointer) !important;
+    }
+
+    button:disabled, [aria-disabled="true"], .modeCard.locked, .tankCard.future {
+      cursor: var(--cursor-disabled) !important;
+    }
+
+    input[type="text"], input[type="search"], input[type="number"], textarea, [contenteditable="true"] {
+      cursor: var(--cursor-text) !important;
+    }
+
+    .cursor-grab { cursor: var(--cursor-grab) !important; }
+    .cursor-grabbing { cursor: var(--cursor-grabbing) !important; }
+    .cursor-wait { cursor: var(--cursor-wait) !important; }
+    .cursor-move { cursor: var(--cursor-move) !important; }
+    .cursor-not-allowed { cursor: var(--cursor-not-allowed) !important; }
+    body.is-grabbing, body.is-grabbing * { cursor: var(--cursor-grabbing) !important; }
 
     img,
     canvas,

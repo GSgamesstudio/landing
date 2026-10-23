@@ -1,3 +1,23 @@
+(() => {
+  const winter = new Date().getMonth() === 11 || new Date().getMonth() <= 1;
+  const suffix = winter ? "-NE" : "";
+  const files = { default: "kursor", pointer: "kursor-pointer", disabled: "kursor-disabled", text: "kursor-text" };
+  const hotspots = { default: "12 12", pointer: "6 2", disabled: "12 12", text: "12 12" };
+  Object.entries(files).forEach(([name, file]) => {
+    document.documentElement.style.setProperty(`--cursor-${name}`, `url("/img/asseti/${file}${suffix}.svg") ${hotspots[name]}, url("/img/asseti/cursor.png") 10 10, auto`);
+  });
+})();
+
+(() => {
+  const winter = new Date().getMonth() === 11 || new Date().getMonth() <= 1;
+  const suffix = winter ? "-NE" : "";
+  const files = { default: "kursor", pointer: "kursor-pointer", disabled: "kursor-disabled", text: "kursor-text" };
+  const hotspots = { default: "12 12", pointer: "6 2", disabled: "12 12", text: "12 12" };
+  Object.entries(files).forEach(([name, file]) => {
+    document.documentElement.style.setProperty(`--cursor-${name}`, `url("/img/asseti/${file}${suffix}.svg") ${hotspots[name]}, url("/img/asseti/cursor.png") 10 10, auto`);
+  });
+})();
+
 const elements = {
   list: document.querySelector("#tankList"),
   details: document.querySelector("#tankDetails"),
@@ -318,6 +338,7 @@ function parseTanks(csvText) {
         researchSilverPrice: toInt(cells[13]),
         className: String(cells[14] || "-").trim().toUpperCase(),
         health: toInt(cells[15]),
+        mass: toNumber(cells[35]),
         reloadTime: toNumber(cells[16]),
         hullTurnDelay: toNumber(cells[17]),
         movementDelay: toNumber(cells[18]),
@@ -529,6 +550,7 @@ function renderDetails(tank) {
     createStat("Пробитие", formatNumber(firstShell.penetration)),
     createStat("Перезарядка", `${formatNumber(tank.reloadTime, 1)} с`),
     createStat("Скорость", `${formatNumber(getMoveSpeed(tank))} ед/с`),
+    createStat("Масса", `${formatNumber(tank.mass, 1)} т`),
     createStat("Поворот корпуса", `${formatNumber(getTurnSpeed(tank))} град/с`),
     createStat("Задержка движения", formatNumber(tank.movementDelay, 3)),
     createStat("Задержка поворота", formatNumber(tank.hullTurnDelay, 3)),

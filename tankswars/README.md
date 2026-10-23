@@ -1,5 +1,15 @@
 # Tanks Wars
 
+## Изменения `1.1.1.2v48`
+
+- Добавлен полный набор обычных и зимних SVG-курсоров: указатель, заблокированное действие, запрет, текстовый ввод, `grab`, `grabbing`, ожидание и перемещение.
+- Основной курсор автоматически выбирает обычный или зимний комплект по сезону.
+- Курсоры подключены к кнопкам, ссылкам, полям ввода, недоступным элементам и специальным CSS-состояниям; единое правило больше не скрывает эти состояния.
+
+Затронутые файлы: `README.md`, `css/styles.css`, `css/tankopedia.css`, `js/00-state.js`, `js/tankopedia-site.js`, `index.html`, `tankopedia.html`, `img/asseti/kursor-pointer.svg`, `img/asseti/kursor-pointer-NE.svg`, `img/asseti/kursor-disabled.svg`, `img/asseti/kursor-disabled-NE.svg`, `img/asseti/kursor-not-allowed.svg`, `img/asseti/kursor-not-allowed-NE.svg`, `img/asseti/kursor-text.svg`, `img/asseti/kursor-text-NE.svg`, `img/asseti/kursor-grab.svg`, `img/asseti/kursor-grab-NE.svg`, `img/asseti/kursor-grabbing.svg`, `img/asseti/kursor-grabbing-NE.svg`, `img/asseti/kursor-wait.svg`, `img/asseti/kursor-wait-NE.svg`, `img/asseti/kursor-move.svg`, `img/asseti/kursor-move-NE.svg`.
+
+Проверки: `node --check js/00-state.js`, `git diff --check`; новые SVG-файлы проверены через `localhost:8001` с успешной отдачей ресурсов.
+
 ## Изменения `1.1.1.2v47`
 
 - Увеличен размер SVG-курсоров до `24×24` пикселей.
