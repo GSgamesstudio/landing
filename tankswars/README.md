@@ -1,5 +1,14 @@
 # Tanks Wars
 
+## Изменения `1.1.1.2v50`
+
+- Добавлено сохранение последнего выбранного танка в `localStorage` по стабильному `id`.
+- При следующем запуске выбранный танк восстанавливается после загрузки `data.csv`; если он недоступен, выбирается первый доступный танк.
+
+Затронутые файлы: `README.md`, `js/00-state.js`, `js/02-hangar-tech-tree.js`, `js/08-startup.js`, `index.html`.
+
+Проверки: `node --check js/00-state.js`, `node --check js/02-hangar-tech-tree.js`, `node --check js/08-startup.js`, `git diff --check`.
+
 ## Изменения `1.1.1.2v49`
 
 - Убран неудачный курсор-стрелка `kursor-pointer.svg` из активного интерфейса.

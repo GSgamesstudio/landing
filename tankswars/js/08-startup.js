@@ -604,7 +604,8 @@
       loadedTanks = await loadTankRows();
       loadTankBarFilters();
       const availableTanks = loadedTanks.filter((tank) => tank.state === 2 && tankIsAvailableInCurrentMode(tank));
-      selectedTank = availableTanks[0] || fallbackTanks[0];
+      selectedTank = getSavedSelectedTank(availableTanks) || availableTanks[0] || fallbackTanks[0];
+      saveSelectedTank(selectedTank);
       renderHangarTankStats(selectedTank);
       setTankImage(hangarTank, selectedTank.name);
       renderTopBar();

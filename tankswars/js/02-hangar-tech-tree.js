@@ -443,6 +443,7 @@
         createHangarTankStat("Пробитие", formatStoredNumber(bestPenetration)),
         createHangarTankStat("Перезарядка", `${reload.toFixed(1)} с`),
         createHangarTankStat("Скорость", `${Math.round(speed)} ед/с`),
+        createHangarTankStat("Масса", `${tank.mass || 0} т`),
         createHangarTankStat("Броня", formatStoredNumber(tank.averageArmor || 0)),
         createHangarTankStat("Боекомплект", `${formatStoredNumber(ammoTotal)} / ${formatStoredNumber(getTankAmmoCapacity(tank))}`),
         createHangarTankStat("Роль", roleInfo.title)
@@ -462,6 +463,7 @@
 
     function selectTank(tank) {
       selectedTank = tank;
+      saveSelectedTank(tank);
       renderHangarTankStats(tank);
       setTankImage(hangarTank, tank.name);
       setTankImageScale(hangarTank, tank);

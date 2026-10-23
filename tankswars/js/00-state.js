@@ -251,6 +251,7 @@
       { file: "events.png", label: "\u0421\u043e\u0431\u044b\u0442\u0438\u044f", screen: "events" }
     ];
     let selectedTank = null;
+    const selectedTankStorageKey = "tanksWarsSelectedTankId";
     let loadedTanks = [];
     let tankFiltersOpen = false;
     const tankBarFilters = {
@@ -263,6 +264,25 @@
     let developerTankId = 1;
     let selectedBattleMode = battleModes[0];
     let selectedTrainingMapPresetId = null;
+
+    function saveSelectedTank(tank) {
+      if (!tank || tank.id === undefined || tank.id === null) return;
+      try {
+        localStorage.setItem(selectedTankStorageKey, String(tank.id));
+      } catch (error) {
+        console.warn("Не удалось сохранить выбранный танк.", error);
+      }
+    }
+
+    function getSavedSelectedTank(tanks) {
+      try {
+        const storedId = localStorage.getItem(selectedTankStorageKey);
+        return tanks.find((tank) => String(tank.id) === storedId) || null;
+      } catch (error) {
+        console.warn("Не удалось загрузить сохранённый танк.", error);
+        return null;
+      }
+    }
     let selectedTechTreeNation = "СССР";
     let gameSettings = { ...defaultGameSettings };
     let mobileControlsMode = "auto";
