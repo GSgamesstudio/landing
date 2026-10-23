@@ -1,17 +1,7 @@
 (() => {
   const winter = new Date().getMonth() === 11 || new Date().getMonth() <= 1;
   const suffix = winter ? "-NE" : "";
-  const files = { default: "kursor", pointer: "kursor-pointer", disabled: "kursor-disabled", text: "kursor-text" };
-  const hotspots = { default: "12 12", pointer: "6 2", disabled: "12 12", text: "12 12" };
-  Object.entries(files).forEach(([name, file]) => {
-    document.documentElement.style.setProperty(`--cursor-${name}`, `url("/img/asseti/${file}${suffix}.svg") ${hotspots[name]}, url("/img/asseti/cursor.png") 10 10, auto`);
-  });
-})();
-
-(() => {
-  const winter = new Date().getMonth() === 11 || new Date().getMonth() <= 1;
-  const suffix = winter ? "-NE" : "";
-  const files = { default: "kursor", pointer: "kursor-pointer", disabled: "kursor-disabled", text: "kursor-text" };
+  const files = { default: "kursor", pointer: "kursor", disabled: "kursor-disabled", text: "kursor-text" };
   const hotspots = { default: "12 12", pointer: "6 2", disabled: "12 12", text: "12 12" };
   Object.entries(files).forEach(([name, file]) => {
     document.documentElement.style.setProperty(`--cursor-${name}`, `url("/img/asseti/${file}${suffix}.svg") ${hotspots[name]}, url("/img/asseti/cursor.png") 10 10, auto`);

@@ -12,7 +12,7 @@
       --nation-tab-count: 15;
       --nation-tab-width: calc(100vw / var(--nation-tab-count));
       --cursor-default: url("/img/asseti/kursor.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
-      --cursor-pointer: url("/img/asseti/kursor-pointer.svg") 6 2, url("/img/asseti/cursor.png") 10 10, auto;
+      --cursor-pointer: var(--cursor-default);
       --cursor-disabled: url("/img/asseti/kursor-disabled.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
       --cursor-not-allowed: url("/img/asseti/kursor-not-allowed.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
       --cursor-text: url("/img/asseti/kursor-text.svg") 12 12, url("/img/asseti/cursor.png") 10 10, text;

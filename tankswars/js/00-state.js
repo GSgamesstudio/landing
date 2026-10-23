@@ -24,7 +24,7 @@
       const suffix = winter ? "-NE" : "";
       const cursorFiles = {
         default: `kursor${suffix}.svg`,
-        pointer: `kursor-pointer${suffix}.svg`,
+        pointer: `kursor${suffix}.svg`,
         disabled: `kursor-disabled${suffix}.svg`,
         notAllowed: `kursor-not-allowed${suffix}.svg`,
         text: `kursor-text${suffix}.svg`,
