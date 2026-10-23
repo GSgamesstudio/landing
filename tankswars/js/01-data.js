@@ -365,15 +365,23 @@
     function createDefaultTankAmmo(tank) {
       const shellCount = Math.max(1, Array.isArray(tank?.shells) ? tank.shells.length : 1);
       const capacity = getTankAmmoCapacity(tank);
-      const baseCount = Math.floor(capacity / shellCount);
-      let remainder = capacity % shellCount;
+      const weights = Array.from({ length: shellCount }, (_, index) => [5, 2, 1][index] || 1);
+      const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+      const exact = weights.map((weight) => capacity * weight / totalWeight);
+      const ammo = exact.map((value) => Math.floor(value));
+      let remainder = capacity - ammo.reduce((sum, count) => sum + count, 0);
 
-      return Array.from({ length: shellCount }, () => {
-        const value = baseCount + (remainder > 0 ? 1 : 0);
+      exact
+        .map((value, index) => ({ index, fraction: value - Math.floor(value) }))
+        .sort((first, second) => second.fraction - first.fraction)
+        .forEach(({ index }) => {
+          if (remainder > 0) {
+            ammo[index] += 1;
+            remainder -= 1;
+          }
+        });
 
-        remainder = Math.max(0, remainder - 1);
-        return value;
-      });
+      return ammo;
     }
 
     function normalizeTankAmmo(tank, value, fallback = null) {
@@ -647,6 +655,7 @@
             containerEligible: techTreeFlagValue === 2,
             premium: techTreeFlagValue === 2,
             health: normalizeNumber(cells[15] || 0),
+            mass: normalizePositiveFloat(cells[35] || 0),
             reloadTime: normalizePositiveFloat(cells[16] || 0),
             hullTurnDelay: normalizePositiveFloat(cells[17] || 0),
             movementDelay: normalizePositiveFloat(cells[18] || 0),

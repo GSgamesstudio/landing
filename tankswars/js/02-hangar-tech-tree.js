@@ -936,6 +936,7 @@
 
         playerResources.silver -= price;
         targetTank.state = 2;
+        loadTankAmmo(targetTank);
         savePlayerResources();
         saveTankState(targetTank);
         selectTank(targetTank);

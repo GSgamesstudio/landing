@@ -87,6 +87,11 @@
       return date >= start && date <= end;
     }
 
+    function oiExperimentalEventHasEnded(date = new Date()) {
+      const end = new Date(oiExperimentalEvent.endYear, oiExperimentalEvent.endMonth, oiExperimentalEvent.endDay, 23, 59, 59, 999);
+      return date > end;
+    }
+
     function oiExperimentalEventModeIsEligible(mode = selectedBattleMode) {
       return Boolean(mode && oiExperimentalEvent.modeIds.includes(mode.id));
     }
@@ -982,6 +987,8 @@
       const progressTrack = document.createElement("div");
       const progressFill = document.createElement("div");
       const progressText = document.createElement("div");
+      const stageSummary = document.createElement("div");
+      const offers = document.createElement("div");
       const button = document.createElement("button");
       const state = getOiExperimentalEventState();
       const completed = getOiExperimentalCompletedStageCount(state);
@@ -995,6 +1002,8 @@
       progressTrack.className = "oiEventProgressTrack";
       progressFill.className = "oiEventProgressFill";
       progressText.className = "oiEventProgressText";
+      stageSummary.className = "oiEventStageSummary";
+      offers.className = "oiEventOffers";
       button.className = "oiEventPrimaryButton";
       button.type = "button";
       eyebrow.textContent = "Ограниченное событие · 15 декабря–5 января";
@@ -1002,10 +1011,23 @@
       text.textContent = oiExperimentalEvent.subtitle;
       progressFill.style.width = `${completed / oiExperimentalEvent.stages.length * 100}%`;
       progressText.textContent = `${completed} / ${oiExperimentalEvent.stages.length} этапов · Награда: ${oiExperimentalEvent.rewardTankName}`;
+      oiExperimentalEvent.stages.forEach((stage, index) => {
+        const stageItem = document.createElement("article");
+        const stageTitle = document.createElement("strong");
+        const stageTask = document.createElement("span");
+        const stageReward = document.createElement("small");
+        stageItem.className = `oiEventStageSummaryItem ${state.claimedStageIds.includes(stage.id) ? "claimed" : ""}`.trim();
+        stageTitle.textContent = `Этап ${index + 1} · ${stage.title}`;
+        stageTask.textContent = stage.description;
+        stageReward.textContent = `Награда: ${stage.rewardTankName || stage.rewardText || "ресурсы"}`;
+        stageItem.append(stageTitle, stageTask, stageReward);
+        stageSummary.append(stageItem);
+      });
+      offers.textContent = "В магазине: зимний контейнер Будапешта — 1 000 золота, шанс БЗ-155; Nexor — 25 000 золота до 5 января.";
       button.textContent = state.rewardClaimed ? "Открыть завершённое событие" : active ? "Открыть событие" : "Подробнее о событии";
       button.addEventListener("click", openOiExperimentalEventDetails);
       progressTrack.append(progressFill);
-      content.append(eyebrow, title, text, progressTrack, progressText, button);
+      content.append(eyebrow, title, text, progressTrack, progressText, stageSummary, offers, button);
       panel.append(content);
       return panel;
     }
@@ -1163,7 +1185,15 @@
 
       overlayContent.textContent = "";
       screen.className = "dailyScreen";
-      screen.append(createOiExperimentalEventCard(), createVictoryDayEventPanel(), createDailyRewardPanel(), createDailyTaskPanel(), createBattlePassPanel(), createContractsPanel());
+      const panels = [];
+      if (!oiExperimentalEventHasEnded()) {
+        panels.push(createOiExperimentalEventCard());
+      }
+      if (victoryDayEventIsActive()) {
+        panels.push(createVictoryDayEventPanel());
+      }
+      panels.push(createDailyRewardPanel(), createDailyTaskPanel(), createBattlePassPanel(), createContractsPanel());
+      screen.append(...panels);
       overlayContent.append(screen);
     }
 
@@ -1173,6 +1203,16 @@
 
     function getStoreContainerDefinitions() {
       const definitions = [
+        {
+          id: "gift",
+          name: giftContainerName,
+          price: giftContainerGoldPrice,
+          tankDropChance: giftContainerTankDropChance,
+          bonusTankDropChance: giftContainerPremiumDropChance,
+          tankPool: loadedTanks.filter((tank) => tank.name === "БЗ-155" && !tank.developerOnly),
+          bonusTankPool: getPremiumStoreTanks(),
+          resourceRewardTypes: ["gold", "silver", "blueprints"]
+        },
         {
           id: "all",
           name: containerName,
@@ -1255,6 +1295,7 @@
 
       playerResources[currency] -= price;
       tank.state = 2;
+      loadTankAmmo(tank);
       selectedTank = tank;
       savePlayerResources();
       saveTankState(tank);
@@ -1581,6 +1622,7 @@
       }
 
       const tankPool = containerDefinition.tankPool;
+      const bonusTankPool = containerDefinition.bonusTankPool || [];
       const rewards = [];
       let reward = null;
 
@@ -1592,12 +1634,15 @@
       const openingOverlay = showContainerOpeningScene();
 
       for (let index = 0; index < containerCount; index += 1) {
-        if (tankPool.length > 0 && Math.random() < containerDefinition.tankDropChance) {
-          const tank = pickRandomItem(tankPool);
+        const bonusTankDrop = bonusTankPool.length > 0 && Math.random() < (containerDefinition.bonusTankDropChance || 0);
+        const regularTankDrop = tankPool.length > 0 && Math.random() < (containerDefinition.tankDropChance || 0);
+        if (bonusTankDrop || regularTankDrop) {
+          const tank = pickRandomItem(bonusTankDrop ? bonusTankPool : tankPool);
           const wasOwned = tank.state === 2;
           const compensation = wasOwned ? getContainerDuplicateCompensation(containerDefinition) : null;
 
           tank.state = 2;
+          loadTankAmmo(tank);
           saveTankState(tank);
           selectedTank = tank;
           if (compensation) {
@@ -1783,6 +1828,7 @@
       const text = document.createElement("div");
       const actions = document.createElement("div");
       const button = document.createElement("button");
+      const giftImage = document.createElement("img");
 
       panel.className = "storePanel storeContainerCard";
       title.className = "storeTitle";
@@ -1790,15 +1836,26 @@
       actions.className = "storeContainerActions";
       button.className = "storeActionButton";
       button.type = "button";
+      giftImage.className = "storeGiftImage";
+      giftImage.src = "./img/asseti/podarok.png";
+      giftImage.alt = "Контейнер Подарок";
       title.textContent = containerDefinition.name;
       const rewardTypes = getContainerResourceRewardTypes(containerDefinition).map((type) => getResourceRewardTitle(type).toLowerCase()).join(" и ");
       const dropChance = (containerDefinition.tankDropChance * 100).toLocaleString("ru-RU", {
         minimumFractionDigits: Number.isInteger(containerDefinition.tankDropChance * 100) ? 0 : 3,
         maximumFractionDigits: 3
       });
+      const bonusTankDropChance = containerDefinition.bonusTankDropChance || 0;
+      const bonusDropChance = (bonusTankDropChance * 100).toLocaleString("ru-RU", {
+        minimumFractionDigits: Number.isInteger(bonusTankDropChance * 100) ? 0 : 3,
+        maximumFractionDigits: 3
+      });
       const duplicateCompensation = getContainerDuplicateCompensation(containerDefinition);
 
-      text.textContent = `Цена: ${formatStoredNumber(containerDefinition.price)} золота.${containerDefinition.bundleCount ? ` Набор из ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота.` : ""} Награды: ${containerPrizeCount} приза из ${rewardTypes}. Шанс получить один из танков контейнера: ${dropChance}%. При повторном выпадении танка начисляется ${formatStoredNumber(duplicateCompensation.amount)} ${getResourceRewardUnit(duplicateCompensation.type)}.`;
+      const tankChanceText = containerDefinition.bonusTankPool
+        ? `БЗ-155 — ${dropChance}%, премиум-танк — ${bonusDropChance}%.`
+        : `Шанс получить один из танков контейнера: ${dropChance}%.`;
+      text.textContent = `Цена: ${formatStoredNumber(containerDefinition.price)} золота.${containerDefinition.bundleCount ? ` Набор из ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота.` : ""} Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${tankChanceText} При повторном выпадении танка начисляется ${formatStoredNumber(duplicateCompensation.amount)} ${getResourceRewardUnit(duplicateCompensation.type)}.`;
       button.textContent = `Открыть: ${formatStoredNumber(containerDefinition.price)} золота`;
       button.dataset.defaultLabel = button.textContent;
       button.disabled = playerResources.gold < containerDefinition.price;
@@ -1817,7 +1874,59 @@
         actions.append(bundleButton);
       }
 
+      if (containerDefinition.id === "gift") {
+        panel.classList.add("giftContainerCard");
+        panel.append(giftImage);
+      }
       panel.append(title, text, actions);
+      return panel;
+    }
+
+    function buyNexorBundle(button, tank) {
+      if (!tank || tank.state === 2) {
+        return;
+      }
+      if (playerResources.gold < nexorBundleGoldPrice) {
+        button.textContent = "Не хватает золота";
+        window.setTimeout(rerenderStoreScreen, 900);
+        return;
+      }
+
+      playerResources.gold -= nexorBundleGoldPrice;
+      playerResources.blueprints += nexorBundleBlueprints;
+      playerResources.silver += nexorBundleSilver;
+      tank.state = 2;
+      loadTankAmmo(tank);
+      selectedTank = tank;
+      savePlayerResources();
+      saveTankState(tank);
+      rerenderStoreScreen();
+      showGameNotification(`${nexorBundleName}: Nexor получен`, "success");
+    }
+
+    function createNexorBundlePanel() {
+      const panel = document.createElement("section");
+      const title = document.createElement("div");
+      const text = document.createElement("div");
+      const button = document.createElement("button");
+      const image = document.createElement("img");
+      const tank = loadedTanks.find((item) => item.name === "Nexor");
+      const owned = !tank || tank.state === 2;
+
+      panel.className = "storePanel storeContainerCard nexorBundlePanel";
+      title.className = "storeTitle";
+      text.className = "storeText";
+      button.className = "storeActionButton";
+      button.type = "button";
+      image.className = "nexorBundleImage";
+      image.src = "./img/tanki/Nexor.png";
+      image.alt = "Nexor";
+      title.textContent = nexorBundleName;
+      text.textContent = `Nexor + ${formatStoredNumber(nexorBundleBlueprints)} чертежей + ${formatStoredNumber(nexorBundleSilver)} серебра. Одноразовый комплект.`;
+      button.textContent = owned ? "Nexor уже в ангаре" : `Купить комплект: ${formatStoredNumber(nexorBundleGoldPrice)} золота`;
+      button.disabled = owned || playerResources.gold < nexorBundleGoldPrice;
+      button.addEventListener("click", () => buyNexorBundle(button, tank));
+      panel.append(image, title, text, button);
       return panel;
     }
 
@@ -1857,7 +1966,7 @@
       });
       containerSection.append(containerSectionTitle, containerList);
       adPanel.append(adTitle, adText, adButton);
-      screen.append(containerSection, adPanel, premiumPanel);
+      screen.append(containerSection, createNexorBundlePanel(), adPanel, premiumPanel);
       overlayContent.append(screen);
     }
 

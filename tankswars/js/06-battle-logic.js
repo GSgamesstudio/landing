@@ -1037,12 +1037,13 @@
         ...shell,
         ammoIndex: index
       }));
+      const configuredAmmo = isBot ? null : normalizeTankAmmo(tank, loadTankAmmo(tank));
       const shellAmmo = isBot
         ? shells.map(() => 9999)
         : battleShouldSpendPlayerAmmo()
-          ? normalizeTankAmmo(tank, loadTankAmmo(tank))
+          ? [...configuredAmmo]
           : createDefaultTankAmmo(tank);
-      const shellAmmoRefillTarget = isBot ? null : [...shellAmmo];
+      const shellAmmoRefillTarget = isBot ? null : [...configuredAmmo];
 
       return {
         tank,
@@ -1055,6 +1056,7 @@
         collisionHeight: 48 * getTankSizeScale(tank),
         sizeScale: getTankSizeScale(tank),
         speed: getTankMoveSpeed(tank, isBot),
+        mass: normalizePositiveFloat(tank.mass || 0) || 30,
         turnSpeed: getTankTurnSpeed(tank, isBot),
         currentSpeed: 0,
         waterRockAmount: 0,
@@ -1498,6 +1500,37 @@
       return false;
     }
 
+    function applyRamDamage(mover, target) {
+      if (!tankIsAlive(mover) || !tankIsAlive(target) || mover.team === target.team) return;
+
+      const directionX = target.x - mover.x;
+      const directionY = target.y - mover.y;
+      const distance = Math.hypot(directionX, directionY);
+      if (distance < 1) return;
+
+      const normalX = directionX / distance;
+      const normalY = directionY / distance;
+      const moverSpeed = mover.currentSpeed * getTerrainSpeedMultiplier(mover);
+      const targetSpeed = target.currentSpeed * getTerrainSpeedMultiplier(target);
+      const closingSpeed = Math.min(400,
+        (Math.cos(mover.angle) * moverSpeed - Math.cos(target.angle) * targetSpeed) * normalX
+        + (Math.sin(mover.angle) * moverSpeed - Math.sin(target.angle) * targetSpeed) * normalY);
+      if (closingSpeed < 25) return;
+
+      const now = performance.now();
+      if (now - (mover.lastRamAt || -Infinity) < 700 || now - (target.lastRamAt || -Infinity) < 700) return;
+      mover.lastRamAt = now;
+      target.lastRamAt = now;
+
+      const moverMass = Math.max(3, mover.mass || 30);
+      const targetMass = Math.max(3, target.mass || 30);
+      const impact = (moverMass + targetMass) / 2 * (closingSpeed ** 2 - 25 ** 2) / 6500;
+      const targetDamage = Math.min(target.maxHealth * 0.35, Math.round(impact * 2 * moverMass / (moverMass + targetMass)));
+      const moverDamage = Math.min(mover.maxHealth * 0.35, Math.round(impact * 2 * targetMass / (moverMass + targetMass)));
+      if (targetDamage > 0) damageTank(target, targetDamage);
+      if (moverDamage > 0) damageTank(mover, moverDamage);
+    }
+
     function moveTank(tank, distance) {
       if (tankMobilityIsBroken(tank)) {
         tank.currentSpeed = 0;
@@ -1512,6 +1545,11 @@
       tank.y += Math.sin(tank.angle) * distance * terrainMultiplier;
 
       if (tankCollides(tank)) {
+        const collisionRect = getTankCollisionRect(tank);
+        const ramTarget = getAllBattleTanks().find((other) => other !== tank
+          && tankIsAlive(other)
+          && rotatedRectsIntersect(collisionRect, getTankCollisionRect(other)));
+        if (ramTarget) applyRamDamage(tank, ramTarget);
         tank.x = previousX;
         tank.y = previousY;
         return false;
