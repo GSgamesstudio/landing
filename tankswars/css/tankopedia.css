@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  cursor: url("/img/asseti/cursor.png") 10 10, auto !important;
 }
 
 :root {

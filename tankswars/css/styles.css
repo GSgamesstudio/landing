@@ -21,14 +21,14 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
       background: #111;
-      cursor: var(--game-cursor, url("../img/asseti/cursor.png") 16 16, auto);
+      cursor: var(--game-cursor, url("/img/asseti/cursor.png") 10 10, auto);
       -webkit-touch-callout: none;
       touch-action: manipulation;
     }
 
     body,
     body * {
-      cursor: var(--game-cursor, url("../img/asseti/cursor.png") 16 16, auto) !important;
+      cursor: var(--game-cursor, url("/img/asseti/cursor.png") 10 10, auto) !important;
     }
 
     img,
