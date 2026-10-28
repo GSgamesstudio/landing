@@ -474,16 +474,22 @@
     function setTankImage(image, tankName) {
       delete image.dataset.fallbackLoaded;
       image.alt = tankName;
-      image.src = `./img/tanki/${tankName}.png`;
+      const sources = [
+        `./img/tanki/${tankName}.svg`,
+        `./img/tanki/${tankName}.png`,
+        `./${tankName}.svg`,
+        `./${tankName}.png`
+      ];
+      let sourceIndex = 0;
       image.onerror = () => {
-        if (image.dataset.fallbackLoaded) {
+        sourceIndex += 1;
+        if (sourceIndex >= sources.length) {
           image.removeAttribute("src");
           return;
         }
-
-        image.dataset.fallbackLoaded = "true";
-        image.src = `./${tankName}.png`;
+        image.src = sources[sourceIndex];
       };
+      image.src = sources[sourceIndex];
     }
 
     function setTankImageScale(image, tank) {

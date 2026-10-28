@@ -1095,8 +1095,8 @@
           timer: 0,
           damagePerSecond: 0
         },
-        bodyImage: getBattleImage(`./img/korpus/${tank.name}.png`),
-        turretImage: hasTurret ? getBattleImage(`./img/bashnya/${tank.name}.png`) : null,
+        bodyImage: getBattleImage(`./img/korpus/${tank.name}.svg`, `./img/korpus/${tank.name}.png`),
+        turretImage: hasTurret ? getBattleImage(`./img/bashnya/${tank.name}.svg`, `./img/bashnya/${tank.name}.png`) : null,
         botTurnTimer: 0,
         botThinkTimer: 0,
         botTarget: null,

@@ -1791,7 +1791,7 @@
       const image = new Image();
       image.onload = () => {
         state.vector.image = String(reader.result || "");
-        state.vector.imageName = file.name || "image.png";
+        state.vector.imageName = file.name || "image.svg";
         state.vector.imageWidth = image.naturalWidth || 1200;
         state.vector.imageHeight = image.naturalHeight || 800;
         updateVectorStorage();

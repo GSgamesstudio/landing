@@ -372,8 +372,10 @@ function setImageFallback(image, paths) {
 
 function setTankImage(image, tankName) {
   setImageFallback(image, [
+    `./img/tanki/${tankName}.svg`,
     `./img/tanki/${tankName}.png`,
     `./img/танки/${tankName}.png`,
+    `./img/korpus/${tankName}.svg`,
     `./img/korpus/${tankName}.png`
   ]);
 }

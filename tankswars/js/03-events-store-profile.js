@@ -1920,6 +1920,10 @@
       button.type = "button";
       image.className = "nexorBundleImage";
       image.src = "./img/tanki/Nexor.png";
+      image.onerror = () => {
+        image.onerror = null;
+        image.src = "./img/tanki/Nexor.svg";
+      };
       image.alt = "Nexor";
       title.textContent = nexorBundleName;
       text.textContent = `Nexor + ${formatStoredNumber(nexorBundleBlueprints)} чертежей + ${formatStoredNumber(nexorBundleSilver)} серебра. Одноразовый комплект.`;
