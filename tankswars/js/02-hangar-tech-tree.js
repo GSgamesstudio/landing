@@ -690,24 +690,58 @@
     }
 
     function createTankFilterSelect(label, value, options, onChange) {
-      const wrapper = document.createElement("label");
+      const wrapper = document.createElement("div");
       const title = document.createElement("span");
-      const select = document.createElement("select");
+      const control = document.createElement("div");
+      const trigger = document.createElement("button");
+      const menu = document.createElement("div");
 
       wrapper.className = "tankFilterField";
       title.textContent = label;
+      control.className = "customTankSelect";
+      trigger.type = "button";
+      trigger.className = "customTankSelectTrigger";
+      trigger.setAttribute("aria-haspopup", "listbox");
+      trigger.setAttribute("aria-expanded", "false");
+      menu.className = "customTankSelectMenu";
+      menu.setAttribute("role", "listbox");
 
       options.forEach((option) => {
-        const element = document.createElement("option");
+        const element = document.createElement("button");
 
+        element.type = "button";
+        element.className = "customTankSelectOption";
+        element.setAttribute("role", "option");
         element.value = option.value;
         element.textContent = option.label;
-        select.append(element);
+        element.setAttribute("aria-selected", String(option.value === value));
+        element.addEventListener("click", () => {
+          control.classList.remove("open");
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.textContent = option.label;
+          menu.querySelectorAll(".customTankSelectOption").forEach((item) => {
+            item.setAttribute("aria-selected", String(item.value === option.value));
+          });
+          onChange(option.value);
+        });
+        menu.append(element);
       });
 
-      select.value = value;
-      select.addEventListener("change", () => onChange(select.value));
-      wrapper.append(title, select);
+      const selected = options.find((option) => option.value === value) || options[0];
+      trigger.textContent = selected.label;
+      trigger.addEventListener("click", () => {
+        const shouldOpen = !control.classList.contains("open");
+
+        wrapper.parentElement?.querySelectorAll(".customTankSelect.open").forEach((item) => {
+          item.classList.remove("open");
+          item.querySelector(".customTankSelectTrigger")?.setAttribute("aria-expanded", "false");
+        });
+        control.classList.toggle("open", shouldOpen);
+        trigger.setAttribute("aria-expanded", String(shouldOpen));
+      });
+
+      control.append(trigger, menu);
+      wrapper.append(title, control);
       return wrapper;
     }
 

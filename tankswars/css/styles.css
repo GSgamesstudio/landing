@@ -2638,14 +2638,94 @@
       font-weight: 700;
     }
 
-    .tankFilterField select {
+    .customTankSelect {
+      position: relative;
+      min-width: 0;
+    }
+
+    .customTankSelectTrigger {
       min-width: 0;
       height: 32px;
+      width: 100%;
       border: 3px solid #000;
       background: #211f19;
       color: #f3d248;
       font: inherit;
+      font-weight: 700;
+      text-align: left;
       outline: none;
+    }
+
+    .customTankSelectTrigger::after {
+      content: "▾";
+      float: right;
+      color: #d8f33e;
+    }
+
+    .customTankSelect.open .customTankSelectTrigger::after {
+      content: "▴";
+    }
+
+    .customTankSelectMenu {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 3px);
+      max-height: min(240px, 40vh);
+      padding: 4px;
+      border: 3px solid #000;
+      background: #211f19;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.55);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-color: #d8f33e #111;
+      scrollbar-width: thin;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+      z-index: 2;
+    }
+
+    .customTankSelect.open .customTankSelectMenu {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .customTankSelectMenu::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .customTankSelectMenu::-webkit-scrollbar-track {
+      background: #111;
+    }
+
+    .customTankSelectMenu::-webkit-scrollbar-thumb {
+      border: 2px solid #111;
+      border-radius: 6px;
+      background: #d8f33e;
+    }
+
+    .customTankSelectOption {
+      display: block;
+      width: 100%;
+      min-height: 30px;
+      padding: 4px 7px;
+      border: 0;
+      background: transparent;
+      color: #f3d248;
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .customTankSelectOption:hover,
+    .customTankSelectOption[aria-selected="true"] {
+      background: #4a472d;
+      color: #d8f33e;
     }
 
     .tankFilterReset {
