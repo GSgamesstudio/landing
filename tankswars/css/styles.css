@@ -5,6 +5,30 @@
       -webkit-user-drag: none;
     }
 
+    * {
+      scrollbar-color: #d8f33e #111;
+      scrollbar-width: thin;
+    }
+
+    *::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: #111;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      border: 2px solid #111;
+      border-radius: 6px;
+      background: #d8f33e;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: #f3d248;
+    }
+
     :root {
       --top-bar-height: 15vh;
       --left-panel-width: min(clamp(108px, 10vw, 156px), calc((100vh - var(--top-bar-height)) / 7));
