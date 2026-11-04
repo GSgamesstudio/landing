@@ -2003,6 +2003,44 @@
       return bestTarget;
     }
 
+    function getNearestEnemyTarget(bot) {
+      return getEnemyTanksFor(bot)
+        .filter(tankIsAlive)
+        .sort((first, second) => getDistanceBetween(bot, first) - getDistanceBetween(bot, second))[0] || null;
+    }
+
+    function updateBotGunAim(bot, target, delta, mobilityBroken) {
+      if (!tankIsAlive(target)) {
+        bot.turretAngle = bot.angle;
+        return;
+      }
+
+      const targetAngle = Math.atan2(target.y - bot.y, target.x - bot.x);
+
+      if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
+        if (bot.turretTraverseRadians > 0 && !mobilityBroken) {
+          const hullAimAngle = getLimitedTurretHullAngle(bot, targetAngle);
+          bot.angle = rotateAngleToward(
+            bot.angle,
+            hullAimAngle,
+            bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta
+          );
+        }
+        bot.turretAngle = rotateAngleToward(
+          bot.turretAngle,
+          limitTurretAngle(bot, targetAngle),
+          bot.turretTurnSpeed * delta
+        );
+      } else if (!mobilityBroken && ["ПТ", "ПТ-САУ", "САУ"].includes(getTankClassKey(bot))) {
+        bot.angle = rotateAngleToward(bot.angle, targetAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
+        bot.turretAngle = bot.angle;
+      } else if (!tankModuleIsBroken(bot, "turret")) {
+        bot.turretAngle = bot.angle;
+      }
+
+      fireBotShell(bot, target);
+    }
+
     function getHealthRatio(tank) {
       return tank.maxHealth > 0 ? tank.health / tank.maxHealth : 1;
     }
@@ -2551,11 +2589,12 @@
         && siegeTargetDistance >= 220 && siegeTargetDistance <= 650 && canTankSeeTank(bot, bot.botTarget));
       setTankSiegeMode(bot, siegeHoldPosition);
       const driveTarget = siegeHoldPosition ? bot : getBotDriveTarget(bot);
-      const className = getTankClassKey(bot);
       const wheeled = tankIsWheeled(bot);
       const personality = getBotPersonality(bot);
       const mobilityBroken = tankMobilityIsBroken(bot);
       let attemptedDrive = false;
+
+      updateBotGunAim(bot, bot.botTarget || getNearestEnemyTarget(bot), delta, mobilityBroken);
 
       if (driveTarget) {
         const navigationTarget = getBotNavigationPoint(bot, driveTarget, delta);
@@ -2576,34 +2615,7 @@
         }
 
         bot.botTarget = getMostDangerousTarget(bot);
-
-        if (bot.botTarget) {
-          const turretAngle = Math.atan2(bot.botTarget.y - bot.y, bot.botTarget.x - bot.x);
-
-          if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
-            if (bot.turretTraverseRadians > 0 && !mobilityBroken) {
-              const hullAimAngle = getLimitedTurretHullAngle(bot, turretAngle);
-              bot.angle = rotateAngleToward(
-                bot.angle,
-                hullAimAngle,
-                bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta
-              );
-            }
-            bot.turretAngle = rotateAngleToward(
-              bot.turretAngle,
-              limitTurretAngle(bot, turretAngle),
-              bot.turretTurnSpeed * delta
-            );
-          } else if (!mobilityBroken && (className === "\u041f\u0422" || className === "\u041f\u0422-\u0421\u0410\u0423" || tankIsArtillery(bot))) {
-            bot.angle = rotateAngleToward(bot.angle, turretAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
-            bot.turretAngle = bot.angle;
-          } else if (!tankModuleIsBroken(bot, "turret")) {
-            bot.turretAngle = bot.angle;
-          }
-          fireBotShell(bot, bot.botTarget);
-        } else {
-          bot.turretAngle = bot.angle;
-        }
+        updateBotGunAim(bot, bot.botTarget || getNearestEnemyTarget(bot), delta, mobilityBroken);
 
         const angleError = Math.abs(normalizeAngle(desiredAngle - bot.angle));
         const canDrive = angleError < Math.PI * 0.55;
@@ -2646,7 +2658,7 @@
         } else {
           moveTrackedTank(bot, 0, delta);
         }
-        bot.turretAngle = bot.angle;
+        updateBotGunAim(bot, bot.botTarget || getNearestEnemyTarget(bot), delta, mobilityBroken);
       }
 
       updateTankStuckRecovery(bot, attemptedDrive, delta);
