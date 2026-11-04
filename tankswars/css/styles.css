@@ -3030,7 +3030,7 @@
   font-weight: 1000;
   line-height: 1;
 }
-.tankCard > .tankMasteryBadge { position: absolute; right: 7px; top: 7px; margin: 0; }
+.tankCard > .tankMasteryBadge { position: absolute; right: 7px; top: 7px; z-index: 10; margin: 0; pointer-events: none; }
 .tankMasteryBadge.second { background: linear-gradient(145deg, #8b9398, #343a3e); }
 .tankMasteryBadge.first { background: linear-gradient(145deg, #d1a94c, #62481d); }
 .tankMasteryBadge.master { color: #201807; border-color: #fff0a5; background: linear-gradient(145deg, #fff3a0, #d98b1f); box-shadow: 0 0 14px rgba(255,190,58,.7); }
