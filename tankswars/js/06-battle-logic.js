@@ -2510,38 +2510,6 @@
       return bot.botPathPoint || driveTarget;
     }
 
-    function updateBotGunAim(bot, target, delta, mobilityBroken) {
-      if (!tankIsAlive(target)) {
-        bot.turretAngle = bot.angle;
-        return;
-      }
-
-      const targetAngle = Math.atan2(target.y - bot.y, target.x - bot.x);
-
-      if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
-        if (bot.turretTraverseRadians > 0 && !mobilityBroken) {
-          const hullAimAngle = getLimitedTurretHullAngle(bot, targetAngle);
-          bot.angle = rotateAngleToward(
-            bot.angle,
-            hullAimAngle,
-            bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta
-          );
-        }
-        bot.turretAngle = rotateAngleToward(
-          bot.turretAngle,
-          limitTurretAngle(bot, targetAngle),
-          bot.turretTurnSpeed * delta
-        );
-      } else if (!mobilityBroken && (bot.className === "ПТ" || bot.className === "ПТ-САУ" || tankIsArtillery(bot))) {
-        bot.angle = rotateAngleToward(bot.angle, targetAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
-        bot.turretAngle = bot.angle;
-      } else if (!tankModuleIsBroken(bot, "turret")) {
-        bot.turretAngle = bot.angle;
-      }
-
-      fireBotShell(bot, target);
-    }
-
     function updateBotStuckState(bot, delta) {
       const movedDistance = Math.hypot(bot.x - bot.botLastX, bot.y - bot.botLastY);
       const minimumProgress = Math.max(0.1, Math.min(0.75, bot.speed * delta * 0.12));
@@ -2587,8 +2555,6 @@
       const mobilityBroken = tankMobilityIsBroken(bot);
       let attemptedDrive = false;
 
-      updateBotGunAim(bot, bot.botTarget, delta, mobilityBroken);
-
       if (driveTarget) {
         const navigationTarget = getBotNavigationPoint(bot, driveTarget, delta);
         const driveDx = navigationTarget.x - bot.x;
@@ -2610,7 +2576,29 @@
         bot.botTarget = getMostDangerousTarget(bot);
 
         if (bot.botTarget) {
-          updateBotGunAim(bot, bot.botTarget, delta, mobilityBroken);
+          const turretAngle = Math.atan2(bot.botTarget.y - bot.y, bot.botTarget.x - bot.x);
+
+          if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
+            if (bot.turretTraverseRadians > 0 && !mobilityBroken) {
+              const hullAimAngle = getLimitedTurretHullAngle(bot, turretAngle);
+              bot.angle = rotateAngleToward(
+                bot.angle,
+                hullAimAngle,
+                bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta
+              );
+            }
+            bot.turretAngle = rotateAngleToward(
+              bot.turretAngle,
+              limitTurretAngle(bot, turretAngle),
+              bot.turretTurnSpeed * delta
+            );
+          } else if (!mobilityBroken && (className === "\u041f\u0422" || className === "\u041f\u0422-\u0421\u0410\u0423" || tankIsArtillery(bot))) {
+            bot.angle = rotateAngleToward(bot.angle, turretAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
+            bot.turretAngle = bot.angle;
+          } else if (!tankModuleIsBroken(bot, "turret")) {
+            bot.turretAngle = bot.angle;
+          }
+          fireBotShell(bot, bot.botTarget);
         } else {
           bot.turretAngle = bot.angle;
         }
@@ -2656,9 +2644,7 @@
         } else {
           moveTrackedTank(bot, 0, delta);
         }
-        if (!bot.botTarget) {
-          bot.turretAngle = bot.angle;
-        }
+        bot.turretAngle = bot.angle;
       }
 
       updateTankStuckRecovery(bot, attemptedDrive, delta);
