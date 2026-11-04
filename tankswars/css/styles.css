@@ -259,6 +259,17 @@
       line-height: 1.25;
     }
 
+    .contractTitle {
+      color: #f3d248;
+      font-weight: 800;
+    }
+
+    .contractDescription {
+      margin-top: 5px;
+      color: #fff;
+      line-height: 1.25;
+    }
+
     .battlePassActions {
       display: grid;
       grid-template-columns: minmax(180px, 1fr) 180px;

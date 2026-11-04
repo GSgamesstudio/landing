@@ -756,10 +756,10 @@
       return {
         createdAt: now,
         contracts: [
-          { id: "blueprints", title: "Контракт на чертежи", metric: "damage", target: 12000, progress: 0, reward: { blueprints: 120 }, expiresAt: now + dayMs * 3, claimed: false },
-          { id: "gold", title: "Контракт на золото", metric: "wins", target: 8, progress: 0, reward: { gold: 350 }, expiresAt: now + dayMs * 5, claimed: false },
-          { id: "silver", title: "Контракт на серебро", metric: "battles", target: 15, progress: 0, reward: { silver: 55000 }, expiresAt: now + dayMs * 4, claimed: false },
-          { id: "tank", title: "Сложный контракт на танк", metric: "roleBonus", target: 3000, progress: 0, reward: { tank: true }, expiresAt: now + dayMs * 10, claimed: false }
+          { id: "blueprints", title: "Контракт на чертежи", description: "Нанесите 12 000 единиц урона", metric: "damage", target: 12000, progress: 0, reward: { blueprints: 120 }, expiresAt: now + dayMs * 3, claimed: false },
+          { id: "gold", title: "Контракт на золото", description: "Победите в 8 боях", metric: "wins", target: 8, progress: 0, reward: { gold: 350 }, expiresAt: now + dayMs * 5, claimed: false },
+          { id: "silver", title: "Контракт на серебро", description: "Проведите 15 боёв", metric: "battles", target: 15, progress: 0, reward: { silver: 55000 }, expiresAt: now + dayMs * 4, claimed: false },
+          { id: "tank", title: "Сложный контракт на танк", description: "Заработайте 3 000 ролевого опыта", metric: "roleBonus", target: 3000, progress: 0, reward: { tank: true }, expiresAt: now + dayMs * 10, claimed: false }
         ]
       };
     }
@@ -901,7 +901,14 @@
         button.disabled = contract.claimed || expired || contract.progress < contract.target;
         button.addEventListener("click", () => claimContract(contract.id));
         card.append(
-          document.createTextNode(contract.title),
+          Object.assign(document.createElement("div"), {
+            className: "contractTitle",
+            textContent: contract.title
+          }),
+          Object.assign(document.createElement("div"), {
+            className: "contractDescription",
+            textContent: contract.description
+          }),
           Object.assign(document.createElement("div"), {
             className: "contractMeta",
             textContent: `${formatStoredNumber(contract.progress)} / ${formatStoredNumber(contract.target)} | ${getContractRewardText(contract)} | ${hoursLeft} ч.`
