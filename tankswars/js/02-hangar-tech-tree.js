@@ -723,7 +723,7 @@
       const updateFilter = (name, value) => {
         tankBarFilters[name] = value;
         saveTankBarFilters();
-        renderTankFilters();
+        resetButton.textContent = `Сбросить (${loadedTanks.filter(tankMatchesBarFilters).length})`;
         renderTankBar(loadedTanks);
       };
 

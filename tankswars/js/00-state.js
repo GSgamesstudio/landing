@@ -33,7 +33,7 @@
         wait: `kursor-wait${suffix}.svg`,
         move: `kursor-move${suffix}.svg`
       };
-      const hotspots = { default: "12 12", pointer: "6 2", disabled: "12 12", notAllowed: "12 12", text: "12 12", grab: "10 8", grabbing: "10 8", wait: "12 12", move: "12 12" };
+      const hotspots = { default: "12 12", pointer: "12 12", disabled: "12 12", notAllowed: "12 12", text: "12 12", grab: "12 12", grabbing: "12 12", wait: "12 12", move: "12 12" };
       Object.entries(cursorFiles).forEach(([name, file]) => {
         document.documentElement.style.setProperty(`--cursor-${name.replace(/([A-Z])/g, "-$1").toLowerCase()}`, `url("/img/asseti/${file}") ${hotspots[name]}, url("/img/asseti/cursor.png") 10 10, auto`);
       });

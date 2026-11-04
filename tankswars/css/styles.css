@@ -16,8 +16,8 @@
       --cursor-disabled: url("/img/asseti/kursor-disabled.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
       --cursor-not-allowed: url("/img/asseti/kursor-not-allowed.svg") 12 12, url("/img/asseti/cursor.png") 10 10, auto;
       --cursor-text: url("/img/asseti/kursor-text.svg") 12 12, url("/img/asseti/cursor.png") 10 10, text;
-      --cursor-grab: url("/img/asseti/kursor-grab.svg") 10 8, url("/img/asseti/cursor.png") 10 10, grab;
-      --cursor-grabbing: url("/img/asseti/kursor-grabbing.svg") 10 8, url("/img/asseti/cursor.png") 10 10, grabbing;
+      --cursor-grab: url("/img/asseti/kursor-grab.svg") 12 12, url("/img/asseti/cursor.png") 10 10, grab;
+      --cursor-grabbing: url("/img/asseti/kursor-grabbing.svg") 12 12, url("/img/asseti/cursor.png") 10 10, grabbing;
       --cursor-wait: url("/img/asseti/kursor-wait.svg") 12 12, url("/img/asseti/cursor.png") 10 10, wait;
       --cursor-move: url("/img/asseti/kursor-move.svg") 12 12, url("/img/asseti/cursor.png") 10 10, move;
     }

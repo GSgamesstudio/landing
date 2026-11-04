@@ -1,5 +1,27 @@
 # Tanks Wars
 
+## Изменения `1.1.1.2v60`
+
+- Исправлено центрирование всех SVG-курсоров: для состояний `default`, `pointer`, `disabled`, `not-allowed`, `text`, `grab`, `grabbing`, `wait` и `move` установлена единая точка hotspot `12 12`.
+- Исправлены настройки курсоров в основном интерфейсе и Tankopedia; курсор `pointer` больше не использует смещённую точку `6 2`, а `grab`/`grabbing` — смещённую точку `10 8`.
+- Исправлено исчезновение курсора в панели фильтров: после изменения фильтра панель больше не пересоздаётся целиком, поэтому активный элемент и отображение курсора сохраняются.
+- Перед фиксацией отдельно зафиксированы обнаруженные пользовательские изменения: обновления `data.csv`, `BALANCE_REPORT.md`, `data.md` и добавленные изображения `img/tanki/M5 Stuart.png`, `img/korpus/M5 Stuart.png`, `img/bashnya/M5 Stuart.png`.
+
+Затронутые файлы: `README.md`, `css/styles.css`, `js/00-state.js`, `js/tankopedia-site.js`, `js/02-hangar-tech-tree.js`, `data.csv`, `BALANCE_REPORT.md`, `data.md`, `img/tanki/M5 Stuart.png`, `img/korpus/M5 Stuart.png`, `img/bashnya/M5 Stuart.png`.
+
+Проверки: `node --check js/00-state.js`, `node --check js/tankopedia-site.js`, `node --check js/02-hangar-tech-tree.js` и `git diff --check` выполнены успешно; поиск старых hotspot `6 2` и `10 8` в активных CSS/JS-файлах ничего не обнаружил. Генераторы баланса не запускались, так как в рамках исправления курсоров `data.csv` не изменялся.
+
+## Изменения `1.1.1.2v59`
+
+- Отбалансирована ветка `M24 → T37 → T71 → M41 Bulldog → T92E1 → XM551 Sheridan`: для всех шести машин расчётный индекс в `BALANCE_REPORT.md` доведён до `1,00`.
+- Уровни HP сохранены в игровом диапазоне, а корректировка выполнена через значения урона: у T37, T71, M41 Bulldog, T92E1 и XM551 Sheridan.
+- После изменения `data.csv` пересозданы `BALANCE_REPORT.md` и `data.md`.
+- Обнаруженные пользовательские изображения `img/tanki/M5 Stuart.png`, `img/korpus/M5 Stuart.png` и `img/bashnya/M5 Stuart.png` сохранены без изменений и включены в текущую фиксацию.
+
+Затронутые файлы: `README.md`, `data.csv`, `BALANCE_REPORT.md`, `data.md`, `img/tanki/M5 Stuart.png`, `img/korpus/M5 Stuart.png`, `img/bashnya/M5 Stuart.png`.
+
+Проверки: `node tools/generate-balance-report.mjs` и `node tools/generate-data-md.mjs` успешно выполнены; ручная проверка отчёта подтвердила `1,00` для всех шести машин ветки; `node --check` для генераторов и `git diff --check` прошли. Три пользовательских PNG `M5 Stuart` визуально проверены и корректно открываются.
+
 ## Изменения `1.1.1.2v58`
 
 - В последний столбец `AJ` файла `data.csv` добавлена оценочная масса в тоннах для всех 561 корректных строк техники; 502 ранее пустых значения заполнены, существующие массы сохранены.
