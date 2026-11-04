@@ -2609,7 +2609,9 @@
 
         bot.botTarget = getMostDangerousTarget(bot);
 
-        if (!bot.botTarget) {
+        if (bot.botTarget) {
+          updateBotGunAim(bot, bot.botTarget, delta, mobilityBroken);
+        } else {
           bot.turretAngle = bot.angle;
         }
 
@@ -2654,7 +2656,9 @@
         } else {
           moveTrackedTank(bot, 0, delta);
         }
-        bot.turretAngle = bot.angle;
+        if (!bot.botTarget) {
+          bot.turretAngle = bot.angle;
+        }
       }
 
       updateTankStuckRecovery(bot, attemptedDrive, delta);
