@@ -2599,10 +2599,6 @@
       z-index: 2;
     }
 
-    #tankBar::-webkit-scrollbar {
-      display: none;
-    }
-
     #searchSlot {
       position: absolute;
       left: 0;
