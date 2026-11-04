@@ -680,7 +680,7 @@
             researchExperiencePrice: normalizeNumber(cells[12] || 0),
             researchSilverPrice: normalizeNumber(cells[13] || 0),
             className,
-            turretTraverseDegrees: className === "ПТ" ? normalizePositiveFloat(cells[36] || 0) : 0,
+            turretTraverseDegrees: ["ПТ", "САУ"].includes(className) ? normalizePositiveFloat(cells[36] || 0) : 0,
             uniqueFeatures: parseTankUniqueFeatures(cells[29] || "")
           };
         })

@@ -12,6 +12,20 @@
       return normalizeAngle(tank.angle + Math.max(-traverse, Math.min(traverse, relativeAngle)));
     }
 
+    function getLimitedTurretHullAngle(tank, targetAngle) {
+      const traverse = normalizePositiveFloat(tank?.turretTraverseRadians || 0);
+      if (!traverse) {
+        return normalizeAngle(targetAngle);
+      }
+
+      const relativeAngle = normalizeAngle(targetAngle - tank.angle);
+      if (Math.abs(relativeAngle) <= traverse) {
+        return tank.angle;
+      }
+
+      return normalizeAngle(targetAngle - Math.sign(relativeAngle) * traverse);
+    }
+
     function tankIsWheeled(tank) {
       const className = typeof tank === "string" ? tank : getTankClassKey(tank);
 
@@ -1026,7 +1040,7 @@
 
     function createBattleTank(tank, x, y, angle, isBot = false, team = "ally", nickname = "") {
       const className = (tank.className || "").toUpperCase();
-      const turretTraverseRadians = className === "ПТ"
+      const turretTraverseRadians = ["ПТ", "САУ"].includes(className)
         ? normalizePositiveFloat(tank.turretTraverseDegrees || 0) * Math.PI / 180
         : 0;
       const hasTurret = tankHasRotatingTurret(className) || turretTraverseRadians > 0;
@@ -2565,6 +2579,14 @@
           const turretAngle = Math.atan2(bot.botTarget.y - bot.y, bot.botTarget.x - bot.x);
 
           if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
+            if (bot.turretTraverseRadians > 0 && !mobilityBroken) {
+              const hullAimAngle = getLimitedTurretHullAngle(bot, turretAngle);
+              bot.angle = rotateAngleToward(
+                bot.angle,
+                hullAimAngle,
+                bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta
+              );
+            }
             bot.turretAngle = rotateAngleToward(bot.turretAngle, limitTurretAngle(bot, turretAngle), bot.turretTurnSpeed * delta);
           } else if (!mobilityBroken && (className === "\u041f\u0422" || className === "\u041f\u0422-\u0421\u0410\u0423" || tankIsArtillery(bot))) {
             bot.angle = rotateAngleToward(bot.angle, turretAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
