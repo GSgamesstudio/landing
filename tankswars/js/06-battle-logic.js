@@ -1885,7 +1885,9 @@
       const movesForward = keyIsPressed("keyForward", ["ц"]);
       const movesBackward = keyIsPressed("keyBackward", ["ы"]);
       const throttle = Number(movesForward) - Number(movesBackward);
-      const mobileControlsActive = typeof shouldUseMobileControls === "function" && shouldUseMobileControls();
+      const mobileControlsActive = typeof shouldUseMobileControls === "function"
+        && shouldUseMobileControls()
+        && battleState.pointerType !== "mouse";
       const previousHullAngle = player.angle;
       const mobilityBroken = tankMobilityIsBroken(player);
       let attemptedMove = throttle !== 0;

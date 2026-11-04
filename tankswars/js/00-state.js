@@ -309,6 +309,7 @@
       camera: { x: 0, y: 0, scale: 1, offsetX: 0, offsetY: 0 },
       mouse: { x: 0, y: 0 },
       cursor: { x: 0, y: 0 },
+      pointerType: "mouse",
       selectedShellIndex: 0,
       selectedShell: null,
       teamListVisible: true,

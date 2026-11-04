@@ -531,7 +531,8 @@
         return;
       }
 
-      if (shouldUseMobileControls()) {
+      battleState.pointerType = event.pointerType || "mouse";
+      if (event.pointerType === "touch") {
         return;
       }
 
@@ -552,7 +553,8 @@
       }
 
       event.preventDefault();
-      if (shouldUseMobileControls()) {
+      battleState.pointerType = event.pointerType || "mouse";
+      if (event.pointerType === "touch") {
         return;
       }
 
