@@ -68,6 +68,8 @@ const columnDefinitions = [
   ["AJ", "Масса, т", "mass", "Оценочная игровая масса в тоннах; используется для урона при таране"]
 ];
 
+columnDefinitions.push(["AK", "Ограничение поворота башни", "turretTraverseDegrees", "Только для ПТ: максимальный угол в каждую сторону; пусто — башни нет"]);
+
 const escapeCell = (value) => String(value ?? "")
   .replace(/\|/g, "\\|")
   .replace(/\r?\n/g, " ")

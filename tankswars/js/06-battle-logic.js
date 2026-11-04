@@ -2,6 +2,16 @@
       return !["\u041f\u0422", "\u041f\u0422-\u0421\u0410\u0423", "\u0421\u0410\u0423"].includes(className);
     }
 
+    function limitTurretAngle(tank, targetAngle) {
+      const traverse = normalizePositiveFloat(tank?.turretTraverseRadians || 0);
+      if (!traverse) {
+        return normalizeAngle(targetAngle);
+      }
+
+      const relativeAngle = normalizeAngle(targetAngle - tank.angle);
+      return normalizeAngle(tank.angle + Math.max(-traverse, Math.min(traverse, relativeAngle)));
+    }
+
     function tankIsWheeled(tank) {
       const className = typeof tank === "string" ? tank : getTankClassKey(tank);
 
@@ -1016,7 +1026,10 @@
 
     function createBattleTank(tank, x, y, angle, isBot = false, team = "ally", nickname = "") {
       const className = (tank.className || "").toUpperCase();
-      const hasTurret = tankHasRotatingTurret(className);
+      const turretTraverseRadians = className === "ПТ"
+        ? normalizePositiveFloat(tank.turretTraverseDegrees || 0) * Math.PI / 180
+        : 0;
+      const hasTurret = tankHasRotatingTurret(className) || turretTraverseRadians > 0;
       const turretTurnSpeeds = {
         "\u041b\u0422": 3.9,
         "\u041a\u0422": 3.7,
@@ -1064,6 +1077,7 @@
         wheelSteer: 0,
         className,
         hasTurret,
+        turretTraverseRadians,
         turretTurnSpeed,
         maxHealth,
         health: maxHealth,
@@ -1889,7 +1903,7 @@
       if (player.hasTurret) {
         const hullDelta = normalizeAngle(player.angle - previousHullAngle);
         if (!tankModuleIsBroken(player, "turret")) {
-          player.turretAngle = normalizeAngle(player.turretAngle + hullDelta);
+          player.turretAngle = limitTurretAngle(player, player.turretAngle + hullDelta);
         }
       }
 
@@ -1912,14 +1926,14 @@
       }
 
       if (keyIsPressed("keyTurretLeft", ["й"])) {
-        player.turretAngle = normalizeAngle(player.turretAngle - player.turretTurnSpeed * delta);
+        player.turretAngle = limitTurretAngle(player, player.turretAngle - player.turretTurnSpeed * delta);
       } else if (keyIsPressed("keyTurretRight", ["у"])) {
-        player.turretAngle = normalizeAngle(player.turretAngle + player.turretTurnSpeed * delta);
+        player.turretAngle = limitTurretAngle(player, player.turretAngle + player.turretTurnSpeed * delta);
       } else if (!mobileControlsActive) {
         const targetTurretAngle = Math.atan2(battleState.mouse.y - player.y, battleState.mouse.x - player.x);
         player.turretAngle = rotateAngleToward(
           player.turretAngle,
-          targetTurretAngle,
+          limitTurretAngle(player, targetTurretAngle),
           player.turretTurnSpeed * delta
         );
       }
@@ -2551,7 +2565,7 @@
           const turretAngle = Math.atan2(bot.botTarget.y - bot.y, bot.botTarget.x - bot.x);
 
           if (bot.hasTurret && !tankModuleIsBroken(bot, "turret")) {
-            bot.turretAngle = rotateAngleToward(bot.turretAngle, turretAngle, bot.turretTurnSpeed * delta);
+            bot.turretAngle = rotateAngleToward(bot.turretAngle, limitTurretAngle(bot, turretAngle), bot.turretTurnSpeed * delta);
           } else if (!mobilityBroken && (className === "\u041f\u0422" || className === "\u041f\u0422-\u0421\u0410\u0423" || tankIsArtillery(bot))) {
             bot.angle = rotateAngleToward(bot.angle, turretAngle, bot.turnSpeed * getTankSiegeTurnMultiplier(bot) * delta);
             bot.turretAngle = bot.angle;

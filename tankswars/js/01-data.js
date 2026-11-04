@@ -635,6 +635,7 @@
           const futureTank = techTreeFlag !== "" && techTreeFlagValue === 0;
           const developerOnly = techTreeFlagValue === 3;
           const collectible = techTreeFlagValue === 4;
+          const className = (cells[14] || "").trim().toUpperCase();
           const researchReferences = [cells[9], cells[10], cells[11]].filter(Boolean);
           const hasTankSizeColumn = cells.length > 32;
 
@@ -678,7 +679,8 @@
             futureResearchReferences: futureTank ? researchReferences : [],
             researchExperiencePrice: normalizeNumber(cells[12] || 0),
             researchSilverPrice: normalizeNumber(cells[13] || 0),
-            className: (cells[14] || "").trim().toUpperCase(),
+            className,
+            turretTraverseDegrees: className === "ПТ" ? normalizePositiveFloat(cells[36] || 0) : 0,
             uniqueFeatures: parseTankUniqueFeatures(cells[29] || "")
           };
         })
