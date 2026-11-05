@@ -1240,10 +1240,10 @@
           id: "russo-balt-type-c",
           name: russoBaltContainerName,
           price: russoBaltContainerGoldPrice,
-          tankDropChance: russoBaltContainerTankDropChance,
           resourceRewardTypes: russoBaltContainerResourceRewardTypes,
           duplicateTankCompensation: russoBaltContainerDuplicateCompensation,
-          tankPool: loadedTanks.filter((tank) => russoBaltContainerTankNames.includes(tank.name) && !tank.developerOnly)
+          tankDropChances: russoBaltContainerTankDrops,
+          tankPool: loadedTanks.filter((tank) => russoBaltContainerTankDrops.some((drop) => drop.name === tank.name) && !tank.developerOnly)
         }
       ];
       if (oiExperimentalEventIsActive()) {
@@ -1642,9 +1642,24 @@
 
       for (let index = 0; index < containerCount; index += 1) {
         const bonusTankDrop = bonusTankPool.length > 0 && Math.random() < (containerDefinition.bonusTankDropChance || 0);
-        const regularTankDrop = tankPool.length > 0 && Math.random() < (containerDefinition.tankDropChance || 0);
-        if (bonusTankDrop || regularTankDrop) {
-          const tank = pickRandomItem(bonusTankDrop ? bonusTankPool : tankPool);
+        let regularTank = null;
+        if (tankPool.length > 0) {
+          if (containerDefinition.tankDropChances) {
+            const roll = Math.random();
+            let threshold = 0;
+            for (const drop of containerDefinition.tankDropChances) {
+              threshold += drop.chance;
+              if (roll < threshold) {
+                regularTank = tankPool.find((tank) => tank.name === drop.name) || null;
+                break;
+              }
+            }
+          } else if (Math.random() < (containerDefinition.tankDropChance || 0)) {
+            regularTank = pickRandomItem(tankPool);
+          }
+        }
+        if (bonusTankDrop || regularTank) {
+          const tank = bonusTankDrop ? pickRandomItem(bonusTankPool) : regularTank;
           const wasOwned = tank.state === 2;
           const compensation = wasOwned ? getContainerDuplicateCompensation(containerDefinition) : null;
 
@@ -1861,6 +1876,8 @@
 
       const tankChanceText = containerDefinition.bonusTankPool
         ? `БЗ-155 — ${dropChance}%, премиум-танк — ${bonusDropChance}%.`
+        : containerDefinition.tankDropChances
+          ? containerDefinition.tankDropChances.map((drop) => `${drop.name} — ${(drop.chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`).join(", ") + "."
         : `Шанс получить один из танков контейнера: ${dropChance}%.`;
       text.textContent = `Цена: ${formatStoredNumber(containerDefinition.price)} золота.${containerDefinition.bundleCount ? ` Набор из ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота.` : ""} Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${tankChanceText} При повторном выпадении танка начисляется ${formatStoredNumber(duplicateCompensation.amount)} ${getResourceRewardUnit(duplicateCompensation.type)}.`;
       button.textContent = `Открыть: ${formatStoredNumber(containerDefinition.price)} золота`;

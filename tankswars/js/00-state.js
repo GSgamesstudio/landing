@@ -63,8 +63,10 @@
     const is4ContainerTankNames = ["ИС-4М", "ИС-4К", "ИС-4 С-70"];
     const russoBaltContainerName = "Имперский";
     const russoBaltContainerGoldPrice = 50;
-    const russoBaltContainerTankDropChance = 0.01914;
-    const russoBaltContainerTankNames = ["Руссо-Балт тип C"];
+    const russoBaltContainerTankDrops = [
+      { name: "Руссо-Балт тип C", chance: 0.01914 },
+      { name: "Проект Менделеева", chance: 0.01915 }
+    ];
     const russoBaltContainerResourceRewardTypes = ["blueprints", "silver"];
     const russoBaltContainerDuplicateCompensation = { type: "silver", amount: 1000 };
     const duplicateTankGoldReward = 5000;
