@@ -324,7 +324,7 @@
     function applyGameLanguage() {
       activeGameLanguage = getGameLanguage();
       document.documentElement.lang = activeGameLanguage;
-      document.title = activeGameLanguage === "en" ? "Tanks Wars" : "Танки Войны";
+      document.title = "Tanks Wars";
       translateGameDocument();
     }
 
