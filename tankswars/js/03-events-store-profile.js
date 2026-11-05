@@ -1873,6 +1873,14 @@
       return `${chance}% на каждый из ${containerPrizeCount} ресурсных призов (${resourceTypes.map(getResourceRewardTitle).join(" или ")})`;
     }
 
+    const containerPreviewAssets = {
+      gift: "./img/asseti/контейнеры/gift.png",
+      all: "./img/asseti/контейнеры/all.png",
+      is4: "./img/asseti/контейнеры/is4.png",
+      "russo-balt-type-c": "./img/asseti/контейнеры/imperial.png",
+      "winter-budapest": "./img/asseti/контейнеры/budapest-winter.png"
+    };
+
     function showContainerPreview(containerDefinition) {
       const previewOverlay = document.createElement("section");
       const previewPanel = document.createElement("div");
@@ -1980,7 +1988,7 @@
       const previewImage = document.createElement("img");
 
       previewImage.className = "containerPreviewImage";
-      previewImage.src = "./img/asseti/container-preview.png";
+      previewImage.src = containerPreviewAssets[containerDefinition.id] || "./img/asseti/container-preview.png";
       previewImage.alt = `3D-контейнер ${containerDefinition.name}`;
       visual.append(previewImage);
       details.append(title, text, rewardTitle, rewardGrid, actions);
@@ -2005,8 +2013,8 @@
       button.className = "storeActionButton";
       button.type = "button";
       giftImage.className = "storeGiftImage";
-      giftImage.src = "./img/asseti/podarok.png";
-      giftImage.alt = "Контейнер Подарок";
+      giftImage.src = containerPreviewAssets[containerDefinition.id] || "./img/asseti/podarok.png";
+      giftImage.alt = `Контейнер ${containerDefinition.name}`;
       title.textContent = containerDefinition.name;
       const rewardTypes = getContainerResourceRewardTypes(containerDefinition).map((type) => getResourceRewardTitle(type).toLowerCase()).join(" и ");
       text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)}`;
