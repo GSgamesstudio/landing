@@ -1895,6 +1895,10 @@
       buyButton.textContent = `Открыть: ${formatStoredNumber(containerDefinition.price)} золота`;
       buyButton.dataset.defaultLabel = buyButton.textContent;
       buyButton.disabled = playerResources.gold < containerDefinition.price;
+      const closePreview = () => {
+        previewOverlay.remove();
+        screenOverlay.classList.remove("containerPreviewActive");
+      };
 
       const rewardTypes = getContainerResourceRewardTypes(containerDefinition)
         .map((type) => getResourceRewardTitle(type).toLowerCase())
@@ -1902,12 +1906,12 @@
       title.textContent = containerDefinition.name;
       text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
 
-      closeButton.addEventListener("click", () => previewOverlay.remove());
+      closeButton.addEventListener("click", closePreview);
       previewOverlay.addEventListener("click", (event) => {
-        if (event.target === previewOverlay) previewOverlay.remove();
+        if (event.target === previewOverlay) closePreview();
       });
       buyButton.addEventListener("click", () => {
-        previewOverlay.remove();
+        closePreview();
         openContainer(buyButton, containerDefinition);
       });
       actions.append(buyButton);
@@ -1921,7 +1925,7 @@
         bundleButton.dataset.defaultLabel = bundleButton.textContent;
         bundleButton.disabled = playerResources.gold < containerDefinition.bundlePrice;
         bundleButton.addEventListener("click", () => {
-          previewOverlay.remove();
+          closePreview();
           openContainer(bundleButton, containerDefinition, containerDefinition.bundleCount, containerDefinition.bundlePrice);
         });
         actions.append(bundleButton);
@@ -1931,6 +1935,7 @@
       details.append(title, text, actions);
       previewPanel.append(closeButton, visual, details);
       previewOverlay.append(previewPanel);
+      screenOverlay.classList.add("containerPreviewActive");
       screenOverlay.append(previewOverlay);
     }
 

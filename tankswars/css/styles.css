@@ -886,6 +886,10 @@
       visibility: hidden;
     }
 
+    #screenOverlay.containerPreviewActive #overlayContent {
+      visibility: hidden;
+    }
+
     #screenOverlay.containerOpeningActive {
       background: transparent;
     }
