@@ -1844,6 +1844,96 @@
         });
     }
 
+    function getContainerTankChanceText(containerDefinition) {
+      const dropChance = ((containerDefinition.tankDropChance || 0) * 100).toLocaleString("ru-RU", {
+        minimumFractionDigits: Number.isInteger((containerDefinition.tankDropChance || 0) * 100) ? 0 : 3,
+        maximumFractionDigits: 3
+      });
+      const bonusTankDropChance = containerDefinition.bonusTankDropChance || 0;
+      const bonusDropChance = (bonusTankDropChance * 100).toLocaleString("ru-RU", {
+        minimumFractionDigits: Number.isInteger(bonusTankDropChance * 100) ? 0 : 3,
+        maximumFractionDigits: 3
+      });
+
+      if (containerDefinition.bonusTankPool) {
+        return `БЗ-155 — ${dropChance}%, премиум-танк — ${bonusDropChance}%.`;
+      }
+      if (containerDefinition.tankDropChances) {
+        return containerDefinition.tankDropChances
+          .map((drop) => `${drop.name} — ${(drop.chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`)
+          .join(", ") + ".";
+      }
+      return `Шанс получить один из танков контейнера: ${dropChance}%.`;
+    }
+
+    function showContainerPreview(containerDefinition) {
+      const previewOverlay = document.createElement("section");
+      const previewPanel = document.createElement("div");
+      const closeButton = document.createElement("button");
+      const visual = document.createElement("div");
+      const details = document.createElement("div");
+      const title = document.createElement("div");
+      const text = document.createElement("div");
+      const actions = document.createElement("div");
+      const buyButton = document.createElement("button");
+
+      previewOverlay.className = "containerPreviewOverlay";
+      previewOverlay.setAttribute("role", "dialog");
+      previewOverlay.setAttribute("aria-modal", "true");
+      previewPanel.className = "containerPreviewPanel";
+      closeButton.className = "containerPreviewClose";
+      closeButton.type = "button";
+      closeButton.textContent = "×";
+      closeButton.setAttribute("aria-label", "Закрыть содержимое контейнера");
+      visual.className = "containerPreviewVisual";
+      details.className = "containerPreviewDetails";
+      title.className = "storeTitle";
+      text.className = "storeText";
+      actions.className = "storeContainerActions";
+      buyButton.className = "storeActionButton";
+      buyButton.type = "button";
+      buyButton.textContent = `Открыть: ${formatStoredNumber(containerDefinition.price)} золота`;
+      buyButton.dataset.defaultLabel = buyButton.textContent;
+      buyButton.disabled = playerResources.gold < containerDefinition.price;
+
+      const rewardTypes = getContainerResourceRewardTypes(containerDefinition)
+        .map((type) => getResourceRewardTitle(type).toLowerCase())
+        .join(" и ");
+      title.textContent = containerDefinition.name;
+      text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
+
+      closeButton.addEventListener("click", () => previewOverlay.remove());
+      previewOverlay.addEventListener("click", (event) => {
+        if (event.target === previewOverlay) previewOverlay.remove();
+      });
+      buyButton.addEventListener("click", () => {
+        previewOverlay.remove();
+        openContainer(buyButton, containerDefinition);
+      });
+      actions.append(buyButton);
+
+      if (containerDefinition.bundleCount) {
+        const bundleButton = document.createElement("button");
+
+        bundleButton.type = "button";
+        bundleButton.className = "storeActionButton";
+        bundleButton.textContent = `Открыть ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота`;
+        bundleButton.dataset.defaultLabel = bundleButton.textContent;
+        bundleButton.disabled = playerResources.gold < containerDefinition.bundlePrice;
+        bundleButton.addEventListener("click", () => {
+          previewOverlay.remove();
+          openContainer(bundleButton, containerDefinition, containerDefinition.bundleCount, containerDefinition.bundlePrice);
+        });
+        actions.append(bundleButton);
+      }
+
+      visual.append(createStoreContainerScene(false));
+      details.append(title, text, actions);
+      previewPanel.append(closeButton, visual, details);
+      previewOverlay.append(previewPanel);
+      screenOverlay.append(previewOverlay);
+    }
+
     function createStoreContainerCard(containerDefinition) {
       const panel = document.createElement("section");
       const title = document.createElement("div");
@@ -1863,46 +1953,29 @@
       giftImage.alt = "Контейнер Подарок";
       title.textContent = containerDefinition.name;
       const rewardTypes = getContainerResourceRewardTypes(containerDefinition).map((type) => getResourceRewardTitle(type).toLowerCase()).join(" и ");
-      const dropChance = (containerDefinition.tankDropChance * 100).toLocaleString("ru-RU", {
-        minimumFractionDigits: Number.isInteger(containerDefinition.tankDropChance * 100) ? 0 : 3,
-        maximumFractionDigits: 3
-      });
-      const bonusTankDropChance = containerDefinition.bonusTankDropChance || 0;
-      const bonusDropChance = (bonusTankDropChance * 100).toLocaleString("ru-RU", {
-        minimumFractionDigits: Number.isInteger(bonusTankDropChance * 100) ? 0 : 3,
-        maximumFractionDigits: 3
-      });
-      const duplicateCompensation = getContainerDuplicateCompensation(containerDefinition);
-
-      const tankChanceText = containerDefinition.bonusTankPool
-        ? `БЗ-155 — ${dropChance}%, премиум-танк — ${bonusDropChance}%.`
-        : containerDefinition.tankDropChances
-          ? containerDefinition.tankDropChances.map((drop) => `${drop.name} — ${(drop.chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`).join(", ") + "."
-        : `Шанс получить один из танков контейнера: ${dropChance}%.`;
-      text.textContent = `Цена: ${formatStoredNumber(containerDefinition.price)} золота.${containerDefinition.bundleCount ? ` Набор из ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота.` : ""} Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${tankChanceText} При повторном выпадении танка начисляется ${formatStoredNumber(duplicateCompensation.amount)} ${getResourceRewardUnit(duplicateCompensation.type)}.`;
-      button.textContent = `Открыть: ${formatStoredNumber(containerDefinition.price)} золота`;
+      text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)}`;
+      button.textContent = "Посмотреть содержимое";
       button.dataset.defaultLabel = button.textContent;
-      button.disabled = playerResources.gold < containerDefinition.price;
-      button.addEventListener("click", () => openContainer(button, containerDefinition));
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        showContainerPreview(containerDefinition);
+      });
       actions.append(button);
-
-      if (containerDefinition.bundleCount) {
-        const bundleButton = document.createElement("button");
-
-        bundleButton.type = "button";
-        bundleButton.className = "storeActionButton";
-        bundleButton.textContent = `Открыть ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота`;
-        bundleButton.dataset.defaultLabel = bundleButton.textContent;
-        bundleButton.disabled = playerResources.gold < containerDefinition.bundlePrice;
-        bundleButton.addEventListener("click", () => openContainer(bundleButton, containerDefinition, containerDefinition.bundleCount, containerDefinition.bundlePrice));
-        actions.append(bundleButton);
-      }
 
       if (containerDefinition.id === "gift") {
         panel.classList.add("giftContainerCard");
         panel.append(giftImage);
       }
       panel.append(title, text, actions);
+      panel.setAttribute("role", "button");
+      panel.tabIndex = 0;
+      panel.addEventListener("click", () => showContainerPreview(containerDefinition));
+      panel.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          showContainerPreview(containerDefinition);
+        }
+      });
       return panel;
     }
 
