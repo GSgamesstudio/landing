@@ -1866,6 +1866,13 @@
       return `Шанс получить один из танков контейнера: ${dropChance}%.`;
     }
 
+    function getContainerResourceChanceText(containerDefinition) {
+      const resourceTypes = getContainerResourceRewardTypes(containerDefinition);
+      const chance = (100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+
+      return `${chance}% на каждый из ${containerPrizeCount} ресурсных призов (${resourceTypes.map(getResourceRewardTitle).join(" или ")})`;
+    }
+
     function showContainerPreview(containerDefinition) {
       const previewOverlay = document.createElement("section");
       const previewPanel = document.createElement("div");
@@ -1909,7 +1916,7 @@
         .join(" и ");
       title.textContent = containerDefinition.name;
       rewardTitle.textContent = "Содержимое контейнера";
-      text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
+      text.textContent = `Награды: ${containerPrizeCount} ресурсных приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} Ресурсный шанс: ${getContainerResourceChanceText(containerDefinition)}. Эти вероятности относятся к разным этапам и не складываются в один процент. При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
 
       const tankRewards = [
         ...(containerDefinition.tankPool || []).map((tank) => ({ tank, chance: containerDefinition.tankDropChances?.find((drop) => drop.name === tank.name)?.chance || ((containerDefinition.tankDropChance || 0) / Math.max(1, containerDefinition.tankPool.length)) })),
@@ -1939,7 +1946,7 @@
         icon.src = `./img/asseti/валюты/${type === "gold" ? "gold" : type === "silver" ? "silver" : "blueprints"}.png`;
         icon.alt = getResourceRewardTitle(type);
         chanceLabel.className = "containerPreviewRewardChance";
-        chanceLabel.textContent = `${(100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`;
+        chanceLabel.textContent = `${(100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}% / приз`;
         label.textContent = getResourceRewardTitle(type);
         rewardCard.append(icon, label, chanceLabel);
         rewardGrid.append(rewardCard);
