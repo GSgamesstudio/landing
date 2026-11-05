@@ -1970,7 +1970,12 @@
         actions.append(bundleButton);
       }
 
-      visual.append(createStoreContainerScene(false));
+      const previewImage = document.createElement("img");
+
+      previewImage.className = "containerPreviewImage";
+      previewImage.src = "./img/asseti/container-preview.png";
+      previewImage.alt = `3D-контейнер ${containerDefinition.name}`;
+      visual.append(previewImage);
       details.append(title, text, rewardTitle, rewardGrid, actions);
       previewPanel.append(closeButton, visual, details);
       previewOverlay.append(previewPanel);
