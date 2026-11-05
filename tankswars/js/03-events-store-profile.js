@@ -1911,31 +1911,37 @@
       rewardTitle.textContent = "Содержимое контейнера";
       text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
 
-      (containerDefinition.tankPool || []).forEach((tank) => {
+      const tankRewards = [
+        ...(containerDefinition.tankPool || []).map((tank) => ({ tank, chance: containerDefinition.tankDropChances?.find((drop) => drop.name === tank.name)?.chance || ((containerDefinition.tankDropChance || 0) / Math.max(1, containerDefinition.tankPool.length)) })),
+        ...(containerDefinition.bonusTankPool || []).map((tank) => ({ tank, chance: (containerDefinition.bonusTankDropChance || 0) / Math.max(1, containerDefinition.bonusTankPool.length) }))
+      ];
+
+      tankRewards.forEach(({ tank, chance }) => {
         const rewardCard = document.createElement("div");
-        const chance = containerDefinition.tankDropChances?.find((drop) => drop.name === tank.name)?.chance;
+        const chanceLabel = document.createElement("div");
 
         rewardCard.className = "containerPreviewRewardCard containerPreviewTankReward";
         rewardCard.append(createTankSlot(tank, false, () => {}));
-        if (chance) {
-          const chanceLabel = document.createElement("div");
-
-          chanceLabel.className = "containerPreviewRewardChance";
-          chanceLabel.textContent = `${(chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`;
-          rewardCard.append(chanceLabel);
-        }
+        chanceLabel.className = "containerPreviewRewardChance";
+        chanceLabel.textContent = `${(chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`;
+        rewardCard.append(chanceLabel);
         rewardGrid.append(rewardCard);
       });
-      getContainerResourceRewardTypes(containerDefinition).forEach((type) => {
+      const resourceTypes = getContainerResourceRewardTypes(containerDefinition);
+      resourceTypes.forEach((type) => {
         const rewardCard = document.createElement("div");
-        const icon = document.createElement("div");
+        const icon = document.createElement("img");
+        const chanceLabel = document.createElement("div");
         const label = document.createElement("div");
 
         rewardCard.className = `containerPreviewRewardCard containerPreviewResourceReward ${type}`;
         icon.className = "containerPreviewRewardIcon";
-        icon.textContent = type === "gold" ? "G" : type === "silver" ? "S" : "B";
+        icon.src = `./img/asseti/валюты/${type === "gold" ? "gold" : type === "silver" ? "silver" : "blueprints"}.png`;
+        icon.alt = getResourceRewardTitle(type);
+        chanceLabel.className = "containerPreviewRewardChance";
+        chanceLabel.textContent = `${(100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`;
         label.textContent = getResourceRewardTitle(type);
-        rewardCard.append(icon, label);
+        rewardCard.append(icon, label, chanceLabel);
         rewardGrid.append(rewardCard);
       });
 

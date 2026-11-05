@@ -1290,10 +1290,15 @@
 
     .containerPreviewRewardGrid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(96px, 1fr));
+      grid-template-rows: 118px;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(96px, 1fr);
       gap: 8px;
-      max-height: 220px;
-      overflow-y: auto;
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
       padding: 3px;
     }
 
@@ -1319,7 +1324,7 @@
     }
 
     .containerPreviewRewardCard .tankCard {
-      min-height: 76px;
+      min-height: 88px;
       border: 0;
       background: transparent;
     }
@@ -1346,27 +1351,11 @@
     }
 
     .containerPreviewRewardIcon {
-      width: 38px;
-      height: 38px;
+      width: 62px;
+      height: 62px;
+      object-fit: contain;
       display: grid;
       place-items: center;
-      border: 2px solid #f3d248;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 28%, #fff3a5, #c29527 44%, #554113 100%);
-      color: #201d12;
-      font-size: 23px;
-      font-weight: 900;
-      box-shadow: 0 0 14px rgba(243, 210, 72, 0.3);
-    }
-
-    .containerPreviewResourceReward.silver .containerPreviewRewardIcon {
-      border-color: #c5d2d8;
-      background: radial-gradient(circle at 35% 28%, #fff, #8d9ba0 45%, #394247 100%);
-    }
-
-    .containerPreviewResourceReward.blueprints .containerPreviewRewardIcon {
-      border-color: #74d6f5;
-      background: radial-gradient(circle at 35% 28%, #d4fbff, #2690c3 45%, #17384a 100%);
     }
 
     .containerPreviewDetails .storeContainerActions {
@@ -1471,7 +1460,7 @@
       }
 
       .containerPreviewRewardGrid {
-        max-height: 180px;
+        min-width: 0;
       }
     }
 
