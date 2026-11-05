@@ -1874,6 +1874,8 @@
       const details = document.createElement("div");
       const title = document.createElement("div");
       const text = document.createElement("div");
+      const rewardTitle = document.createElement("div");
+      const rewardGrid = document.createElement("div");
       const actions = document.createElement("div");
       const buyButton = document.createElement("button");
 
@@ -1889,6 +1891,8 @@
       details.className = "containerPreviewDetails";
       title.className = "storeTitle";
       text.className = "storeText";
+      rewardTitle.className = "containerPreviewRewardTitle";
+      rewardGrid.className = "containerPreviewRewardGrid";
       actions.className = "storeContainerActions";
       buyButton.className = "storeActionButton";
       buyButton.type = "button";
@@ -1904,7 +1908,36 @@
         .map((type) => getResourceRewardTitle(type).toLowerCase())
         .join(" и ");
       title.textContent = containerDefinition.name;
+      rewardTitle.textContent = "Содержимое контейнера";
       text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
+
+      (containerDefinition.tankPool || []).forEach((tank) => {
+        const rewardCard = document.createElement("div");
+        const chance = containerDefinition.tankDropChances?.find((drop) => drop.name === tank.name)?.chance;
+
+        rewardCard.className = "containerPreviewRewardCard containerPreviewTankReward";
+        rewardCard.append(createTankSlot(tank, false, () => {}));
+        if (chance) {
+          const chanceLabel = document.createElement("div");
+
+          chanceLabel.className = "containerPreviewRewardChance";
+          chanceLabel.textContent = `${(chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`;
+          rewardCard.append(chanceLabel);
+        }
+        rewardGrid.append(rewardCard);
+      });
+      getContainerResourceRewardTypes(containerDefinition).forEach((type) => {
+        const rewardCard = document.createElement("div");
+        const icon = document.createElement("div");
+        const label = document.createElement("div");
+
+        rewardCard.className = `containerPreviewRewardCard containerPreviewResourceReward ${type}`;
+        icon.className = "containerPreviewRewardIcon";
+        icon.textContent = type === "gold" ? "G" : type === "silver" ? "S" : "B";
+        label.textContent = getResourceRewardTitle(type);
+        rewardCard.append(icon, label);
+        rewardGrid.append(rewardCard);
+      });
 
       closeButton.addEventListener("click", closePreview);
       previewOverlay.addEventListener("click", (event) => {
@@ -1932,7 +1965,7 @@
       }
 
       visual.append(createStoreContainerScene(false));
-      details.append(title, text, actions);
+      details.append(title, text, rewardTitle, rewardGrid, actions);
       previewPanel.append(closeButton, visual, details);
       previewOverlay.append(previewPanel);
       screenOverlay.classList.add("containerPreviewActive");
