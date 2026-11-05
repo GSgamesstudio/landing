@@ -8,7 +8,7 @@
 
 Затронутые файлы: `README.md`, `js/03-events-store-profile.js`, `css/styles.css`, `img/asseti/валюты/gold.png`, `img/asseti/валюты/silver.png`, `img/asseti/валюты/blueprints.png`, `золото.svg`, `серебро.png`, `чертежи.svg`.
 
-Проверки: будут выполнены `node --check js/03-events-store-profile.js`, `node --check js/00-state.js` и `git diff --check`. Финальные изображения созданы с использованием фирменного референса `img/asseti/logo.png`.
+Проверки: успешно выполнены `node --check js/03-events-store-profile.js`, `node --check js/00-state.js` и `git diff --check`. Финальные изображения созданы с использованием фирменного референса `img/asseti/logo.png`.
 
 ## Изменения `1.1.1.2v91`
 
