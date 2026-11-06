@@ -25,6 +25,8 @@
       "ЗАБЛОКИРОВАНО": "BLOCKED DAMAGE", "ПРОБИТИЯ": "PENETRATIONS",
       "НЕПРОБИТИЯ": "NON-PENETRATIONS", "ОТБИТО ПО НАМ": "BLOCKED BY ARMOR",
       "ПРОБИЛИ НАС": "PENETRATED US",
+      "Панель боевой статистики": "Battle statistics panel",
+      "Показывать в бою кокарду с суммарным уроном и статистикой.": "Show the damage cockade and battle statistics during combat.",
     });
 
     Object.assign(englishText, {

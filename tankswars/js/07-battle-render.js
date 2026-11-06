@@ -1789,7 +1789,9 @@
         58 + (battleState.teamListVisible ? battleState.allies.length * 22 : 0) + 8,
         Math.max(16, battleCanvas.clientHeight - summaryPanelHeight - 16)
       );
-      drawBattleSummaryPanel(ctx, 16, summaryPanelTop);
+      if (gameSettings.showBattleStatsPanel) {
+        drawBattleSummaryPanel(ctx, 16, summaryPanelTop);
+      }
       drawBattleTutorial(ctx, width, battleCanvas.clientHeight);
       drawMinimap(ctx);
       ctx.restore();

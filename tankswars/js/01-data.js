@@ -253,6 +253,7 @@
           showTeamMarkers: parsedSettings.showTeamMarkers !== false,
           showReloadIndicator: parsedSettings.showReloadIndicator !== false,
           showBattleResultPanel: parsedSettings.showBattleResultPanel !== false,
+          showBattleStatsPanel: parsedSettings.showBattleStatsPanel === true,
           fullscreen: parsedSettings.fullscreen === true,
           language: supportedGameLanguages.includes(parsedSettings.language) ? parsedSettings.language : "auto"
         };

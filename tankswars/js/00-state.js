@@ -134,6 +134,7 @@
       showTeamMarkers: true,
       showReloadIndicator: true,
       showBattleResultPanel: true,
+      showBattleStatsPanel: false,
       fullscreen: false,
       language: "auto",
       keyForward: "w",
