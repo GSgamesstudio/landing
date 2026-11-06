@@ -1308,7 +1308,7 @@
       grid-auto-rows: 96px;
       gap: 8px;
       min-width: 0;
-      max-height: min(300px, 24vh);
+      max-height: min(240px, 20vh);
       max-width: 100%;
       overflow-x: hidden;
       overflow-y: auto;
