@@ -35,6 +35,7 @@
       battleState.rocks = createBattleRocks();
       battleState.allies = [];
       battleState.enemies = [];
+      battleState.combatIndicators = [];
       battleState.player = createPlacedBattleTank(playerTank, allySpawns[0], false, "ally", playerProfile.username);
       battleState.allies.push(battleState.player);
       battleState.spectatorTarget = null;
@@ -318,6 +319,7 @@
       battleState.allies = [];
       battleState.enemies = [];
       battleState.projectiles = [];
+      battleState.combatIndicators = [];
       battleState.player = null;
       battleState.spectatorTarget = null;
       battleState.result = null;

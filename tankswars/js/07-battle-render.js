@@ -1770,6 +1770,84 @@
       ctx.restore();
     }
 
+    function getCombatIndicatorColor(indicator) {
+      const damageRatio = indicator.damage / Math.max(1, indicator.maxHealth);
+      const bands = indicator.kind === "ram"
+        ? [0.1, 0.2, 0.35]
+        : [0.3, 1.4, 2];
+      const tier = damageRatio < bands[0] ? 0 : damageRatio <= bands[1] ? 1 : damageRatio <= bands[2] ? 2 : 3;
+      return ["#64b9ad", "#f4ce43", "#ff7a36", "#ed4352"][tier];
+    }
+
+    function drawBattleCombatIndicators(ctx) {
+      const now = performance.now();
+      const lifetime = 1700;
+      battleState.combatIndicators = (battleState.combatIndicators || []).filter((indicator) => now - indicator.createdAt < lifetime);
+
+      battleState.combatIndicators.forEach((indicator) => {
+        const elapsed = now - indicator.createdAt;
+        const progress = elapsed / lifetime;
+        const alpha = Math.min(1, (1 - progress) * 1.8);
+        const x = indicator.x;
+        const y = indicator.y - 34 - progress * 38;
+        const ringColor = getCombatIndicatorColor(indicator);
+        const damageText = String(indicator.damage);
+        const fontSize = Math.max(8, 15 - Math.max(0, damageText.length - 4) * 1.5);
+        const sourceLabel = indicator.kind === "ram" ? "ТАРАН" : "ВЫСТРЕЛ";
+        const sourceText = typeof localizeText === "function" ? localizeText(sourceLabel) : sourceLabel;
+        const killText = typeof localizeText === "function" ? localizeText("ФРАГ") : "ФРАГ";
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        ctx.font = "bold 9px Arial";
+        const sourceWidth = ctx.measureText(sourceText).width + 12;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.82)";
+        ctx.fillRect(x - sourceWidth / 2, y - 31, sourceWidth, 14);
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(sourceText, x, y - 24);
+
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.fillStyle = ringColor;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, y, 17, 0, Math.PI * 2);
+        ctx.fillStyle = "#f47721";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = "#111111";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.fillText(damageText, x, y + 0.5);
+
+        if (indicator.killed) {
+          const killX = x + 42;
+          const killY = y - 14;
+          ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+          ctx.fillRect(killX - 3, killY - 11, 48, 22);
+          ctx.strokeStyle = "#ed4352";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(killX - 3, killY - 11, 48, 22);
+          ctx.fillStyle = "#ed4352";
+          ctx.font = "bold 14px Arial";
+          ctx.fillText("✖", killX + 5, killY);
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 9px Arial";
+          ctx.fillText(killText, killX + 28, killY);
+        }
+
+        ctx.restore();
+      });
+    }
+
     function renderBattle() {
       const ctx = battleContext;
 
@@ -1816,6 +1894,7 @@
           drawCommanderMarker(ctx, battleState.enemies[0], "#d82020");
         }
       }
+      drawBattleCombatIndicators(ctx);
       ctx.restore();
       drawBattleLighting(ctx);
       drawScreenAtmosphere(ctx);

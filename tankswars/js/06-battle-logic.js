@@ -1528,6 +1528,23 @@
       return false;
     }
 
+    function recordBattleCombatIndicator(target, damage, kind, killed = false) {
+      const dealtDamage = Math.max(0, Math.round(normalizeNumber(damage)));
+      if (dealtDamage <= 0) return;
+
+      battleState.combatIndicators ||= [];
+      battleState.combatIndicators.push({
+        x: target.x,
+        y: target.y,
+        damage: dealtDamage,
+        maxHealth: Math.max(1, normalizeNumber(target.maxHealth)),
+        kind,
+        killed,
+        createdAt: performance.now()
+      });
+      if (battleState.combatIndicators.length > 24) battleState.combatIndicators.shift();
+    }
+
     function applyRamDamage(mover, target) {
       if (!tankIsAlive(mover) || !tankIsAlive(target) || mover.team === target.team) return;
 
@@ -1555,7 +1572,18 @@
       const impact = (moverMass + targetMass) / 2 * (closingSpeed ** 2 - 25 ** 2) / 6500;
       const targetDamage = Math.min(target.maxHealth * 0.35, Math.round(impact * 2 * moverMass / (moverMass + targetMass)));
       const moverDamage = Math.min(mover.maxHealth * 0.35, Math.round(impact * 2 * targetMass / (moverMass + targetMass)));
-      if (targetDamage > 0) damageTank(target, targetDamage);
+      if (targetDamage > 0) {
+        const dealtDamage = Math.min(target.health, targetDamage);
+        const killed = target.health > 0 && target.health - targetDamage <= 0;
+        damageTank(target, targetDamage);
+        if (mover === battleState.player && dealtDamage > 0) {
+          recordBattleCombatIndicator(target, dealtDamage, "ram", killed);
+          if (battleState.stats) {
+            battleState.stats.damage += dealtDamage;
+            if (killed) battleState.stats.kills += 1;
+          }
+        }
+      }
       if (moverDamage > 0) damageTank(mover, moverDamage);
     }
 
@@ -3370,13 +3398,17 @@
 
             if (finalDamage > 0) {
               const dealtDamage = Math.min(target.health, finalDamage);
+              const killed = target.health > 0 && target.health - finalDamage <= 0;
 
               battleState.stats.damage += dealtDamage;
+              if (!projectile.fire && dealtDamage > 0) {
+                recordBattleCombatIndicator(target, finalDamage, "shot", killed);
+              }
               if (dealtDamage > 0 && battleState.tutorial.enabled) {
                 battleState.tutorial.dealtDamage = true;
               }
 
-              if (target.health > 0 && target.health - finalDamage <= 0) {
+              if (killed) {
                 battleState.stats.kills += 1;
               }
             }

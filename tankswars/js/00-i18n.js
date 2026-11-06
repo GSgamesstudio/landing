@@ -20,6 +20,10 @@
     let translationPattern = null;
 
     Object.assign(englishText, {
+      "ВЫСТРЕЛ": "SHOT", "ТАРАН": "RAM", "ФРАГ": "KILL",
+    });
+
+    Object.assign(englishText, {
       "Сравнить": "Compare", "Тест-драйв": "Test drive", "Роль": "Role",
       "Сменить режим": "Change mode",
       "Разведка": "Scout", "Поддержка": "Support", "Штурм": "Assault",
