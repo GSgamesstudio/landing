@@ -1292,6 +1292,18 @@
       return definitions;
     }
 
+    function getStoreContainerDescription(containerDefinition) {
+      const descriptions = {
+        gift: "Новогодний подарок Tanks Wars к 2027 году! Внутри — три ресурсных приза и шанс получить БЗ-155 или премиум-танк. Откройте контейнер и начните новый год с пополнением ангара и запасов.",
+        all: "Трофейный набор Tanks Wars: полезные запасы для экипажа и шанс пополнить ангар техникой со всего мира.",
+        is4: "Контейнер серии ИС-4 хранит полевые запасы и особые машины, созданные на основе легендарного тяжёлого танка.",
+        "russo-balt-type-c": "Имперский запас чертежей и серебра с редкими машинами Руссо-Балтийской коллекции Tanks Wars.",
+        "winter-budapest": "Зимний контейнер Будапешта хранит сезонные запасы и особую машину из праздничной коллекции Tanks Wars."
+      };
+
+      return descriptions[containerDefinition.id] || "Контейнер Tanks Wars с запасами для ангара и особым трофеем.";
+    }
+
     function getPremiumStoreTanks() {
       return loadedTanks.filter((tank) => tank.premium && !tank.developerOnly && (tank.name !== "Nexor" || oiExperimentalEventIsActive()));
     }
@@ -1878,48 +1890,6 @@
         });
     }
 
-    function getContainerTankChanceText(containerDefinition) {
-      const dropChance = ((containerDefinition.tankDropChance || 0) * 100).toLocaleString("ru-RU", {
-        minimumFractionDigits: Number.isInteger((containerDefinition.tankDropChance || 0) * 100) ? 0 : 3,
-        maximumFractionDigits: 3
-      });
-      const bonusTankDropChance = containerDefinition.bonusTankDropChance || 0;
-      const bonusDropChance = (bonusTankDropChance * 100).toLocaleString("ru-RU", {
-        minimumFractionDigits: Number.isInteger(bonusTankDropChance * 100) ? 0 : 3,
-        maximumFractionDigits: 3
-      });
-
-      if (containerDefinition.bonusTankPool) {
-        return `БЗ-155 — ${dropChance}%, премиум-танк — ${bonusDropChance}%.`;
-      }
-      if (containerDefinition.tankDropChances) {
-        return containerDefinition.tankDropChances
-          .map((drop) => `${drop.name} — ${(drop.chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}%`)
-          .join(", ") + ".";
-      }
-      return `Шанс получить один из танков контейнера: ${dropChance}%.`;
-    }
-
-    function getContainerResourceChanceText(containerDefinition) {
-      const resourceTypes = getContainerResourceRewardTypes(containerDefinition);
-      const outcomes = containerDefinition.resourceRewardProfile?.outcomes;
-      if (Array.isArray(outcomes)) {
-        const describeType = (type) => outcomes
-          .filter((outcome) => outcome.type === type)
-          .map((outcome) => `${(outcome.chance * 100).toLocaleString("ru-RU")}% — ${formatStoredNumber(outcome.amount)}`)
-          .join(", ");
-        const typeChance = (type) => outcomes
-          .filter((outcome) => outcome.type === type)
-          .reduce((sum, outcome) => sum + outcome.chance, 0);
-        const asPercent = (value) => (value * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 });
-        return `На каждый ресурсный приз: золото — ${asPercent(typeChance("gold"))}% (${describeType("gold")}); серебро — ${asPercent(typeChance("silver"))}% (${describeType("silver")}); чертежи — ${asPercent(typeChance("blueprints"))}% (${describeType("blueprints")}). Шансы рассчитаны отдельно для каждого из ${containerPrizeCount} призов.`;
-      }
-
-      const chance = (100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
-
-      return `${chance}% на каждый из ${containerPrizeCount} ресурсных призов (${resourceTypes.map(getResourceRewardTitle).join(" или ")}).`;
-    }
-
     const containerPreviewAssets = {
       gift: "./img/asseti/контейнеры/gift.png",
       all: "./img/asseti/контейнеры/all.png",
@@ -1966,14 +1936,9 @@
         screenOverlay.classList.remove("containerPreviewActive");
       };
 
-      const rewardTypes = getContainerResourceRewardTypes(containerDefinition)
-        .map((type) => getResourceRewardTitle(type).toLowerCase())
-        .join(" и ");
       title.textContent = containerDefinition.name;
       rewardTitle.textContent = "Содержимое контейнера";
-      text.textContent = containerDefinition.id === "gift"
-        ? "Новогодний подарок Tanks Wars к 2027 году! Внутри — три ресурсных приза и шанс получить БЗ-155 или премиум-танк. Откройте контейнер и начните новый год с пополнением ангара и запасов."
-        : `Награды: ${containerPrizeCount} ресурсных приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} Ресурсный шанс: ${getContainerResourceChanceText(containerDefinition)}. Эти вероятности относятся к разным этапам и не складываются в один процент. При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
+      text.textContent = getStoreContainerDescription(containerDefinition);
 
       const tankRewards = [
         ...(containerDefinition.tankPool || []).map((tank) => ({ tank, chance: containerDefinition.tankDropChances?.find((drop) => drop.name === tank.name)?.chance || ((containerDefinition.tankDropChance || 0) / Math.max(1, containerDefinition.tankPool.length)) })),
@@ -2072,8 +2037,7 @@
       giftImage.src = containerPreviewAssets[containerDefinition.id] || "./img/asseti/podarok.png";
       giftImage.alt = `Контейнер ${containerDefinition.name}`;
       title.textContent = containerDefinition.name;
-      const rewardTypes = getContainerResourceRewardTypes(containerDefinition).map((type) => getResourceRewardTitle(type).toLowerCase()).join(" и ");
-      text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)}`;
+      text.textContent = getStoreContainerDescription(containerDefinition);
       button.textContent = `Купить за ${formatStoredNumber(containerDefinition.price)} золота`;
       button.dataset.defaultLabel = button.textContent;
       button.disabled = playerResources.gold < containerDefinition.price;
