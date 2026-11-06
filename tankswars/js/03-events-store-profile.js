@@ -1230,8 +1230,21 @@
               { type: "gold", chance: 0.015, amount: 150000 },
               { type: "gold", chance: 0.004, amount: 250000 },
               { type: "gold", chance: 0.001, amount: 1000000 },
-              { type: "silver", chance: 0.3, min: 10000, max: 50000 },
-              { type: "blueprints", chance: 0.3, min: 25, max: 100 }
+              { type: "silver", chance: 0.1, amount: 10000 },
+              { type: "silver", chance: 0.1, amount: 20000 },
+              { type: "silver", chance: 0.05, amount: 50000 },
+              { type: "silver", chance: 0.05, amount: 100000 },
+              { type: "silver", chance: 0.03, amount: 250000 },
+              { type: "silver", chance: 0.03, amount: 500000 },
+              { type: "silver", chance: 0.02, amount: 1000000 },
+              { type: "silver", chance: 0.015, amount: 1500000 },
+              { type: "silver", chance: 0.004, amount: 2500000 },
+              { type: "silver", chance: 0.001, amount: 10000000 },
+              { type: "blueprints", chance: 0.1, amount: 100 },
+              { type: "blueprints", chance: 0.05, amount: 150 },
+              { type: "blueprints", chance: 0.03, amount: 250 },
+              { type: "blueprints", chance: 0.015, amount: 500 },
+              { type: "blueprints", chance: 0.005, amount: 1000 }
             ]
           },
           bundleOffers: [
@@ -1891,14 +1904,15 @@
       const resourceTypes = getContainerResourceRewardTypes(containerDefinition);
       const outcomes = containerDefinition.resourceRewardProfile?.outcomes;
       if (Array.isArray(outcomes)) {
-        const goldOutcomes = outcomes.filter((outcome) => outcome.type === "gold");
-        const goldText = goldOutcomes
+        const describeType = (type) => outcomes
+          .filter((outcome) => outcome.type === type)
           .map((outcome) => `${(outcome.chance * 100).toLocaleString("ru-RU")}% — ${formatStoredNumber(outcome.amount)}`)
           .join(", ");
-        const silverChance = outcomes.filter((outcome) => outcome.type === "silver").reduce((sum, outcome) => sum + outcome.chance, 0);
-        const blueprintChance = outcomes.filter((outcome) => outcome.type === "blueprints").reduce((sum, outcome) => sum + outcome.chance, 0);
+        const typeChance = (type) => outcomes
+          .filter((outcome) => outcome.type === type)
+          .reduce((sum, outcome) => sum + outcome.chance, 0);
         const asPercent = (value) => (value * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 });
-        return `На каждый ресурсный приз: золото — ${asPercent(goldOutcomes.reduce((sum, outcome) => sum + outcome.chance, 0))}% (${goldText}); серебро — ${asPercent(silverChance)}%; чертежи — ${asPercent(blueprintChance)}%. Награды выдаются по отдельному броску для каждого из ${containerPrizeCount} призов.`;
+        return `На каждый ресурсный приз: золото — ${asPercent(typeChance("gold"))}% (${describeType("gold")}); серебро — ${asPercent(typeChance("silver"))}% (${describeType("silver")}); чертежи — ${asPercent(typeChance("blueprints"))}% (${describeType("blueprints")}). Шансы рассчитаны отдельно для каждого из ${containerPrizeCount} призов.`;
       }
 
       const chance = (100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
