@@ -1971,7 +1971,9 @@
         .join(" и ");
       title.textContent = containerDefinition.name;
       rewardTitle.textContent = "Содержимое контейнера";
-      text.textContent = `Награды: ${containerPrizeCount} ресурсных приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} Ресурсный шанс: ${getContainerResourceChanceText(containerDefinition)}. Эти вероятности относятся к разным этапам и не складываются в один процент. При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
+      text.textContent = containerDefinition.id === "gift"
+        ? "Новогодний подарок Tanks Wars к 2027 году! Внутри — три ресурсных приза и шанс получить БЗ-155 или премиум-танк. Откройте контейнер и начните новый год с пополнением ангара и запасов."
+        : `Награды: ${containerPrizeCount} ресурсных приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)} Ресурсный шанс: ${getContainerResourceChanceText(containerDefinition)}. Эти вероятности относятся к разным этапам и не складываются в один процент. При повторном выпадении танка начисляется ${formatStoredNumber(getContainerDuplicateCompensation(containerDefinition).amount)} ${getResourceRewardUnit(getContainerDuplicateCompensation(containerDefinition).type)}.`;
 
       const tankRewards = [
         ...(containerDefinition.tankPool || []).map((tank) => ({ tank, chance: containerDefinition.tankDropChances?.find((drop) => drop.name === tank.name)?.chance || ((containerDefinition.tankDropChance || 0) / Math.max(1, containerDefinition.tankPool.length)) })),
