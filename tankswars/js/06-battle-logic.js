@@ -1528,7 +1528,7 @@
       return false;
     }
 
-    function recordBattleCombatIndicator(target, damage, kind, killed = false) {
+    function recordBattleCombatIndicator(target, damage, kind, killed = false, fragCount = 0) {
       const dealtDamage = Math.max(0, Math.round(normalizeNumber(damage)));
       if (dealtDamage <= 0) return;
 
@@ -1540,6 +1540,7 @@
         maxHealth: Math.max(1, normalizeNumber(target.maxHealth)),
         kind,
         killed,
+        fragCount,
         createdAt: performance.now()
       });
       if (battleState.combatIndicators.length > 24) battleState.combatIndicators.shift();
@@ -1577,7 +1578,7 @@
         const killed = target.health > 0 && target.health - targetDamage <= 0;
         damageTank(target, targetDamage);
         if (mover === battleState.player && dealtDamage > 0) {
-          recordBattleCombatIndicator(target, dealtDamage, "ram", killed);
+          recordBattleCombatIndicator(target, dealtDamage, "ram", killed, killed ? (battleState.stats?.kills || 0) + 1 : 0);
           if (battleState.stats) {
             battleState.stats.damage += dealtDamage;
             if (killed) battleState.stats.kills += 1;
@@ -2721,6 +2722,7 @@
         owner: null,
         team: null,
         progress: 0,
+        lastMilestone: 0,
         allyCount: 0,
         enemyCount: 0
       };
@@ -2807,6 +2809,7 @@
       if (!base) {
         battleState.baseCapture.team = null;
         battleState.baseCapture.progress = 0;
+        battleState.baseCapture.lastMilestone = 0;
         return;
       }
 
@@ -2828,12 +2831,14 @@
       if (!capturingTeam) {
         capture.team = null;
         capture.progress = 0;
+        capture.lastMilestone = 0;
         return;
       }
 
       if (capture.team !== capturingTeam) {
         capture.team = capturingTeam;
         capture.progress = 0;
+        capture.lastMilestone = 0;
       }
 
       if (
@@ -2850,6 +2855,25 @@
       }
 
       capture.progress = Math.min(100, capture.progress + captureStep);
+
+      if (capturingTeam === "ally") {
+        const playerCapturing = tankIsAlive(battleState.player) && tankIsInsideBase(battleState.player, base);
+        [25, 50, 75, 100].forEach((milestone) => {
+          if (capture.lastMilestone < milestone && capture.progress >= milestone) {
+            if (playerCapturing) {
+              battleState.combatIndicators ||= [];
+              battleState.combatIndicators.push({
+                x: base.x,
+                y: base.y,
+                kind: "capture",
+                progress: milestone,
+                createdAt: performance.now()
+              });
+            }
+            capture.lastMilestone = milestone;
+          }
+        });
+      }
 
       if (capture.progress >= 100) {
         capture.owner = capturingTeam;
@@ -3402,7 +3426,7 @@
 
               battleState.stats.damage += dealtDamage;
               if (!projectile.fire && dealtDamage > 0) {
-                recordBattleCombatIndicator(target, finalDamage, "shot", killed);
+                recordBattleCombatIndicator(target, finalDamage, "shot", killed, killed ? battleState.stats.kills + 1 : 0);
               }
               if (dealtDamage > 0 && battleState.tutorial.enabled) {
                 battleState.tutorial.dealtDamage = true;

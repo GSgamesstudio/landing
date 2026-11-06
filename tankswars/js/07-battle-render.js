@@ -1790,10 +1790,13 @@
         const alpha = Math.min(1, (1 - progress) * 1.8);
         const x = indicator.x;
         const y = indicator.y - 34 - progress * 38;
-        const ringColor = getCombatIndicatorColor(indicator);
-        const damageText = String(indicator.damage);
+        const isCapture = indicator.kind === "capture";
+        const ringColor = isCapture
+          ? ["#64b9ad", "#f4ce43", "#ff7a36", "#ed4352"][Math.max(0, Math.min(3, Math.floor(indicator.progress / 25) - 1))]
+          : getCombatIndicatorColor(indicator);
+        const damageText = isCapture ? `${indicator.progress}%` : String(indicator.damage);
         const fontSize = Math.max(8, 15 - Math.max(0, damageText.length - 4) * 1.5);
-        const sourceLabel = indicator.kind === "ram" ? "ТАРАН" : "ВЫСТРЕЛ";
+        const sourceLabel = isCapture ? "ЗАХВАТ" : indicator.kind === "ram" ? "ТАРАН" : "ВЫСТРЕЛ";
         const sourceText = typeof localizeText === "function" ? localizeText(sourceLabel) : sourceLabel;
         const killText = typeof localizeText === "function" ? localizeText("ФРАГ") : "ФРАГ";
 
@@ -1831,17 +1834,21 @@
         if (indicator.killed) {
           const killX = x + 42;
           const killY = y - 14;
-          ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
-          ctx.fillRect(killX - 3, killY - 11, 48, 22);
-          ctx.strokeStyle = "#ed4352";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(killX - 3, killY - 11, 48, 22);
-          ctx.fillStyle = "#ed4352";
-          ctx.font = "bold 14px Arial";
-          ctx.fillText("✖", killX + 5, killY);
-          ctx.fillStyle = "#ffffff";
+          const killTier = Math.max(1, Math.min(4, indicator.fragCount || 1));
+          const killLabel = `${killText} ${killTier === 4 ? "4+" : killTier}`;
+          const killColors = ["#64b9ad", "#4d9cff", "#bd69ff", "#ed4352"];
           ctx.font = "bold 9px Arial";
-          ctx.fillText(killText, killX + 28, killY);
+          const killWidth = ctx.measureText(killLabel).width + 10;
+          ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+          ctx.fillRect(killX - 3, killY - 11, killWidth, 22);
+          ctx.strokeStyle = killColors[killTier - 1];
+          ctx.lineWidth = 2;
+          ctx.strokeRect(killX - 3, killY - 11, killWidth, 22);
+          ctx.fillStyle = killColors[killTier - 1];
+          ctx.font = "bold 9px Arial";
+          ctx.fillText("✖", killX + 3, killY);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(killLabel, killX + 14, killY);
         }
 
         ctx.restore();
