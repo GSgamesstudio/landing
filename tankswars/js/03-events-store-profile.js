@@ -1898,7 +1898,7 @@
         const silverChance = outcomes.filter((outcome) => outcome.type === "silver").reduce((sum, outcome) => sum + outcome.chance, 0);
         const blueprintChance = outcomes.filter((outcome) => outcome.type === "blueprints").reduce((sum, outcome) => sum + outcome.chance, 0);
         const asPercent = (value) => (value * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 });
-        return `На каждый ресурсный приз: золото — ${asPercent(goldOutcomes.reduce((sum, outcome) => sum + outcome.chance, 0)}% (${goldText}); серебро — ${asPercent(silverChance)}%; чертежи — ${asPercent(blueprintChance)}%. Награды выдаются по отдельному броску для каждого из ${containerPrizeCount} призов.`;
+        return `На каждый ресурсный приз: золото — ${asPercent(goldOutcomes.reduce((sum, outcome) => sum + outcome.chance, 0))}% (${goldText}); серебро — ${asPercent(silverChance)}%; чертежи — ${asPercent(blueprintChance)}%. Награды выдаются по отдельному броску для каждого из ${containerPrizeCount} призов.`;
       }
 
       const chance = (100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
