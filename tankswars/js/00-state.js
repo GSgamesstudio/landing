@@ -45,7 +45,6 @@
     const frameDelay = 1000;
     const containerTankDropChance = 0.05;
     const containerGoldPrice = 500;
-    const containerPrizeCount = 3;
     const containerName = "Все из всех";
     const giftContainerName = "Подарок";
     const giftContainerGoldPrice = 5000;
@@ -67,7 +66,7 @@
       { name: "Руссо-Балт тип C", chance: 0.01914 },
       { name: "Проект Менделеева", chance: 0.01915 }
     ];
-    const russoBaltContainerResourceRewardTypes = ["blueprints", "silver"];
+    const russoBaltContainerResourceRewardTypes = ["gold", "blueprints", "silver"];
     const russoBaltContainerDuplicateCompensation = { type: "silver", amount: 1000 };
     const duplicateTankGoldReward = 5000;
     const premiumTankGoldPricesByLevel = [0, 25, 50, 100, 200, 300, 500, 1500, 2500, 4500, 5000];

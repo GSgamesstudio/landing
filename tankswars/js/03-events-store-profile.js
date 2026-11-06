@@ -1429,7 +1429,7 @@
     function getContainerResourceRewardTypes(containerDefinition) {
       const types = containerDefinition?.resourceRewardTypes;
 
-      return Array.isArray(types) && types.length > 0 ? types : ["gold", "blueprints"];
+      return Array.isArray(types) && types.length > 0 ? types : ["gold", "silver", "blueprints"];
     }
 
     function getContainerDuplicateCompensation(containerDefinition) {
@@ -1452,23 +1452,25 @@
       }[type] || "единиц";
     }
 
-    function createContainerResourceReward(resourceRewardTypes = ["gold", "blueprints"], containerDefinition = null) {
+    function createContainerResourceReward(resourceRewardTypes = ["gold", "silver", "blueprints"], containerDefinition = null, selectedType = null) {
       const profile = containerDefinition?.resourceRewardProfile;
 
       if (Array.isArray(profile?.outcomes)) {
-        const roll = Math.random();
+        const eligibleOutcomes = profile.outcomes.filter((outcome) => !selectedType || outcome.type === selectedType);
+        const totalWeight = eligibleOutcomes.reduce((sum, outcome) => sum + outcome.chance, 0);
+        const roll = Math.random() * totalWeight;
         let threshold = 0;
-        const outcome = profile.outcomes.find((entry) => {
+        const outcome = eligibleOutcomes.find((entry) => {
           threshold += entry.chance;
           return roll < threshold;
-        }) || profile.outcomes[profile.outcomes.length - 1];
+        }) || eligibleOutcomes[eligibleOutcomes.length - 1];
         const amount = outcome.min === undefined
           ? outcome.amount
           : outcome.min + Math.floor(Math.random() * (outcome.max - outcome.min + 1));
         return { type: outcome.type, amount };
       }
 
-      const type = pickRandomItem(resourceRewardTypes) || "blueprints";
+      const type = selectedType || pickRandomItem(resourceRewardTypes) || "blueprints";
 
       if (type === "gold") {
         return {
@@ -1693,10 +1695,30 @@
         return { type: "tank", tank, wasOwned, compensation };
       }
 
-      return Array.from(
-        { length: containerPrizeCount },
-        () => createContainerResourceReward(getContainerResourceRewardTypes(containerDefinition), containerDefinition)
-      ).map((item) => {
+      const resourceTypes = getContainerResourceRewardTypes(containerDefinition);
+      const prizeCount = Math.min(resourceTypes.length, 2 + Math.floor(Math.random() * 2));
+      const profileOutcomes = containerDefinition.resourceRewardProfile?.outcomes;
+      const remainingTypes = [...resourceTypes];
+      const selectedTypes = [];
+
+      while (selectedTypes.length < prizeCount && remainingTypes.length > 0) {
+        const getTypeWeight = (type) => Array.isArray(profileOutcomes)
+          ? profileOutcomes.filter((outcome) => outcome.type === type).reduce((sum, outcome) => sum + outcome.chance, 0)
+          : 1;
+        const totalWeight = remainingTypes.reduce((sum, type) => sum + getTypeWeight(type), 0);
+        let roll = Math.random() * totalWeight;
+        let selectedIndex = remainingTypes.length - 1;
+        for (let index = 0; index < remainingTypes.length; index += 1) {
+          roll -= getTypeWeight(remainingTypes[index]);
+          if (roll < 0) {
+            selectedIndex = index;
+            break;
+          }
+        }
+        selectedTypes.push(remainingTypes.splice(selectedIndex, 1)[0]);
+      }
+
+      return selectedTypes.map((type) => createContainerResourceReward(resourceTypes, containerDefinition, type)).map((item) => {
         playerResources[item.type] += item.amount;
         return item;
       });
@@ -1968,11 +1990,7 @@
         icon.src = `./img/asseti/валюты/${type === "gold" ? "gold" : type === "silver" ? "silver" : "blueprints"}.png`;
         icon.alt = getResourceRewardTitle(type);
         chanceLabel.className = "containerPreviewRewardChance";
-        const resourceOutcomes = containerDefinition.resourceRewardProfile?.outcomes;
-        const chance = Array.isArray(resourceOutcomes)
-          ? resourceOutcomes.filter((outcome) => outcome.type === type).reduce((sum, outcome) => sum + outcome.chance, 0)
-          : 1 / resourceTypes.length;
-        chanceLabel.textContent = `${(chance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 3 })}% / приз`;
+        chanceLabel.textContent = "Не повторяется";
         label.textContent = getResourceRewardTitle(type);
         rewardCard.append(icon, label, chanceLabel);
         rewardGrid.append(rewardCard);
