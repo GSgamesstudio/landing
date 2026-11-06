@@ -1218,6 +1218,10 @@
           bonusTankDropChance: giftContainerPremiumDropChance,
           tankPool: loadedTanks.filter((tank) => tank.name === "БЗ-155" && !tank.developerOnly),
           bonusTankPool: getPremiumStoreTanks(),
+          bundleOffers: [
+            { count: 5, price: 20000 },
+            { count: 15, price: 50000 }
+          ],
           resourceRewardTypes: ["gold", "silver", "blueprints"]
         },
         {
@@ -1970,20 +1974,23 @@
       });
       actions.append(buyButton);
 
-      if (containerDefinition.bundleCount) {
+      const bundleOffers = containerDefinition.bundleOffers || (containerDefinition.bundleCount
+        ? [{ count: containerDefinition.bundleCount, price: containerDefinition.bundlePrice }]
+        : []);
+      bundleOffers.forEach(({ count, price }) => {
         const bundleButton = document.createElement("button");
 
         bundleButton.type = "button";
         bundleButton.className = "storeActionButton";
-        bundleButton.textContent = `Открыть ${containerDefinition.bundleCount}: ${formatStoredNumber(containerDefinition.bundlePrice)} золота`;
+        bundleButton.textContent = `Открыть ${count}: ${formatStoredNumber(price)} золота`;
         bundleButton.dataset.defaultLabel = bundleButton.textContent;
-        bundleButton.disabled = playerResources.gold < containerDefinition.bundlePrice;
+        bundleButton.disabled = playerResources.gold < price;
         bundleButton.addEventListener("click", () => {
           closePreview();
-          openContainer(bundleButton, containerDefinition, containerDefinition.bundleCount, containerDefinition.bundlePrice);
+          openContainer(bundleButton, containerDefinition, count, price);
         });
         actions.append(bundleButton);
-      }
+      });
 
       const previewImage = document.createElement("img");
 
