@@ -1218,6 +1218,12 @@
           bonusTankDropChance: giftContainerPremiumDropChance,
           tankPool: loadedTanks.filter((tank) => tank.name === "БЗ-155" && !tank.developerOnly),
           bonusTankPool: getPremiumStoreTanks(),
+          resourceRewardProfile: {
+            jackpot: { chance: 0.001, amount: 1000000 },
+            gold: { min: 1000, max: 10000 },
+            silver: { min: 10000, max: 50000 },
+            blueprints: { min: 25, max: 100 }
+          },
           bundleOffers: [
             { count: 5, price: 20000 },
             { count: 15, price: 50000 }
@@ -1411,8 +1417,21 @@
       }[type] || "единиц";
     }
 
-    function createContainerResourceReward(resourceRewardTypes = ["gold", "blueprints"]) {
+    function createContainerResourceReward(resourceRewardTypes = ["gold", "blueprints"], containerDefinition = null) {
+      const profile = containerDefinition?.resourceRewardProfile;
+
+      if (profile?.jackpot && Math.random() < profile.jackpot.chance) {
+        return { type: "gold", amount: profile.jackpot.amount };
+      }
+
       const type = pickRandomItem(resourceRewardTypes) || "blueprints";
+      const configuredRange = profile?.[type];
+      if (configuredRange) {
+        return {
+          type,
+          amount: configuredRange.min + Math.floor(Math.random() * (configuredRange.max - configuredRange.min + 1))
+        };
+      }
 
       if (type === "gold") {
         return {
@@ -1639,7 +1658,7 @@
 
       return Array.from(
         { length: containerPrizeCount },
-        () => createContainerResourceReward(getContainerResourceRewardTypes(containerDefinition))
+        () => createContainerResourceReward(getContainerResourceRewardTypes(containerDefinition), containerDefinition)
       ).map((item) => {
         playerResources[item.type] += item.amount;
         return item;
@@ -1859,8 +1878,12 @@
     function getContainerResourceChanceText(containerDefinition) {
       const resourceTypes = getContainerResourceRewardTypes(containerDefinition);
       const chance = (100 / resourceTypes.length).toLocaleString("ru-RU", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+      const jackpotChance = containerDefinition.resourceRewardProfile?.jackpot?.chance;
+      const jackpotText = jackpotChance
+        ? ` Отдельный шанс джекпота: ${(jackpotChance * 100).toLocaleString("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% на каждый ресурсный приз.`
+        : "";
 
-      return `${chance}% на каждый из ${containerPrizeCount} ресурсных призов (${resourceTypes.map(getResourceRewardTitle).join(" или ")})`;
+      return `${chance}% на каждый из ${containerPrizeCount} ресурсных призов (${resourceTypes.map(getResourceRewardTitle).join(" или ")}).${jackpotText}`;
     }
 
     const containerPreviewAssets = {
