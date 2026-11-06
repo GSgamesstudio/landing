@@ -21,6 +21,10 @@
 
     Object.assign(englishText, {
       "ВЫСТРЕЛ": "SHOT", "ТАРАН": "RAM", "ФРАГ": "KILL", "ЗАХВАТ": "CAPTURE",
+      "СТАТИСТИКА БОЯ": "BATTLE STATS", "УРОН": "DAMAGE", "ФРАГИ": "KILLS",
+      "ЗАБЛОКИРОВАНО": "BLOCKED DAMAGE", "ПРОБИТИЯ": "PENETRATIONS",
+      "НЕПРОБИТИЯ": "NON-PENETRATIONS", "ОТБИТО ПО НАМ": "BLOCKED BY ARMOR",
+      "ПРОБИЛИ НАС": "PENETRATED US",
     });
 
     Object.assign(englishText, {

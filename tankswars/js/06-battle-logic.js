@@ -612,6 +612,12 @@
         damage: 0,
         damageReceived: 0,
         blockedDamage: 0,
+        penetrations: 0,
+        nonPenetrations: 0,
+        incomingPenetrations: 0,
+        incomingNonPenetrations: 0,
+        armorBounceTiers: [0, 0, 0, 0],
+        nonPenetrationTiers: [0, 0, 0, 0],
         assistedDamage: 0,
         roleBonus: 0,
         kills: 0,
@@ -1528,24 +1534,6 @@
       return false;
     }
 
-    function recordBattleCombatIndicator(target, damage, kind, killed = false, fragCount = 0) {
-      const dealtDamage = Math.max(0, Math.round(normalizeNumber(damage)));
-      if (dealtDamage <= 0) return;
-
-      battleState.combatIndicators ||= [];
-      battleState.combatIndicators.push({
-        x: target.x,
-        y: target.y,
-        damage: dealtDamage,
-        maxHealth: Math.max(1, normalizeNumber(target.maxHealth)),
-        kind,
-        killed,
-        fragCount,
-        createdAt: performance.now()
-      });
-      if (battleState.combatIndicators.length > 24) battleState.combatIndicators.shift();
-    }
-
     function applyRamDamage(mover, target) {
       if (!tankIsAlive(mover) || !tankIsAlive(target) || mover.team === target.team) return;
 
@@ -1578,7 +1566,6 @@
         const killed = target.health > 0 && target.health - targetDamage <= 0;
         damageTank(target, targetDamage);
         if (mover === battleState.player && dealtDamage > 0) {
-          recordBattleCombatIndicator(target, dealtDamage, "ram", killed, killed ? (battleState.stats?.kills || 0) + 1 : 0);
           if (battleState.stats) {
             battleState.stats.damage += dealtDamage;
             if (killed) battleState.stats.kills += 1;
@@ -2722,7 +2709,6 @@
         owner: null,
         team: null,
         progress: 0,
-        lastMilestone: 0,
         allyCount: 0,
         enemyCount: 0
       };
@@ -2809,7 +2795,6 @@
       if (!base) {
         battleState.baseCapture.team = null;
         battleState.baseCapture.progress = 0;
-        battleState.baseCapture.lastMilestone = 0;
         return;
       }
 
@@ -2831,14 +2816,12 @@
       if (!capturingTeam) {
         capture.team = null;
         capture.progress = 0;
-        capture.lastMilestone = 0;
         return;
       }
 
       if (capture.team !== capturingTeam) {
         capture.team = capturingTeam;
         capture.progress = 0;
-        capture.lastMilestone = 0;
       }
 
       if (
@@ -2855,25 +2838,6 @@
       }
 
       capture.progress = Math.min(100, capture.progress + captureStep);
-
-      if (capturingTeam === "ally") {
-        const playerCapturing = tankIsAlive(battleState.player) && tankIsInsideBase(battleState.player, base);
-        [25, 50, 75, 100].forEach((milestone) => {
-          if (capture.lastMilestone < milestone && capture.progress >= milestone) {
-            if (playerCapturing) {
-              battleState.combatIndicators ||= [];
-              battleState.combatIndicators.push({
-                x: base.x,
-                y: base.y,
-                kind: "capture",
-                progress: milestone,
-                createdAt: performance.now()
-              });
-            }
-            capture.lastMilestone = milestone;
-          }
-        });
-      }
 
       if (capture.progress >= 100) {
         capture.owner = capturingTeam;
@@ -3411,6 +3375,16 @@
           if (target === battleState.player && battleState.stats) {
             battleState.stats.damageReceived += Math.min(target.health, finalDamage);
             battleState.stats.blockedDamage += blockedDamage;
+            if (!projectile.fire) {
+              if (penetrated) {
+                battleState.stats.incomingPenetrations += 1;
+              } else {
+                battleState.stats.incomingNonPenetrations += 1;
+                const blockedRatio = projectile.damage / Math.max(1, normalizeNumber(target.maxHealth));
+                const blockedTier = blockedRatio < 0.3 ? 0 : blockedRatio <= 1.4 ? 1 : blockedRatio <= 2 ? 2 : 3;
+                battleState.stats.armorBounceTiers[blockedTier] += 1;
+              }
+            }
           }
 
           if (projectile.owner?.isBot && projectile.owner.team === "ally" && battleState.stats && target.team === "enemy" && canTankSeeTank(battleState.player, target)) {
@@ -3419,15 +3393,22 @@
 
           if (projectile.owner === battleState.player && battleState.stats) {
             battleState.stats.hits += 1;
+            if (!projectile.fire) {
+              if (penetrated) {
+                battleState.stats.penetrations += 1;
+              } else {
+                battleState.stats.nonPenetrations += 1;
+                const damageRatio = projectile.damage / Math.max(1, normalizeNumber(target.maxHealth));
+                const tier = damageRatio < 0.3 ? 0 : damageRatio <= 1.4 ? 1 : damageRatio <= 2 ? 2 : 3;
+                battleState.stats.nonPenetrationTiers[tier] += 1;
+              }
+            }
 
             if (finalDamage > 0) {
               const dealtDamage = Math.min(target.health, finalDamage);
               const killed = target.health > 0 && target.health - finalDamage <= 0;
 
               battleState.stats.damage += dealtDamage;
-              if (!projectile.fire && dealtDamage > 0) {
-                recordBattleCombatIndicator(target, finalDamage, "shot", killed, killed ? battleState.stats.kills + 1 : 0);
-              }
               if (dealtDamage > 0 && battleState.tutorial.enabled) {
                 battleState.tutorial.dealtDamage = true;
               }
