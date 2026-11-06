@@ -2020,24 +2020,6 @@
       });
       actions.append(button);
 
-      const bundleOffers = containerDefinition.bundleOffers || (containerDefinition.bundleCount
-        ? [{ count: containerDefinition.bundleCount, price: containerDefinition.bundlePrice }]
-        : []);
-      bundleOffers.forEach(({ count, price }) => {
-        const bundleButton = document.createElement("button");
-
-        bundleButton.className = "storeActionButton";
-        bundleButton.type = "button";
-        bundleButton.textContent = `Купить ${count}: ${formatStoredNumber(price)} золота`;
-        bundleButton.dataset.defaultLabel = bundleButton.textContent;
-        bundleButton.disabled = playerResources.gold < price;
-        bundleButton.addEventListener("click", (event) => {
-          event.stopPropagation();
-          openContainer(bundleButton, containerDefinition, count, price);
-        });
-        actions.append(bundleButton);
-      });
-
       if (containerDefinition.id === "gift") {
         panel.classList.add("giftContainerCard");
         panel.append(giftImage);
