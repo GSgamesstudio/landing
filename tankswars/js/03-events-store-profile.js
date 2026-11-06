@@ -1602,21 +1602,48 @@
       panel.append(title, value);
     }
 
-    function aggregateContainerRewards(rewards) {
-      const tankRewards = rewards.filter((reward) => reward.type === "tank");
-      const resourceTotals = rewards.reduce((totals, reward) => {
-        if (reward.type === "gold" || reward.type === "silver" || reward.type === "blueprints") {
-          totals[reward.type] = normalizeNumber(totals[reward.type]) + normalizeNumber(reward.amount);
-        }
-        return totals;
-      }, {});
+    function rollContainerReward(containerDefinition) {
+      const tankPool = containerDefinition.tankPool;
+      const bonusTankPool = containerDefinition.bonusTankPool || [];
+      const bonusTankDrop = bonusTankPool.length > 0 && Math.random() < (containerDefinition.bonusTankDropChance || 0);
+      let regularTank = null;
 
-      ["gold", "silver", "blueprints"].forEach((type) => {
-        if (resourceTotals[type] > 0) {
-          tankRewards.push({ type, amount: resourceTotals[type] });
+      if (tankPool.length > 0) {
+        if (containerDefinition.tankDropChances) {
+          const roll = Math.random();
+          let threshold = 0;
+          for (const drop of containerDefinition.tankDropChances) {
+            threshold += drop.chance;
+            if (roll < threshold) {
+              regularTank = tankPool.find((tank) => tank.name === drop.name) || null;
+              break;
+            }
+          }
+        } else if (Math.random() < (containerDefinition.tankDropChance || 0)) {
+          regularTank = pickRandomItem(tankPool);
         }
+      }
+
+      if (bonusTankDrop || regularTank) {
+        const tank = bonusTankDrop ? pickRandomItem(bonusTankPool) : regularTank;
+        const wasOwned = tank.state === 2;
+        const compensation = wasOwned ? getContainerDuplicateCompensation(containerDefinition) : null;
+
+        tank.state = 2;
+        loadTankAmmo(tank);
+        saveTankState(tank);
+        selectedTank = tank;
+        if (compensation) playerResources[compensation.type] += compensation.amount;
+        return { type: "tank", tank, wasOwned, compensation };
+      }
+
+      return Array.from(
+        { length: containerPrizeCount },
+        () => createContainerResourceReward(getContainerResourceRewardTypes(containerDefinition))
+      ).map((item) => {
+        playerResources[item.type] += item.amount;
+        return item;
       });
-      return tankRewards;
     }
 
     function openContainer(button, containerDefinition, containerCount = 1, purchasePrice = containerDefinition.price) {
@@ -1632,77 +1659,36 @@
         return;
       }
 
-      const tankPool = containerDefinition.tankPool;
-      const bonusTankPool = containerDefinition.bonusTankPool || [];
-      const rewards = [];
-      let reward = null;
-
       button.disabled = true;
       button.dataset.opening = "1";
       playerResources.gold -= purchasePrice;
       savePlayerResources();
       renderTopBar();
-      const openingOverlay = showContainerOpeningScene();
+      let openedCount = 0;
+      const openNextContainer = () => {
+        const openingOverlay = showContainerOpeningScene();
+        const rewards = rollContainerReward(containerDefinition);
+        const reward = Array.isArray(rewards)
+          ? (rewards.length === 1 ? rewards[0] : rewards)
+          : rewards;
+        openedCount += 1;
 
-      for (let index = 0; index < containerCount; index += 1) {
-        const bonusTankDrop = bonusTankPool.length > 0 && Math.random() < (containerDefinition.bonusTankDropChance || 0);
-        let regularTank = null;
-        if (tankPool.length > 0) {
-          if (containerDefinition.tankDropChances) {
-            const roll = Math.random();
-            let threshold = 0;
-            for (const drop of containerDefinition.tankDropChances) {
-              threshold += drop.chance;
-              if (roll < threshold) {
-                regularTank = tankPool.find((tank) => tank.name === drop.name) || null;
-                break;
-              }
+        window.setTimeout(() => {
+          savePlayerResources();
+          refreshSelectedTank();
+          renderTopBar();
+          renderTankBar(loadedTanks);
+          showContainerOpeningReward(openingOverlay, reward, containerDefinition, () => {
+            if (openedCount < containerCount) {
+              openNextContainer();
+              return;
             }
-          } else if (Math.random() < (containerDefinition.tankDropChance || 0)) {
-            regularTank = pickRandomItem(tankPool);
-          }
-        }
-        if (bonusTankDrop || regularTank) {
-          const tank = bonusTankDrop ? pickRandomItem(bonusTankPool) : regularTank;
-          const wasOwned = tank.state === 2;
-          const compensation = wasOwned ? getContainerDuplicateCompensation(containerDefinition) : null;
-
-          tank.state = 2;
-          loadTankAmmo(tank);
-          saveTankState(tank);
-          selectedTank = tank;
-          if (compensation) {
-            playerResources[compensation.type] += compensation.amount;
-          }
-          rewards.push({ type: "tank", tank, wasOwned, compensation });
-        } else {
-          const resourceRewards = Array.from(
-            { length: containerPrizeCount },
-            () => createContainerResourceReward(getContainerResourceRewardTypes(containerDefinition))
-          );
-
-          resourceRewards.forEach((item) => {
-            rewards.push(item);
-            playerResources[item.type] += item.amount;
+            button.dataset.opening = "0";
+            rerenderStoreScreen();
           });
-        }
-      }
-
-      reward = containerCount > 1 ? aggregateContainerRewards(rewards) : rewards;
-      if (reward.length === 1) {
-        reward = reward[0];
-      }
-
-      window.setTimeout(() => {
-        savePlayerResources();
-        refreshSelectedTank();
-        renderTopBar();
-        renderTankBar(loadedTanks);
-        showContainerOpeningReward(openingOverlay, reward, containerDefinition, () => {
-          button.dataset.opening = "0";
-          rerenderStoreScreen();
-        });
-      }, 1450);
+        }, 1450);
+      };
+      openNextContainer();
     }
 
     function initTabActivityCheck() {
@@ -2025,11 +2011,12 @@
       title.textContent = containerDefinition.name;
       const rewardTypes = getContainerResourceRewardTypes(containerDefinition).map((type) => getResourceRewardTitle(type).toLowerCase()).join(" и ");
       text.textContent = `Награды: ${containerPrizeCount} приза из ${rewardTypes}. ${getContainerTankChanceText(containerDefinition)}`;
-      button.textContent = "Посмотреть содержимое";
+      button.textContent = `Купить за ${formatStoredNumber(containerDefinition.price)} золота`;
       button.dataset.defaultLabel = button.textContent;
+      button.disabled = playerResources.gold < containerDefinition.price;
       button.addEventListener("click", (event) => {
         event.stopPropagation();
-        showContainerPreview(containerDefinition);
+        openContainer(button, containerDefinition);
       });
       actions.append(button);
 
