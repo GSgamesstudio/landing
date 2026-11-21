@@ -1529,20 +1529,48 @@
 
   function buildMapBorderSegments(map, regionAtPixel, regionTypeById) {
     const segments = [];
-    const addSegment = (regionA, regionB, x1, y1, x2, y2) => {
-      if (!regionA || !regionB || regionA === regionB) return;
-      const isSeaPair = regionTypeById.get(regionA) === "sea" && regionTypeById.get(regionB) === "sea";
-      if (!isSeaPair) segments.push(regionA, regionB, x1, y1, x2, y2);
+    const isDrawablePair = (regionA, regionB) => {
+      if (!regionA || !regionB || regionA === regionB) return false;
+      return !(regionTypeById.get(regionA) === "sea" && regionTypeById.get(regionB) === "sea");
     };
-    for (let y = 0; y < map.height; y += 1) {
-      const row = y * map.width;
-      for (let x = 0; x < map.width; x += 1) {
-        const index = row + x;
-        const regionA = regionAtPixel[index];
-        if (x < map.width - 1) addSegment(regionA, regionAtPixel[index + 1], x + 1, y, x + 1, y + 1);
-        if (y < map.height - 1) addSegment(regionA, regionAtPixel[index + map.width], x, y + 1, x + 1, y + 1);
+    const addRuns = (length, edgeCount, getPair, makeSegment) => {
+      for (let edge = 1; edge < edgeCount; edge += 1) {
+        let runStart = -1;
+        let runA = 0;
+        let runB = 0;
+        const flush = (end) => {
+          if (runStart < 0) return;
+          segments.push(...makeSegment(edge, runStart, end, runA, runB));
+          runStart = -1;
+        };
+        for (let along = 0; along < length; along += 1) {
+          const [left, right] = getPair(edge, along);
+          const regionA = Math.min(left, right);
+          const regionB = Math.max(left, right);
+          if (!isDrawablePair(regionA, regionB)) {
+            flush(along);
+            continue;
+          }
+          if (runStart >= 0 && (regionA !== runA || regionB !== runB)) flush(along);
+          if (runStart < 0) {
+            runStart = along;
+            runA = regionA;
+            runB = regionB;
+          }
+        }
+        flush(length);
       }
-    }
+    };
+    // Coalesce adjacent pixel edges into continuous lines. Coordinates lie on
+    // pixel seams, so strokes stay centered between the two territories.
+    addRuns(map.height, map.width, (x, y) => {
+      const index = y * map.width + x;
+      return [regionAtPixel[index - 1], regionAtPixel[index]];
+    }, (x, y1, y2, regionA, regionB) => [regionA, regionB, x, y1, x, y2]);
+    addRuns(map.width, map.height, (y, x) => {
+      const index = y * map.width + x;
+      return [regionAtPixel[index - map.width], regionAtPixel[index]];
+    }, (y, x1, x2, regionA, regionB) => [regionA, regionB, x1, y, x2, y]);
     return segments;
   }
 
@@ -1558,10 +1586,24 @@
       gameOverlayCtx.moveTo(gameData.borderSegments[index + 2], gameData.borderSegments[index + 3]);
       gameOverlayCtx.lineTo(gameData.borderSegments[index + 4], gameData.borderSegments[index + 5]);
     }
-    gameOverlayCtx.strokeStyle = "rgba(228, 58, 44, .82)";
-    gameOverlayCtx.lineWidth = 2.8;
-    gameOverlayCtx.shadowColor = "rgba(255, 210, 96, .42)";
-    gameOverlayCtx.shadowBlur = 4;
+    gameOverlayCtx.lineCap = "round";
+    gameOverlayCtx.lineJoin = "round";
+    gameOverlayCtx.strokeStyle = "rgba(35, 12, 13, .88)";
+    gameOverlayCtx.lineWidth = 4.2;
+    gameOverlayCtx.shadowColor = "rgba(218, 48, 39, .46)";
+    gameOverlayCtx.shadowBlur = 3;
+    gameOverlayCtx.stroke();
+    gameOverlayCtx.beginPath();
+    for (let index = 0; index < gameData.borderSegments.length; index += 6) {
+      const countryA = controllerByRegion.get(gameData.borderSegments[index]);
+      const countryB = controllerByRegion.get(gameData.borderSegments[index + 1]);
+      if (!countryA || !countryB || Number(countryA.id) === Number(countryB.id) || !isAtWar(countryA.id, countryB.id)) continue;
+      gameOverlayCtx.moveTo(gameData.borderSegments[index + 2], gameData.borderSegments[index + 3]);
+      gameOverlayCtx.lineTo(gameData.borderSegments[index + 4], gameData.borderSegments[index + 5]);
+    }
+    gameOverlayCtx.strokeStyle = "rgba(235, 55, 45, .96)";
+    gameOverlayCtx.lineWidth = 2.6;
+    gameOverlayCtx.shadowBlur = 0;
     gameOverlayCtx.stroke();
     gameOverlayCtx.restore();
   }
@@ -1880,14 +1922,16 @@
       gameOverlayCtx.stroke();
     }
 
-    gameOverlayCtx.strokeStyle = "rgba(18,24,25,.10)";
-    gameOverlayCtx.lineWidth = 0.35;
+    gameOverlayCtx.lineCap = "round";
+    gameOverlayCtx.lineJoin = "round";
+    gameOverlayCtx.strokeStyle = "rgba(15,22,24,.28)";
+    gameOverlayCtx.lineWidth = 0.65;
     strokeBorders(false);
-    gameOverlayCtx.strokeStyle = "rgba(245,238,211,.26)";
-    gameOverlayCtx.lineWidth = 2.2;
+    gameOverlayCtx.strokeStyle = "rgba(16,23,25,.82)";
+    gameOverlayCtx.lineWidth = 2.4;
     strokeBorders(true);
-    gameOverlayCtx.strokeStyle = "rgba(8,10,11,.72)";
-    gameOverlayCtx.lineWidth = 1.15;
+    gameOverlayCtx.strokeStyle = "rgba(237,226,198,.82)";
+    gameOverlayCtx.lineWidth = 1.1;
     strokeBorders(true);
 
     drawFrontLines(controllerByRegion);

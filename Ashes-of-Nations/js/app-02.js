@@ -107,7 +107,7 @@
   }
 
   function loadUserSettings() {
-    const defaults = { language: "ru", smoothing: "off", politicalMap: "standard", gameMode: "historical" };
+    const defaults = { language: "ru", smoothing: "msaa", politicalMap: "standard", gameMode: "historical" };
     try {
       const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
       return { ...defaults, ...(raw ? JSON.parse(raw) : {}) };
@@ -150,7 +150,7 @@
   }
 
   function applySmoothing() {
-    const smoothing = userSettings.smoothing || "off";
+    const smoothing = userSettings.smoothing || "msaa";
     gameCanvasStack.classList.toggle("smoothing-off", smoothing === "off");
     gameCanvasStack.classList.toggle("smoothing-msaa", smoothing === "msaa");
     gameCanvasStack.classList.toggle("smoothing-ssaa", smoothing === "ssaa");
