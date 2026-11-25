@@ -82,6 +82,7 @@
     }
 
     function loadPlayerProfile() {
+      removeStoredValue("battleReplays");
       const storedProfile = parseStoredJson("playerProfile", {});
       const id = /^\d{16}$/.test(String(storedProfile.id || "")) ? String(storedProfile.id) : createPlayerId();
       const username = String(storedProfile.username || defaultPlayerProfile.username).trim().slice(0, 24) || defaultPlayerProfile.username;

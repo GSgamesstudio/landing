@@ -826,7 +826,6 @@
         "blueprints",
         "silver",
         "gold",
-        "battleReplays",
         "june_fourth_2026_gold_claimed",
         victoryDayEvent.progressCookie,
         victoryDayEvent.claimedCookie,
@@ -927,6 +926,10 @@
 
     function applyImportedSaveData(values) {
       Object.keys(values).forEach((key) => {
+        if (key === "battleReplays") {
+          return;
+        }
+
         setCookie(key, String(values[key]));
       });
     }

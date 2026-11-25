@@ -634,8 +634,6 @@
       ammoRefillCost: 0,
       dailyFirstExperienceBonus: 0,
       dailyFirstExperienceApplied: false,
-      shotLog: [],
-      nextShotLogId: 1,
       rewardsApplied: false
       };
     }
@@ -666,40 +664,6 @@
       if (normalizedLevel >= 2) return { id: "second", title: "II \u0441\u0442\u0435\u043f\u0435\u043d\u044c", mark: "II" };
       if (normalizedLevel >= 1) return { id: "third", title: "III \u0441\u0442\u0435\u043f\u0435\u043d\u044c", mark: "III" };
       return null;
-    }
-
-    function getReplayTankLabel(tank) {
-      if (!tank) {
-        return "-";
-      }
-
-      return `${tank.nickname || (tank.isBot ? "\u0411\u043e\u0442" : playerProfile.username)} (${tank.tank?.name || tank.name || "-"})`;
-    }
-
-    function addBattleShotLog(entry) {
-      const stats = battleState.stats;
-
-      if (!stats?.shotLog || stats.shotLog.length >= 160) {
-        return 0;
-      }
-
-      const shotId = stats.nextShotLogId;
-      stats.nextShotLogId += 1;
-      stats.shotLog.push({
-        id: shotId,
-        time: Number(((performance.now() - (battleState.startedAt || performance.now())) / 1000).toFixed(1)),
-        ...entry
-      });
-
-      return shotId;
-    }
-
-    function updateBattleShotLog(shotId, patch) {
-      const entry = battleState.stats?.shotLog?.find((item) => item.id === shotId);
-
-      if (entry) {
-        Object.assign(entry, patch);
-      }
     }
 
     function renderBattleAmmoPanel() {
@@ -3076,21 +3040,6 @@
         battleState.stats.shots += 1;
       }
 
-      const shotLogId = addBattleShotLog({
-        shooter: getReplayTankLabel(tank),
-        shooterTeam: tank.team,
-        shell: shell.type,
-        damage: damage,
-        from: { x: Math.round(tank.x), y: Math.round(tank.y) },
-        to: targetPoint
-          ? { x: Math.round(targetPoint.x), y: Math.round(targetPoint.y) }
-          : {
-            x: Math.round(tank.x + Math.cos(angle) * 900),
-            y: Math.round(tank.y + Math.sin(angle) * 900)
-          },
-        result: "\u0432 \u043f\u043e\u043b\u0451\u0442\u0435"
-      });
-
       battleState.projectiles.push({
         x: startX,
         y: startY,
@@ -3101,7 +3050,6 @@
         radius: fireShell ? 18 : guidedMissile ? 9 : 5,
         team: tank.team,
         owner: tank,
-        shotLogId,
         shell: projectileShell,
         damage,
         fire: fireShell,
@@ -3316,20 +3264,10 @@
           || projectile.x > battleState.mapWidth
           || projectile.y > battleState.mapHeight
         ) {
-          updateBattleShotLog(projectile.shotLogId, {
-            result: "\u043f\u0440\u043e\u043c\u0430\u0445",
-            end: { x: Math.round(projectile.x), y: Math.round(projectile.y) },
-            distance: Math.round(traveledDistance)
-          });
           return false;
         }
 
         if (projectileHitsObstacle(projectile)) {
-          updateBattleShotLog(projectile.shotLogId, {
-            result: "\u043f\u0440\u0435\u043f\u044f\u0442\u0441\u0442\u0432\u0438\u0435",
-            end: { x: Math.round(projectile.x), y: Math.round(projectile.y) },
-            distance: Math.round(traveledDistance)
-          });
           return false;
         }
 
@@ -3344,23 +3282,11 @@
             ));
 
         if (projectile.artilleryTarget && reachedArtilleryTarget && !target) {
-          updateBattleShotLog(projectile.shotLogId, {
-            result: "промах",
-            end: { x: Math.round(projectile.x), y: Math.round(projectile.y) },
-            distance: Math.round(traveledDistance)
-          });
           return false;
         }
 
         if (target) {
           if (target.team === projectile.team && selectedBattleMode.id !== "survival") {
-            updateBattleShotLog(projectile.shotLogId, {
-              result: "\u0441\u043e\u044e\u0437\u043d\u0438\u043a",
-              target: getReplayTankLabel(target),
-              targetTeam: target.team,
-              end: { x: Math.round(projectile.x), y: Math.round(projectile.y) },
-              distance: Math.round(traveledDistance)
-            });
             return false;
           }
 
@@ -3421,29 +3347,8 @@
 
           if (finalDamage > 0) {
             const moduleTitle = applyProjectileModuleDamage(target, projectile, finalDamage);
-            updateBattleShotLog(projectile.shotLogId, {
-              result: penetrated ? "\u043f\u0440\u043e\u0431\u0438\u043b" : "\u0444\u0443\u0433\u0430\u0441",
-              target: getReplayTankLabel(target),
-              targetTeam: target.team,
-              end: { x: Math.round(projectile.x), y: Math.round(projectile.y) },
-              distance: Math.round(traveledDistance),
-              penetrated,
-              finalDamage,
-              blockedDamage,
-              module: moduleTitle
-            });
             damageTank(target, finalDamage);
           } else {
-            updateBattleShotLog(projectile.shotLogId, {
-              result: "\u043d\u0435 \u043f\u0440\u043e\u0431\u0438\u043b",
-              target: getReplayTankLabel(target),
-              targetTeam: target.team,
-              end: { x: Math.round(projectile.x), y: Math.round(projectile.y) },
-              distance: Math.round(traveledDistance),
-              penetrated: false,
-              finalDamage: 0,
-              blockedDamage
-            });
           }
 
           return projectile.fire;
@@ -3549,52 +3454,6 @@
       return Math.round(stats.damage * 0.05);
     }
 
-    function loadBattleReplays() {
-      const stored = parseStoredJson("battleReplays", []);
-
-      return Array.isArray(stored) ? stored : [];
-    }
-
-    function saveBattleReplay(result, stats, tank) {
-      const replay = {
-        id: `${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-        date: new Date().toISOString(),
-        result,
-        mode: selectedBattleMode.title,
-        tank: tank?.name || selectedTank?.name || "-",
-        map: battleState.mapPreset?.title || battleState.mapPreset?.id || "-",
-        summary: {
-          damage: normalizeNumber(stats.damage),
-          received: normalizeNumber(stats.damageReceived),
-          kills: normalizeNumber(stats.kills),
-          shots: normalizeNumber(stats.shots),
-          hits: normalizeNumber(stats.hits),
-          experience: normalizeNumber(stats.experience),
-          silver: normalizeNumber(stats.silver)
-        },
-        shots: (stats.shotLog || []).map((shot) => ({
-          id: shot.id,
-          time: shot.time,
-          shooter: shot.shooter,
-          shooterTeam: shot.shooterTeam,
-          target: shot.target || "-",
-          targetTeam: shot.targetTeam || "",
-          shell: shot.shell,
-          result: shot.result,
-          damage: normalizeNumber(shot.finalDamage || 0),
-          blocked: normalizeNumber(shot.blockedDamage || 0),
-          module: shot.module || "",
-          from: shot.from,
-          to: shot.end || shot.to,
-          distance: normalizeNumber(shot.distance || 0),
-          penetrated: shot.penetrated === true
-        }))
-      };
-      const replays = [replay, ...loadBattleReplays()].slice(0, 5);
-
-      setCookie("battleReplays", JSON.stringify(replays));
-    }
-
     function recordBattleStats(result, stats, tank) {
       const tankId = tank ? String(tank.id) : "unknown";
       const tankStats = {
@@ -3650,7 +3509,6 @@
         calculateBattleMasteryLevel(result, stats, tank)
       );
       playerStats.tanks[tankId] = tankStats;
-      saveBattleReplay(result, stats, tank);
       savePlayerStats();
     }
 
